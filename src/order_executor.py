@@ -262,12 +262,26 @@ class OrderExecutor:
             BinanceAPIException: If all retry attempts fail
             ValueError: If client is not initialized or invalid parameters
         """
+        logger.info("=" * 80)
+        logger.info("PLACE_MARKET_ORDER CALLED")
+        logger.info(f"Symbol: {symbol}")
+        logger.info(f"Side: {side}")
+        logger.info(f"Quantity: {quantity}")
+        logger.info(f"Reduce Only: {reduce_only}")
+        logger.info("=" * 80)
+        
         if self.client is None:
+            logger.error("CRITICAL: Binance client is None - cannot place order!")
             raise ValueError("Binance client not initialized. Cannot place orders in BACKTEST mode.")
         
         # Ensure authenticated and permissions validated before trading
+        logger.info("Checking authentication...")
         self.ensure_authenticated()
+        logger.info("[OK] Authenticated")
+        
+        logger.info("Checking permissions...")
         self.ensure_permissions_validated()
+        logger.info("[OK] Permissions validated")
         
         if side not in ["BUY", "SELL"]:
             raise ValueError(f"Invalid order side '{side}'. Must be 'BUY' or 'SELL'")
@@ -276,6 +290,7 @@ class OrderExecutor:
             raise ValueError(f"Invalid quantity {quantity}. Must be positive")
         
         logger.info(f"Placing market {side} order for {quantity} {symbol}")
+        logger.info("Calling Binance API...")
         
         for attempt in range(self.max_retries):
             try:
@@ -388,33 +403,57 @@ class OrderExecutor:
     def get_account_balance(self) -> float:
         """Get current USDT balance from futures account.
         
+        Implements retry logic with exponential backoff for network resilience.
+        
         Returns:
             Available USDT balance
             
         Raises:
-            BinanceAPIException: If API request fails
+            BinanceAPIException: If API request fails after retries
             ValueError: If client is not initialized
         """
         if self.client is None:
             raise ValueError("Binance client not initialized. Cannot get balance in BACKTEST mode.")
         
-        try:
-            account_info = self.client.futures_account()
-            
-            # Find USDT balance
-            for asset in account_info['assets']:
-                if asset['asset'] == 'USDT':
-                    available_balance = float(asset['availableBalance'])
-                    logger.info(f"USDT balance: {available_balance}")
-                    return available_balance
-            
-            # If USDT not found, return 0
-            logger.warning("USDT balance not found in account")
-            return 0.0
+        max_retries = 3
+        retry_delay = 1.0  # Start with 1 second
         
-        except BinanceAPIException as e:
-            logger.error(f"Failed to get account balance: {e}")
-            raise
+        for attempt in range(max_retries):
+            try:
+                logger.info(f"Fetching account balance (attempt {attempt + 1}/{max_retries})...")
+                account_info = self.client.futures_account()
+                
+                # Find USDT balance
+                for asset in account_info['assets']:
+                    if asset['asset'] == 'USDT':
+                        available_balance = float(asset['availableBalance'])
+                        logger.info(f"USDT balance: {available_balance}")
+                        return available_balance
+                
+                # If USDT not found, return 0
+                logger.warning("USDT balance not found in account")
+                return 0.0
+            
+            except (BinanceAPIException, Exception) as e:
+                error_msg = str(e)
+                
+                # Check if it's a timeout or connection error
+                is_network_error = any(keyword in error_msg.lower() for keyword in [
+                    'timeout', 'timed out', 'connection', 'network'
+                ])
+                
+                if attempt < max_retries - 1 and is_network_error:
+                    # Retry with exponential backoff
+                    logger.warning(
+                        f"Network error getting account balance (attempt {attempt + 1}/{max_retries}): {error_msg}"
+                    )
+                    logger.info(f"Retrying in {retry_delay:.1f} seconds...")
+                    time.sleep(retry_delay)
+                    retry_delay *= 2  # Exponential backoff
+                else:
+                    # Final attempt failed or non-network error
+                    logger.error(f"Failed to get account balance after {attempt + 1} attempts: {e}")
+                    raise
     
     def validate_margin_availability(
         self,

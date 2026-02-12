@@ -65,11 +65,224 @@
   "log_file": "binance_results.json",
   "_log_file_help": "Performance metrics output file. Default: binance_results.json.",
   
+  "_section_advanced_features": "=== ADVANCED FEATURES (OPTIONAL) ===",
+  "_advanced_features_note": "These features are disabled by default. Enable them individually to enhance bot performance.",
+  
+  "_subsection_feature_toggles": "--- Feature Toggles ---",
+  "enable_adaptive_thresholds": false,
+  "_enable_adaptive_thresholds_help": "Enable dynamic threshold adjustment based on market volatility. Default: false.",
+  
+  "enable_multi_timeframe": false,
+  "_enable_multi_timeframe_help": "Enable multi-timeframe analysis (5m, 15m, 1h, 4h). Default: false.",
+  
+  "enable_volume_profile": false,
+  "_enable_volume_profile_help": "Enable volume profile analysis for support/resistance levels. Default: false.",
+  
+  "enable_ml_prediction": false,
+  "_enable_ml_prediction_help": "Enable machine learning trend prediction. Requires trained model. Default: false.",
+  
+  "enable_portfolio_management": false,
+  "_enable_portfolio_management_help": "Enable multi-symbol portfolio management. Default: false.",
+  
+  "enable_advanced_exits": false,
+  "_enable_advanced_exits_help": "Enable partial profit taking and dynamic stops. Default: false.",
+  
+  "enable_regime_detection": false,
+  "_enable_regime_detection_help": "Enable market regime detection (trending/ranging/volatile). Default: false.",
+  
+  "_subsection_adaptive_thresholds": "--- Adaptive Threshold Parameters ---",
+  "adaptive_threshold_update_interval": 3600,
+  "_adaptive_threshold_update_interval_help": "Threshold update interval in seconds. Default: 3600 (1 hour).",
+  
+  "adaptive_threshold_lookback_days": 30,
+  "_adaptive_threshold_lookback_days_help": "Days of historical data for volatility calculation. Default: 30.",
+  
+  "adaptive_threshold_min_adx": 15.0,
+  "_adaptive_threshold_min_adx_help": "Minimum ADX threshold (low volatility). Default: 15.0.",
+  
+  "adaptive_threshold_max_adx": 35.0,
+  "_adaptive_threshold_max_adx_help": "Maximum ADX threshold (high volatility). Default: 35.0.",
+  
+  "adaptive_threshold_min_rvol": 0.8,
+  "_adaptive_threshold_min_rvol_help": "Minimum RVOL threshold (low volatility). Default: 0.8.",
+  
+  "adaptive_threshold_max_rvol": 2.0,
+  "_adaptive_threshold_max_rvol_help": "Maximum RVOL threshold (high volatility). Default: 2.0.",
+  
+  "_subsection_multi_timeframe": "--- Multi-Timeframe Parameters ---",
+  "timeframe_5m": "5m",
+  "_timeframe_5m_help": "5-minute timeframe for precise entry timing. Default: 5m.",
+  
+  "timeframe_4h": "4h",
+  "_timeframe_4h_help": "4-hour timeframe for overall trend direction. Default: 4h.",
+  
+  "timeframe_weights": {
+    "5m": 0.1,
+    "15m": 0.2,
+    "1h": 0.3,
+    "4h": 0.4
+  },
+  "_timeframe_weights_help": "Weights for each timeframe (must sum to 1.0). Default: 5m=0.1, 15m=0.2, 1h=0.3, 4h=0.4.",
+  
+  "min_timeframe_alignment": 3,
+  "_min_timeframe_alignment_help": "Minimum aligned timeframes for signal generation. Default: 3 out of 4.",
+  
+  "_subsection_volume_profile": "--- Volume Profile Parameters ---",
+  "volume_profile_lookback_days": 7,
+  "_volume_profile_lookback_days_help": "Days of volume data for profile calculation. Default: 7.",
+  
+  "volume_profile_update_interval": 14400,
+  "_volume_profile_update_interval_help": "Profile update interval in seconds. Default: 14400 (4 hours).",
+  
+  "volume_profile_bin_size": 0.001,
+  "_volume_profile_bin_size_help": "Price bin size as decimal (0.001 = 0.1%). Default: 0.001.",
+  
+  "volume_profile_value_area_pct": 0.70,
+  "_volume_profile_value_area_pct_help": "Percentage of volume for value area. Default: 0.70 (70%).",
+  
+  "volume_profile_key_level_threshold": 0.005,
+  "_volume_profile_key_level_threshold_help": "Proximity threshold for key levels (0.005 = 0.5%). Default: 0.005.",
+  
+  "volume_profile_low_volume_size_reduction": 0.5,
+  "_volume_profile_low_volume_size_reduction_help": "Position size reduction in low volume areas. Default: 0.5 (50%).",
+  
+  "_subsection_ml_predictor": "--- ML Predictor Parameters ---",
+  "ml_model_path": "models/ml_predictor.pkl",
+  "_ml_model_path_help": "Path to trained ML model file. Default: models/ml_predictor.pkl.",
+  
+  "ml_feature_count": 20,
+  "_ml_feature_count_help": "Number of features for ML model. Default: 20.",
+  
+  "ml_prediction_horizon_hours": 4,
+  "_ml_prediction_horizon_hours_help": "Prediction horizon in hours. Default: 4.",
+  
+  "ml_min_accuracy": 0.55,
+  "_ml_min_accuracy_help": "Minimum accuracy before auto-disable. Default: 0.55 (55%).",
+  
+  "ml_accuracy_window": 100,
+  "_ml_accuracy_window_help": "Rolling window for accuracy tracking. Default: 100 predictions.",
+  
+  "ml_high_confidence_threshold": 0.7,
+  "_ml_high_confidence_threshold_help": "High confidence threshold. Default: 0.7 (70%).",
+  
+  "ml_low_confidence_threshold": 0.3,
+  "_ml_low_confidence_threshold_help": "Low confidence threshold. Default: 0.3 (30%).",
+  
+  "ml_retrain_interval_days": 7,
+  "_ml_retrain_interval_days_help": "Model retraining interval in days. Default: 7.",
+  
+  "ml_training_lookback_days": 90,
+  "_ml_training_lookback_days_help": "Training data lookback in days. Default: 90.",
+  
+  "_subsection_portfolio": "--- Portfolio Management Parameters ---",
+  "portfolio_symbols": ["BTCUSDT"],
+  "_portfolio_symbols_help": "List of symbols to trade. Default: [\"BTCUSDT\"]. Max 5 symbols.",
+  
+  "portfolio_max_symbols": 5,
+  "_portfolio_max_symbols_help": "Maximum number of symbols. Default: 5.",
+  
+  "portfolio_correlation_threshold": 0.7,
+  "_portfolio_correlation_threshold_help": "Correlation threshold for exposure limits. Default: 0.7.",
+  
+  "portfolio_correlation_max_exposure": 0.5,
+  "_portfolio_correlation_max_exposure_help": "Max combined exposure for correlated symbols. Default: 0.5 (50%).",
+  
+  "portfolio_max_single_allocation": 0.4,
+  "_portfolio_max_single_allocation_help": "Max allocation per symbol. Default: 0.4 (40%).",
+  
+  "portfolio_rebalance_interval": 21600,
+  "_portfolio_rebalance_interval_help": "Rebalance interval in seconds. Default: 21600 (6 hours).",
+  
+  "portfolio_correlation_lookback_days": 30,
+  "_portfolio_correlation_lookback_days_help": "Correlation calculation lookback. Default: 30 days.",
+  
+  "portfolio_max_total_risk": 0.05,
+  "_portfolio_max_total_risk_help": "Maximum total portfolio risk. Default: 0.05 (5%).",
+  
+  "_subsection_advanced_exits": "--- Advanced Exit Parameters ---",
+  "exit_partial_1_atr_multiplier": 1.5,
+  "_exit_partial_1_atr_multiplier_help": "First partial exit profit level (ATR multiplier). Default: 1.5.",
+  
+  "exit_partial_1_percentage": 0.33,
+  "_exit_partial_1_percentage_help": "First partial exit percentage. Default: 0.33 (33%).",
+  
+  "exit_partial_2_atr_multiplier": 3.0,
+  "_exit_partial_2_atr_multiplier_help": "Second partial exit profit level (ATR multiplier). Default: 3.0.",
+  
+  "exit_partial_2_percentage": 0.33,
+  "_exit_partial_2_percentage_help": "Second partial exit percentage. Default: 0.33 (33%).",
+  
+  "exit_final_atr_multiplier": 5.0,
+  "_exit_final_atr_multiplier_help": "Final exit profit level (ATR multiplier). Default: 5.0.",
+  
+  "exit_breakeven_atr_multiplier": 2.0,
+  "_exit_breakeven_atr_multiplier_help": "Profit level to move stop to breakeven. Default: 2.0.",
+  
+  "exit_tight_stop_atr_multiplier": 0.5,
+  "_exit_tight_stop_atr_multiplier_help": "Tight trailing stop on momentum reversal. Default: 0.5.",
+  
+  "exit_max_hold_time_hours": 24,
+  "_exit_max_hold_time_hours_help": "Maximum position hold time in hours. Default: 24.",
+  
+  "exit_regime_change_enabled": true,
+  "_exit_regime_change_enabled_help": "Close positions on regime change. Default: true.",
+  
+  "_subsection_regime_detection": "--- Market Regime Parameters ---",
+  "regime_update_interval": 900,
+  "_regime_update_interval_help": "Regime update interval in seconds. Default: 900 (15 minutes).",
+  
+  "regime_stability_minutes": 15,
+  "_regime_stability_minutes_help": "Required stability before regime change. Default: 15 minutes.",
+  
+  "regime_trending_adx_threshold": 30.0,
+  "_regime_trending_adx_threshold_help": "ADX threshold for trending regime. Default: 30.0.",
+  
+  "regime_ranging_adx_threshold": 20.0,
+  "_regime_ranging_adx_threshold_help": "ADX threshold for ranging regime. Default: 20.0.",
+  
+  "regime_volatile_atr_percentile": 80.0,
+  "_regime_volatile_atr_percentile_help": "ATR percentile for volatile regime. Default: 80.0.",
+  
+  "regime_ranging_atr_percentile": 40.0,
+  "_regime_ranging_atr_percentile_help": "ATR percentile for ranging regime. Default: 40.0.",
+  
+  "regime_trending_stop_multiplier": 2.5,
+  "_regime_trending_stop_multiplier_help": "Stop multiplier in trending regime. Default: 2.5.",
+  
+  "regime_ranging_stop_multiplier": 1.0,
+  "_regime_ranging_stop_multiplier_help": "Stop multiplier in ranging regime. Default: 1.0.",
+  
+  "regime_volatile_size_reduction": 0.5,
+  "_regime_volatile_size_reduction_help": "Position size reduction in volatile regime. Default: 0.5 (50%).",
+  
+  "regime_volatile_threshold_increase": 0.3,
+  "_regime_volatile_threshold_increase_help": "Threshold increase in volatile regime. Default: 0.3 (30%).",
+  
+  "_subsection_performance": "--- Performance Parameters ---",
+  "max_memory_mb": 500,
+  "_max_memory_mb_help": "Maximum memory usage in MB. Default: 500.",
+  
+  "ml_prediction_timeout_ms": 100,
+  "_ml_prediction_timeout_ms_help": "ML prediction timeout in milliseconds. Default: 100.",
+  
+  "api_rate_limit_per_minute": 1200,
+  "_api_rate_limit_per_minute_help": "API rate limit per minute. Default: 1200.",
+  
+  "data_cleanup_interval_hours": 6,
+  "_data_cleanup_interval_hours_help": "Data cleanup interval in hours. Default: 6.",
+  
+  "async_volume_profile": true,
+  "_async_volume_profile_help": "Calculate volume profile asynchronously. Default: true.",
+  
+  "cache_indicators": true,
+  "_cache_indicators_help": "Cache calculated indicators. Default: true.",
+  
   "_section_safety": "=== SAFETY NOTES ===",
   "_safety_1": "⚠️  ALWAYS test with BACKTEST mode first",
   "_safety_2": "⚠️  Use PAPER mode to verify strategy with live data before risking real money",
   "_safety_3": "⚠️  LIVE mode trades with REAL MONEY - use at your own risk",
   "_safety_4": "⚠️  Press ESC at any time to trigger panic close (closes all positions immediately)",
   "_safety_5": "⚠️  Never share your API keys - store them in environment variables",
-  "_safety_6": "⚠️  Use isolated margin mode to limit risk per position"
+  "_safety_6": "⚠️  Use isolated margin mode to limit risk per position",
+  "_safety_7": "⚠️  Advanced features increase complexity - test thoroughly before enabling in live trading"
 }

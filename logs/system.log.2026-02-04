@@ -1,0 +1,13 @@
+2026-02-04 00:43:35 - trading_bot.system - INFO - Starting TradingBot in LIVE mode
+2026-02-04 00:46:17 - trading_bot.system - INFO - Initiating graceful shutdown
+2026-02-04 00:46:17 - trading_bot.system - INFO - Performance metrics saved to binance_results.json
+2026-02-04 00:46:17 - trading_bot.system - INFO - Shutdown complete
+2026-02-04 00:48:41 - trading_bot.system - INFO - Starting TradingBot in LIVE mode
+2026-02-04 00:54:52 - trading_bot.system - INFO - Starting TradingBot in BACKTEST mode
+2026-02-04 00:54:52 - trading_bot.system - INFO - Initiating graceful shutdown
+2026-02-04 00:54:52 - trading_bot.system - INFO - Shutdown complete
+2026-02-04 00:58:16 - trading_bot.system - INFO - Starting TradingBot in LIVE mode
+2026-02-04 01:00:17 - trading_bot.system - INFO - Starting TradingBot in LIVE mode
+2026-02-04 01:02:59 - trading_bot.system - INFO - Starting TradingBot in LIVE mode
+2026-02-04 01:59:56 - trading_bot.system - INFO - Initiating graceful shutdown
+2026-02-04 01:59:56 - trading_bot.system - INFO - Shutdown complete

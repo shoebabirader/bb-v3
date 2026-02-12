@@ -35,7 +35,11 @@ class UIDisplay:
         trades: List[Trade],
         indicators: dict,
         wallet_balance: float,
-        mode: str = "LIVE"
+        mode: str = "LIVE",
+        market_regime: Optional[str] = None,
+        ml_prediction: Optional[float] = None,
+        volume_profile: Optional[dict] = None,
+        adaptive_thresholds: Optional[dict] = None
     ) -> Panel:
         """Render main dashboard with live updates.
         
@@ -45,6 +49,10 @@ class UIDisplay:
         - Trend status (1h and 15m)
         - RVOL level
         - ADX value
+        - Market regime (if provided)
+        - ML prediction probability (if provided)
+        - Volume profile levels (POC, VAH, VAL) (if provided)
+        - Adaptive thresholds (if provided)
         - Open positions
         - Recent trades
         
@@ -54,6 +62,10 @@ class UIDisplay:
             indicators: Dictionary of current indicator values
             wallet_balance: Current wallet balance in USDT
             mode: Operating mode ("BACKTEST", "PAPER", "LIVE")
+            market_regime: Current market regime (optional)
+            ml_prediction: ML prediction probability 0.0-1.0 (optional)
+            volume_profile: Dict with 'poc', 'vah', 'val' keys (optional)
+            adaptive_thresholds: Dict with 'adx', 'rvol' keys (optional)
             
         Returns:
             Rich Panel containing the formatted dashboard
@@ -96,6 +108,7 @@ class UIDisplay:
         # Body - split into metrics and positions
         layout["body"].split_row(
             Layout(name="metrics", ratio=2),
+            Layout(name="advanced", ratio=1),
             Layout(name="positions", ratio=1)
         )
         
@@ -173,10 +186,73 @@ class UIDisplay:
         
         layout["metrics"].update(Panel(metrics_table, title="Metrics", border_style="cyan"))
         
+        # Advanced features section
+        advanced_table = Table(show_header=False, box=box.SIMPLE, padding=(0, 1))
+        advanced_table.add_column("Feature", style="magenta", width=18)
+        advanced_table.add_column("Value", justify="left", width=20)
+        
+        # Market regime
+        if market_regime:
+            regime_colors = {
+                "TRENDING_BULLISH": "green",
+                "TRENDING_BEARISH": "red",
+                "RANGING": "yellow",
+                "VOLATILE": "orange1",
+                "UNCERTAIN": "dim white"
+            }
+            regime_color = regime_colors.get(market_regime, "white")
+            regime_display = market_regime.replace("_", " ")
+            advanced_table.add_row(
+                "Market Regime",
+                Text(regime_display, style=f"bold {regime_color}")
+            )
+        
+        # ML prediction
+        if ml_prediction is not None:
+            ml_color = "green" if ml_prediction > 0.7 else "red" if ml_prediction < 0.3 else "yellow"
+            ml_direction = "BULLISH" if ml_prediction > 0.5 else "BEARISH"
+            advanced_table.add_row(
+                "ML Prediction",
+                Text(f"{ml_prediction:.2f} ({ml_direction})", style=ml_color)
+            )
+        
+        # Volume profile levels
+        if volume_profile:
+            poc = volume_profile.get('poc')
+            vah = volume_profile.get('vah')
+            val = volume_profile.get('val')
+            
+            if poc is not None:
+                advanced_table.add_row("POC", f"${poc:.2f}")
+            if vah is not None:
+                advanced_table.add_row("VAH", f"${vah:.2f}")
+            if val is not None:
+                advanced_table.add_row("VAL", f"${val:.2f}")
+        
+        # Adaptive thresholds
+        if adaptive_thresholds:
+            adx_threshold = adaptive_thresholds.get('adx')
+            rvol_threshold = adaptive_thresholds.get('rvol')
+            
+            if adx_threshold is not None:
+                advanced_table.add_row("ADX Threshold", f"{adx_threshold:.1f}")
+            if rvol_threshold is not None:
+                advanced_table.add_row("RVOL Threshold", f"{rvol_threshold:.2f}")
+        
+        # Only show advanced panel if there's data
+        if market_regime or ml_prediction is not None or volume_profile or adaptive_thresholds:
+            layout["advanced"].update(Panel(advanced_table, title="Advanced Features", border_style="magenta"))
+        else:
+            layout["advanced"].update(Panel(
+                Text("No advanced data", style="dim white", justify="center"),
+                title="Advanced Features",
+                border_style="magenta"
+            ))
+        
         # Positions section
         if positions:
             positions_table = Table(show_header=True, box=box.SIMPLE_HEAD, padding=(0, 1))
-            positions_table.add_column("Side", style="cyan", width=6)
+            positions_table.add_column("Side", style="cyan", width=8)
             positions_table.add_column("Entry", justify="right", width=10)
             positions_table.add_column("PnL", justify="right", width=10)
             
@@ -313,10 +389,10 @@ class UIDisplay:
             level: Notification level ("INFO", "WARNING", "ERROR", "SUCCESS")
         """
         level_styles = {
-            "INFO": ("blue", "ℹ"),
-            "WARNING": ("yellow", "⚠"),
-            "ERROR": ("red", "✗"),
-            "SUCCESS": ("green", "✓")
+            "INFO": ("blue", "[i]"),
+            "WARNING": ("yellow", "[WARNING]"),
+            "ERROR": ("red", "[X]"),
+            "SUCCESS": ("green", "[OK]")
         }
         
         style, icon = level_styles.get(level.upper(), ("white", "•"))
@@ -357,6 +433,248 @@ class UIDisplay:
         
         self.console.print(panel)
         self.console.print("\n")
+    
+    def render_portfolio_view(
+        self,
+        portfolio_metrics: Optional[dict] = None
+    ) -> Panel:
+        """Render portfolio view with multi-symbol information.
+        
+        Displays:
+        - All active symbols
+        - Per-symbol PnL
+        - Correlation matrix
+        - Portfolio-level metrics
+        
+        Args:
+            portfolio_metrics: Dictionary containing:
+                - 'symbols': List of active symbol names
+                - 'per_symbol_pnl': Dict mapping symbol to PnL
+                - 'correlation_matrix': Dict of (symbol1, symbol2) -> correlation
+                - 'total_value': Total portfolio value
+                - 'total_pnl': Total portfolio PnL
+                - 'total_risk': Total portfolio risk percentage
+                - 'diversification_ratio': Portfolio diversification ratio
+                
+        Returns:
+            Rich Panel containing the formatted portfolio view
+        """
+        if not portfolio_metrics:
+            return Panel(
+                Text("No portfolio data available", style="dim white", justify="center"),
+                title="Portfolio View",
+                border_style="blue",
+                padding=(1, 2)
+            )
+        
+        layout = Layout()
+        layout.split_column(
+            Layout(name="summary", size=8),
+            Layout(name="symbols"),
+            Layout(name="correlation", size=10)
+        )
+        
+        # Portfolio summary
+        summary_table = Table(show_header=False, box=box.SIMPLE, padding=(0, 1))
+        summary_table.add_column("Metric", style="cyan", width=25)
+        summary_table.add_column("Value", justify="right")
+        
+        total_value = portfolio_metrics.get('total_value', 0.0)
+        total_pnl = portfolio_metrics.get('total_pnl', 0.0)
+        total_risk = portfolio_metrics.get('total_risk', 0.0)
+        diversification_ratio = portfolio_metrics.get('diversification_ratio', 0.0)
+        
+        summary_table.add_row("Total Portfolio Value", f"${total_value:.2f}")
+        
+        pnl_color = "green" if total_pnl >= 0 else "red"
+        pnl_symbol = "+" if total_pnl >= 0 else ""
+        summary_table.add_row(
+            "Total Portfolio PnL",
+            Text(f"{pnl_symbol}${total_pnl:.2f}", style=f"bold {pnl_color}")
+        )
+        
+        risk_color = "green" if total_risk <= 2.0 else "yellow" if total_risk <= 3.0 else "red"
+        summary_table.add_row(
+            "Total Portfolio Risk",
+            Text(f"{total_risk:.2f}%", style=risk_color)
+        )
+        
+        div_color = "green" if diversification_ratio >= 0.7 else "yellow" if diversification_ratio >= 0.5 else "red"
+        summary_table.add_row(
+            "Diversification Ratio",
+            Text(f"{diversification_ratio:.2f}", style=div_color)
+        )
+        
+        layout["summary"].update(Panel(summary_table, title="Portfolio Summary", border_style="cyan"))
+        
+        # Per-symbol PnL
+        symbols = portfolio_metrics.get('symbols', [])
+        per_symbol_pnl = portfolio_metrics.get('per_symbol_pnl', {})
+        
+        if symbols and per_symbol_pnl:
+            symbols_table = Table(show_header=True, box=box.SIMPLE_HEAD, padding=(0, 1))
+            symbols_table.add_column("Symbol", style="cyan", width=12)
+            symbols_table.add_column("PnL", justify="right", width=15)
+            symbols_table.add_column("Status", justify="center", width=10)
+            
+            for symbol in symbols:
+                pnl = per_symbol_pnl.get(symbol, 0.0)
+                pnl_color = "green" if pnl >= 0 else "red"
+                pnl_symbol = "+" if pnl >= 0 else ""
+                
+                status = "ACTIVE" if pnl != 0 else "IDLE"
+                status_color = "green" if status == "ACTIVE" else "dim white"
+                
+                symbols_table.add_row(
+                    symbol,
+                    Text(f"{pnl_symbol}${pnl:.2f}", style=pnl_color),
+                    Text(status, style=status_color)
+                )
+            
+            layout["symbols"].update(Panel(symbols_table, title="Symbol Performance", border_style="yellow"))
+        else:
+            layout["symbols"].update(Panel(
+                Text("No active symbols", style="dim white", justify="center"),
+                title="Symbol Performance",
+                border_style="yellow"
+            ))
+        
+        # Correlation matrix
+        correlation_matrix = portfolio_metrics.get('correlation_matrix', {})
+        
+        if correlation_matrix and len(symbols) > 1:
+            corr_table = Table(show_header=True, box=box.SIMPLE_HEAD, padding=(0, 1))
+            corr_table.add_column("", style="cyan", width=10)
+            
+            for symbol in symbols:
+                corr_table.add_column(symbol[:8], justify="center", width=8)
+            
+            for symbol1 in symbols:
+                row_data = [symbol1[:8]]
+                for symbol2 in symbols:
+                    if symbol1 == symbol2:
+                        row_data.append(Text("1.00", style="dim white"))
+                    else:
+                        # Try both orderings of the tuple
+                        corr = correlation_matrix.get((symbol1, symbol2))
+                        if corr is None:
+                            corr = correlation_matrix.get((symbol2, symbol1), 0.0)
+                        
+                        corr_color = "red" if abs(corr) > 0.7 else "yellow" if abs(corr) > 0.5 else "green"
+                        row_data.append(Text(f"{corr:.2f}", style=corr_color))
+                
+                corr_table.add_row(*row_data)
+            
+            layout["correlation"].update(Panel(corr_table, title="Correlation Matrix", border_style="magenta"))
+        else:
+            layout["correlation"].update(Panel(
+                Text("Insufficient data for correlation", style="dim white", justify="center"),
+                title="Correlation Matrix",
+                border_style="magenta"
+            ))
+        
+        return Panel(layout, title="Portfolio View", border_style="bold blue", padding=(1, 2))
+    
+    def render_feature_status(
+        self,
+        feature_status: Optional[dict] = None
+    ) -> Panel:
+        """Render feature status indicators.
+        
+        Displays:
+        - Which features are enabled/disabled
+        - ML predictor accuracy
+        - Last threshold adjustment timestamp
+        
+        Args:
+            feature_status: Dictionary containing:
+                - 'adaptive_thresholds': bool (enabled/disabled)
+                - 'ml_predictor': bool (enabled/disabled)
+                - 'ml_accuracy': float (0.0-1.0)
+                - 'volume_profile': bool (enabled/disabled)
+                - 'market_regime': bool (enabled/disabled)
+                - 'portfolio_manager': bool (enabled/disabled)
+                - 'advanced_exits': bool (enabled/disabled)
+                - 'last_threshold_adjustment': int (timestamp)
+                
+        Returns:
+            Rich Panel containing the formatted feature status
+        """
+        if not feature_status:
+            return Panel(
+                Text("No feature status data available", style="dim white", justify="center"),
+                title="Feature Status",
+                border_style="blue",
+                padding=(1, 2)
+            )
+        
+        layout = Layout()
+        layout.split_column(
+            Layout(name="features", ratio=2),
+            Layout(name="details", ratio=1)
+        )
+        
+        # Feature toggles
+        features_table = Table(show_header=True, box=box.SIMPLE_HEAD, padding=(0, 1))
+        features_table.add_column("Feature", style="cyan", width=25)
+        features_table.add_column("Status", justify="center", width=12)
+        
+        feature_names = {
+            'adaptive_thresholds': 'Adaptive Thresholds',
+            'ml_predictor': 'ML Predictor',
+            'volume_profile': 'Volume Profile',
+            'market_regime': 'Market Regime',
+            'portfolio_manager': 'Portfolio Manager',
+            'advanced_exits': 'Advanced Exits'
+        }
+        
+        for key, name in feature_names.items():
+            enabled = feature_status.get(key, False)
+            if enabled:
+                status_text = Text("[OK] ENABLED", style="bold green")
+            else:
+                status_text = Text("[X] DISABLED", style="dim red")
+            
+            features_table.add_row(name, status_text)
+        
+        layout["features"].update(Panel(features_table, title="Feature Toggles", border_style="cyan"))
+        
+        # Feature details
+        details_table = Table(show_header=False, box=box.SIMPLE, padding=(0, 1))
+        details_table.add_column("Detail", style="magenta", width=22)
+        details_table.add_column("Value", justify="right")
+        
+        # ML accuracy
+        ml_accuracy = feature_status.get('ml_accuracy')
+        if ml_accuracy is not None:
+            accuracy_pct = ml_accuracy * 100
+            accuracy_color = "green" if accuracy_pct >= 55 else "red"
+            details_table.add_row(
+                "ML Accuracy",
+                Text(f"{accuracy_pct:.1f}%", style=accuracy_color)
+            )
+        
+        # Last threshold adjustment
+        last_adjustment = feature_status.get('last_threshold_adjustment')
+        if last_adjustment:
+            try:
+                adjustment_time = datetime.fromtimestamp(last_adjustment)
+                time_ago = datetime.now() - adjustment_time
+                
+                if time_ago.total_seconds() < 3600:
+                    minutes = int(time_ago.total_seconds() / 60)
+                    time_str = f"{minutes}m ago"
+                else:
+                    hours = int(time_ago.total_seconds() / 3600)
+                    time_str = f"{hours}h ago"
+                
+                details_table.add_row("Last Threshold Adj", time_str)
+            except (ValueError, OSError):
+                details_table.add_row("Last Threshold Adj", "N/A")
+        
+        layout["details"].update(Panel(details_table, title="Feature Details", border_style="magenta"))
+        
+        return Panel(layout, title="Feature Status", border_style="bold blue", padding=(1, 2))
     
     def clear_screen(self):
         """Clear the terminal screen."""

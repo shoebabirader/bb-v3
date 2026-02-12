@@ -475,3 +475,356 @@ def test_invalid_exit_reason(risk_manager):
             exit_price=51000.0,
             reason="INVALID_REASON"
         )
+
+
+# ===== INTEGRATION TESTS FOR ENHANCED RISK MANAGEMENT =====
+
+def test_advanced_exit_manager_integration(config, position_sizer):
+    """Test RiskManager integration with AdvancedExitManager.
+    
+    Tests:
+    - AdvancedExitManager is initialized when enabled
+    - Partial exits are checked correctly
+    - Time-based exits work
+    - Regime-based exits work
+    
+    Validates: Requirements 6.1, 6.2, 6.3, 6.4, 6.7
+    """
+    # Enable advanced exits
+    config.enable_advanced_exits = True
+    config.exit_partial_1_atr_multiplier = 1.5
+    config.exit_partial_1_percentage = 0.33
+    config.exit_partial_2_atr_multiplier = 3.0
+    config.exit_partial_2_percentage = 0.33
+    config.exit_max_hold_time_hours = 24
+    config.exit_regime_change_enabled = True
+    
+    risk_manager = RiskManager(config, position_sizer)
+    
+    # Verify AdvancedExitManager is initialized
+    assert risk_manager.advanced_exit_manager is not None, \
+        "AdvancedExitManager should be initialized when enabled"
+    
+    # Open a position
+    signal = Signal(
+        type="LONG_ENTRY",
+        timestamp=1000000,
+        price=50000.0,
+        indicators={}
+    )
+    
+    position = risk_manager.open_position(
+        signal=signal,
+        wallet_balance=10000.0,
+        atr=500.0
+    )
+    
+    # Test partial exit check (price at 1.5x ATR profit)
+    current_price = position.entry_price + (1.5 * 500.0)
+    partial_pct = risk_manager.check_partial_exit(position, current_price, 500.0)
+    
+    assert partial_pct is not None, "Partial exit should be triggered at 1.5x ATR"
+    assert partial_pct == 0.33, f"Expected 33% partial exit, got {partial_pct}"
+    
+    # Execute partial exit
+    trade = risk_manager.execute_partial_exit(position, current_price, partial_pct)
+    
+    assert trade.exit_reason == "PARTIAL_EXIT_33%", \
+        f"Expected PARTIAL_EXIT_33%, got {trade.exit_reason}"
+    assert trade.quantity < position.quantity + trade.quantity, \
+        "Position quantity should be reduced after partial exit"
+    
+    # Test time-based exit (simulate 25 hours passing)
+    import time
+    position.entry_time = int((time.time() - 25 * 3600) * 1000)
+    
+    time_exit = risk_manager.check_time_based_exit(position)
+    assert time_exit is True, "Time-based exit should trigger after 24 hours"
+    
+    # Test regime-based exit
+    risk_manager.update_regime("TRENDING_BULLISH")
+    risk_manager.update_regime("RANGING")
+    
+    regime_exit = risk_manager.check_regime_exit(position)
+    assert regime_exit is True, \
+        "Regime-based exit should trigger when changing from TRENDING to RANGING"
+
+
+def test_portfolio_manager_integration(config, position_sizer):
+    """Test RiskManager integration with PortfolioManager.
+    
+    Tests:
+    - PortfolioManager is initialized when enabled
+    - Portfolio risk limits are enforced
+    - Multi-symbol position management works
+    - Portfolio metrics are tracked
+    
+    Validates: Requirements 5.1, 5.4
+    """
+    # Enable portfolio management
+    config.enable_portfolio_management = True
+    config.portfolio_symbols = ["BTCUSDT", "ETHUSDT", "BNBUSDT"]
+    config.portfolio_max_symbols = 3
+    config.portfolio_max_total_risk = 0.05  # 5% max total risk
+    
+    risk_manager = RiskManager(config, position_sizer)
+    
+    # Verify PortfolioManager is initialized
+    assert risk_manager.portfolio_manager is not None, \
+        "PortfolioManager should be initialized when enabled"
+    
+    # Verify managed symbols
+    managed_symbols = risk_manager.get_managed_symbols()
+    assert len(managed_symbols) == 3, f"Expected 3 symbols, got {len(managed_symbols)}"
+    assert "BTCUSDT" in managed_symbols, "BTCUSDT should be in managed symbols"
+    
+    # Test opening position for first symbol
+    signal1 = Signal(
+        type="LONG_ENTRY",
+        timestamp=1000000,
+        price=50000.0,
+        indicators={},
+        symbol="BTCUSDT"
+    )
+    
+    can_open = risk_manager.can_open_position_for_symbol("BTCUSDT", 10000.0)
+    assert can_open is True, "Should be able to open first position"
+    
+    position1 = risk_manager.open_position(
+        signal=signal1,
+        wallet_balance=10000.0,
+        atr=500.0
+    )
+    
+    assert position1.symbol == "BTCUSDT", "Position should be for BTCUSDT"
+    
+    # Verify portfolio manager was updated
+    assert risk_manager.portfolio_manager.positions["BTCUSDT"] is not None, \
+        "Portfolio manager should track the position"
+    
+    # Test opening position for second symbol
+    signal2 = Signal(
+        type="SHORT_ENTRY",
+        timestamp=1000000,
+        price=3000.0,
+        indicators={},
+        symbol="ETHUSDT"
+    )
+    
+    can_open = risk_manager.can_open_position_for_symbol("ETHUSDT", 10000.0)
+    assert can_open is True, "Should be able to open second position"
+    
+    position2 = risk_manager.open_position(
+        signal=signal2,
+        wallet_balance=10000.0,
+        atr=30.0
+    )
+    
+    assert position2.symbol == "ETHUSDT", "Position should be for ETHUSDT"
+    
+    # Get portfolio metrics
+    metrics = risk_manager.get_portfolio_metrics(10000.0)
+    
+    assert metrics is not None, "Should return portfolio metrics"
+    assert metrics.total_risk <= config.portfolio_max_total_risk, \
+        f"Total risk {metrics.total_risk} should not exceed {config.portfolio_max_total_risk}"
+    
+    # Close first position and verify PnL tracking
+    trade1 = risk_manager.close_position(position1, 51000.0, "SIGNAL_EXIT")
+    
+    assert trade1.pnl > 0, "Should have profit on long position"
+    assert risk_manager.portfolio_manager.per_symbol_pnl["BTCUSDT"] > 0, \
+        "Portfolio manager should track PnL for BTCUSDT"
+    
+    # Verify position was removed from portfolio
+    assert risk_manager.portfolio_manager.positions["BTCUSDT"] is None, \
+        "Position should be removed from portfolio after closing"
+
+
+def test_multi_symbol_position_management(config, position_sizer):
+    """Test managing positions across multiple symbols.
+    
+    Tests:
+    - Can open positions for different symbols
+    - Each symbol has independent position tracking
+    - Closing one position doesn't affect others
+    - Portfolio-level risk is enforced
+    
+    Validates: Requirements 5.1, 6.1, 6.2, 6.3
+    """
+    # Enable both advanced exits and portfolio management
+    config.enable_advanced_exits = True
+    config.enable_portfolio_management = True
+    config.portfolio_symbols = ["BTCUSDT", "ETHUSDT"]
+    config.portfolio_max_symbols = 2
+    config.exit_partial_1_atr_multiplier = 1.5
+    config.exit_partial_1_percentage = 0.33
+    
+    risk_manager = RiskManager(config, position_sizer)
+    
+    # Open position for BTC
+    signal_btc = Signal(
+        type="LONG_ENTRY",
+        timestamp=1000000,
+        price=50000.0,
+        indicators={},
+        symbol="BTCUSDT"
+    )
+    
+    position_btc = risk_manager.open_position(
+        signal=signal_btc,
+        wallet_balance=10000.0,
+        atr=500.0
+    )
+    
+    # Open position for ETH
+    signal_eth = Signal(
+        type="LONG_ENTRY",
+        timestamp=1000000,
+        price=3000.0,
+        indicators={},
+        symbol="ETHUSDT"
+    )
+    
+    position_eth = risk_manager.open_position(
+        signal=signal_eth,
+        wallet_balance=10000.0,
+        atr=30.0
+    )
+    
+    # Verify both positions exist
+    assert risk_manager.has_active_position("BTCUSDT"), "Should have BTC position"
+    assert risk_manager.has_active_position("ETHUSDT"), "Should have ETH position"
+    
+    # Test partial exit on BTC position
+    btc_price_profit = position_btc.entry_price + (1.5 * 500.0)
+    partial_pct = risk_manager.check_partial_exit(position_btc, btc_price_profit, 500.0)
+    
+    assert partial_pct == 0.33, "Should trigger 33% partial exit for BTC"
+    
+    # Execute partial exit on BTC
+    trade_btc_partial = risk_manager.execute_partial_exit(
+        position_btc, btc_price_profit, partial_pct
+    )
+    
+    # Verify BTC position is reduced but ETH is unchanged
+    assert position_btc.quantity < position_eth.quantity, \
+        "BTC position should be reduced after partial exit"
+    assert risk_manager.has_active_position("BTCUSDT"), \
+        "BTC position should still exist after partial exit"
+    assert risk_manager.has_active_position("ETHUSDT"), \
+        "ETH position should be unaffected"
+    
+    # Close ETH position completely
+    trade_eth = risk_manager.close_position(position_eth, 3100.0, "SIGNAL_EXIT")
+    
+    # Verify ETH is closed but BTC remains
+    assert not risk_manager.has_active_position("ETHUSDT"), \
+        "ETH position should be closed"
+    assert risk_manager.has_active_position("BTCUSDT"), \
+        "BTC position should still exist"
+    
+    # Verify portfolio metrics reflect changes
+    metrics = risk_manager.get_portfolio_metrics(10000.0)
+    assert metrics is not None, "Should return portfolio metrics"
+    assert "ETHUSDT" in metrics.per_symbol_pnl, "Should track ETH PnL"
+    assert metrics.per_symbol_pnl["ETHUSDT"] > 0, "ETH should have positive PnL"
+
+
+def test_advanced_exits_without_portfolio_management(config, position_sizer):
+    """Test that advanced exits work independently without portfolio management.
+    
+    Validates: Requirements 6.1, 6.2, 6.3
+    """
+    # Enable only advanced exits
+    config.enable_advanced_exits = True
+    config.enable_portfolio_management = False
+    config.exit_partial_1_atr_multiplier = 1.5
+    config.exit_partial_1_percentage = 0.33
+    
+    risk_manager = RiskManager(config, position_sizer)
+    
+    # Verify only AdvancedExitManager is initialized
+    assert risk_manager.advanced_exit_manager is not None, \
+        "AdvancedExitManager should be initialized"
+    assert risk_manager.portfolio_manager is None, \
+        "PortfolioManager should not be initialized"
+    
+    # Open position
+    signal = Signal(
+        type="LONG_ENTRY",
+        timestamp=1000000,
+        price=50000.0,
+        indicators={}
+    )
+    
+    position = risk_manager.open_position(
+        signal=signal,
+        wallet_balance=10000.0,
+        atr=500.0
+    )
+    
+    # Test partial exit
+    current_price = position.entry_price + (1.5 * 500.0)
+    partial_pct = risk_manager.check_partial_exit(position, current_price, 500.0)
+    
+    assert partial_pct == 0.33, "Partial exit should work without portfolio management"
+    
+    # Execute partial exit
+    trade = risk_manager.execute_partial_exit(position, current_price, partial_pct)
+    
+    assert trade.pnl > 0, "Should have profit on partial exit"
+    assert position.quantity < trade.quantity + position.quantity, \
+        "Position should be reduced"
+
+
+def test_portfolio_management_without_advanced_exits(config, position_sizer):
+    """Test that portfolio management works independently without advanced exits.
+    
+    Validates: Requirements 5.1, 5.4
+    """
+    # Enable only portfolio management
+    config.enable_advanced_exits = False
+    config.enable_portfolio_management = True
+    config.portfolio_symbols = ["BTCUSDT", "ETHUSDT"]
+    config.portfolio_max_symbols = 2
+    
+    risk_manager = RiskManager(config, position_sizer)
+    
+    # Verify only PortfolioManager is initialized
+    assert risk_manager.portfolio_manager is not None, \
+        "PortfolioManager should be initialized"
+    assert risk_manager.advanced_exit_manager is None, \
+        "AdvancedExitManager should not be initialized"
+    
+    # Open positions for multiple symbols
+    signal_btc = Signal(
+        type="LONG_ENTRY",
+        timestamp=1000000,
+        price=50000.0,
+        indicators={},
+        symbol="BTCUSDT"
+    )
+    
+    position_btc = risk_manager.open_position(
+        signal=signal_btc,
+        wallet_balance=10000.0,
+        atr=500.0
+    )
+    
+    # Verify portfolio tracking works
+    assert risk_manager.portfolio_manager.positions["BTCUSDT"] is not None, \
+        "Portfolio should track BTC position"
+    
+    # Get metrics
+    metrics = risk_manager.get_portfolio_metrics(10000.0)
+    assert metrics is not None, "Should return portfolio metrics"
+    
+    # Close position
+    trade = risk_manager.close_position(position_btc, 51000.0, "SIGNAL_EXIT")
+    
+    # Verify portfolio was updated
+    assert risk_manager.portfolio_manager.positions["BTCUSDT"] is None, \
+        "Position should be removed from portfolio"
+    assert risk_manager.portfolio_manager.per_symbol_pnl["BTCUSDT"] > 0, \
+        "PnL should be tracked"

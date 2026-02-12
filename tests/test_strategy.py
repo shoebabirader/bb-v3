@@ -348,3 +348,272 @@ def test_trend_direction_consistency(candles_1h: List[Candle]):
     # Trend should remain consistent when 1h data hasn't changed
     assert initial_trend == updated_trend, \
         "Trend direction should remain consistent when 1h candle data hasn't changed"
+
+
+# ===== INTEGRATION TESTS FOR ADVANCED FEATURES =====
+
+def test_strategy_with_all_features_enabled():
+    """Integration test: Full signal generation pipeline with all features enabled.
+    
+    Tests that the strategy engine works correctly when all advanced features
+    are enabled simultaneously.
+    
+    Validates: Requirements 8.6
+    """
+    # Create config with all features enabled
+    config = Config()
+    config.enable_adaptive_thresholds = True
+    config.enable_multi_timeframe = True
+    config.enable_volume_profile = True
+    config.enable_ml_prediction = False  # Disabled as model may not exist
+    config.enable_regime_detection = True
+    
+    # Create strategy engine
+    strategy = StrategyEngine(config)
+    
+    # Verify all components are initialized
+    assert strategy.adaptive_threshold_manager is not None
+    assert strategy.timeframe_coordinator is not None
+    assert strategy.volume_profile_analyzer is not None
+    assert strategy.market_regime_detector is not None
+    
+    # Generate test candles
+    candles_15m = _generate_test_candles(100, "15m")
+    candles_1h = _generate_test_candles(50, "1h")
+    candles_5m = _generate_test_candles(200, "5m")
+    candles_4h = _generate_test_candles(30, "4h")
+    
+    # Update indicators with all timeframes
+    strategy.update_indicators(candles_15m, candles_1h, candles_5m, candles_4h)
+    
+    # Check that indicators were updated
+    assert strategy.current_indicators.current_price > 0
+    
+    # Try to generate signals (may or may not generate depending on conditions)
+    long_signal = strategy.check_long_entry()
+    short_signal = strategy.check_short_entry()
+    
+    # Signals should be either None or valid Signal objects
+    if long_signal:
+        assert long_signal.type == "LONG_ENTRY"
+        assert long_signal.price > 0
+        assert 0.0 <= long_signal.confidence <= 1.0
+    
+    if short_signal:
+        assert short_signal.type == "SHORT_ENTRY"
+        assert short_signal.price > 0
+        assert 0.0 <= short_signal.confidence <= 1.0
+
+
+def test_strategy_with_individual_features_disabled():
+    """Integration test: Strategy works with individual features disabled.
+    
+    Tests that disabling individual features doesn't break the strategy engine.
+    
+    Validates: Requirements 8.6
+    """
+    # Test with each feature disabled individually
+    feature_flags = [
+        'enable_adaptive_thresholds',
+        'enable_multi_timeframe',
+        'enable_volume_profile',
+        'enable_regime_detection'
+    ]
+    
+    for disabled_feature in feature_flags:
+        config = Config()
+        # Enable all features
+        config.enable_adaptive_thresholds = True
+        config.enable_multi_timeframe = True
+        config.enable_volume_profile = True
+        config.enable_regime_detection = True
+        config.enable_ml_prediction = False
+        
+        # Disable one feature
+        setattr(config, disabled_feature, False)
+        
+        # Create strategy engine
+        strategy = StrategyEngine(config)
+        
+        # Generate test candles
+        candles_15m = _generate_test_candles(100, "15m")
+        candles_1h = _generate_test_candles(50, "1h")
+        candles_5m = _generate_test_candles(200, "5m")
+        candles_4h = _generate_test_candles(30, "4h")
+        
+        # Update indicators - should not raise exceptions
+        strategy.update_indicators(candles_15m, candles_1h, candles_5m, candles_4h)
+        
+        # Check signals - should not raise exceptions
+        long_signal = strategy.check_long_entry()
+        short_signal = strategy.check_short_entry()
+        
+        # Verify strategy still works
+        assert strategy.current_indicators.current_price > 0
+
+
+def test_strategy_with_no_advanced_features():
+    """Integration test: Strategy works with all advanced features disabled.
+    
+    Tests backward compatibility - strategy should work with all features off.
+    
+    Validates: Requirements 8.6
+    """
+    config = Config()
+    config.enable_adaptive_thresholds = False
+    config.enable_multi_timeframe = False
+    config.enable_volume_profile = False
+    config.enable_ml_prediction = False
+    config.enable_regime_detection = False
+    
+    strategy = StrategyEngine(config)
+    
+    # Verify no advanced components are initialized
+    assert strategy.adaptive_threshold_manager is None
+    assert strategy.timeframe_coordinator is None
+    assert strategy.volume_profile_analyzer is None
+    assert strategy.market_regime_detector is None
+    assert strategy.ml_predictor is None
+    
+    # Generate test candles
+    candles_15m = _generate_test_candles(100, "15m")
+    candles_1h = _generate_test_candles(50, "1h")
+    
+    # Update indicators (without optional timeframes)
+    strategy.update_indicators(candles_15m, candles_1h)
+    
+    # Check that basic functionality still works
+    assert strategy.current_indicators.current_price > 0
+    
+    # Try to generate signals
+    long_signal = strategy.check_long_entry()
+    short_signal = strategy.check_short_entry()
+    
+    # Should work without errors
+
+
+def test_adaptive_thresholds_integration():
+    """Integration test: Adaptive thresholds affect signal generation.
+    
+    Tests that adaptive threshold manager properly adjusts thresholds
+    and those adjustments are used in signal generation.
+    
+    Validates: Requirements 1.6
+    """
+    config = Config()
+    config.enable_adaptive_thresholds = True
+    
+    strategy = StrategyEngine(config)
+    
+    # Generate test candles with high volatility
+    candles_15m = _generate_high_volatility_candles(100)
+    candles_1h = _generate_test_candles(50, "1h")
+    
+    # Update indicators
+    strategy.update_indicators(candles_15m, candles_1h)
+    
+    # Get current thresholds
+    if strategy.adaptive_threshold_manager:
+        thresholds = strategy.adaptive_threshold_manager.get_current_thresholds()
+        
+        # Thresholds should be within configured bounds
+        assert config.adaptive_threshold_min_adx <= thresholds['adx'] <= config.adaptive_threshold_max_adx
+        assert config.adaptive_threshold_min_rvol <= thresholds['rvol'] <= config.adaptive_threshold_max_rvol
+
+
+def test_volume_profile_size_adjustment():
+    """Integration test: Volume profile affects position sizing.
+    
+    Tests that volume profile analyzer properly identifies low volume areas
+    and returns appropriate size adjustments.
+    
+    Validates: Requirements 3.4, 3.5, 3.6
+    """
+    config = Config()
+    config.enable_volume_profile = True
+    
+    strategy = StrategyEngine(config)
+    
+    # Generate test candles
+    candles_15m = _generate_test_candles(100, "15m")
+    candles_1h = _generate_test_candles(50, "1h")
+    
+    # Update indicators
+    strategy.update_indicators(candles_15m, candles_1h)
+    
+    # Get volume profile size adjustment
+    size_adjustment = strategy.get_volume_profile_size_adjustment()
+    
+    # Size adjustment should be between 0.5 and 1.0
+    assert 0.5 <= size_adjustment <= 1.0
+
+
+# Helper functions for test data generation
+
+def _generate_test_candles(count: int, timeframe: str) -> List[Candle]:
+    """Generate test candles with realistic price movements."""
+    candles = []
+    base_price = 30000.0
+    base_volume = 1000.0
+    
+    # Determine interval in milliseconds
+    intervals = {
+        "5m": 5 * 60 * 1000,
+        "15m": 15 * 60 * 1000,
+        "1h": 60 * 60 * 1000,
+        "4h": 4 * 60 * 60 * 1000
+    }
+    interval = intervals.get(timeframe, 15 * 60 * 1000)
+    
+    current_time = int(time.time() * 1000) - (count * interval)
+    
+    for i in range(count):
+        # Generate OHLC with realistic relationships
+        open_price = base_price * (1.0 + (i % 10 - 5) * 0.001)
+        close_price = open_price * (1.0 + (i % 7 - 3) * 0.002)
+        high_price = max(open_price, close_price) * 1.005
+        low_price = min(open_price, close_price) * 0.995
+        volume = base_volume * (1.0 + (i % 5) * 0.2)
+        
+        candles.append(Candle(
+            timestamp=current_time + (i * interval),
+            open=open_price,
+            high=high_price,
+            low=low_price,
+            close=close_price,
+            volume=volume
+        ))
+        
+        base_price = close_price
+    
+    return candles
+
+
+def _generate_high_volatility_candles(count: int) -> List[Candle]:
+    """Generate test candles with high volatility."""
+    candles = []
+    base_price = 30000.0
+    base_volume = 1000.0
+    
+    current_time = int(time.time() * 1000) - (count * 15 * 60 * 1000)
+    
+    for i in range(count):
+        # Generate OHLC with high volatility
+        open_price = base_price * (1.0 + (i % 10 - 5) * 0.01)  # 1% swings
+        close_price = open_price * (1.0 + (i % 7 - 3) * 0.02)  # 2% swings
+        high_price = max(open_price, close_price) * 1.02
+        low_price = min(open_price, close_price) * 0.98
+        volume = base_volume * (1.0 + (i % 5) * 0.5)
+        
+        candles.append(Candle(
+            timestamp=current_time + (i * 15 * 60 * 1000),
+            open=open_price,
+            high=high_price,
+            low=low_price,
+            close=close_price,
+            volume=volume
+        ))
+        
+        base_price = close_price
+    
+    return candles

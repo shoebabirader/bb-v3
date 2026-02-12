@@ -82,6 +82,15 @@ class PositionSizer:
         position_notional_value = quantity * entry_price
         margin_required = position_notional_value / self.config.leverage
         
+        # CRITICAL FIX: If margin required exceeds wallet balance, reduce position size
+        # This ensures we never try to open a position larger than our available balance
+        if margin_required > wallet_balance:
+            # Reduce quantity to fit within available balance
+            max_notional = wallet_balance * self.config.leverage
+            quantity = max_notional / entry_price
+            position_notional_value = quantity * entry_price
+            margin_required = position_notional_value / self.config.leverage
+        
         # Calculate stop-loss price (for reference, not used in actual orders)
         # This is just for logging/display purposes
         stop_loss_price = entry_price - stop_loss_distance

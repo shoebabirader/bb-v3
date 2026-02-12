@@ -1,11 +1,15 @@
 """Backtest engine for simulating trading strategy on historical data."""
 
 import numpy as np
+import logging
 from typing import List, Dict, Optional
+from binance.client import Client
 from src.config import Config
 from src.models import Candle, Trade, PerformanceMetrics, Signal, Position
 from src.strategy import StrategyEngine
 from src.risk_manager import RiskManager
+
+logger = logging.getLogger(__name__)
 
 
 class BacktestEngine:
@@ -13,6 +17,7 @@ class BacktestEngine:
     
     Implements realistic trade execution with fees and slippage,
     tracks equity curve, and calculates comprehensive performance metrics.
+    Supports multi-timeframe analysis and adaptive features.
     """
     
     def __init__(
@@ -35,22 +40,52 @@ class BacktestEngine:
         self.equity_curve: List[float] = []
         self.initial_balance = 0.0
         self.current_balance = 0.0
+        
+        # Feature tracking for adaptive components
+        self.feature_metrics = {
+            'adaptive_thresholds': {
+                'enabled': False,
+                'adjustments': 0,
+                'trades_influenced': 0
+            },
+            'volume_profile': {
+                'enabled': False,
+                'trades_at_key_levels': 0,
+                'total_trades': 0
+            },
+            'ml_predictions': {
+                'enabled': False,
+                'high_confidence_trades': 0,
+                'low_confidence_filtered': 0,
+                'total_predictions': 0
+            },
+            'market_regime': {
+                'enabled': False,
+                'regime_changes': 0,
+                'trades_by_regime': {}
+            }
+        }
     
     def run_backtest(
         self, 
         candles_15m: List[Candle],
         candles_1h: List[Candle],
-        initial_balance: float = 10000.0
+        initial_balance: float = 10000.0,
+        candles_5m: Optional[List[Candle]] = None,
+        candles_4h: Optional[List[Candle]] = None
     ) -> Dict:
         """Execute backtest on historical data.
         
         Iterates through historical candles, generates signals, simulates
         trade execution with realistic fills, and tracks performance.
+        Supports multi-timeframe analysis when 5m and 4h data is provided.
         
         Args:
             candles_15m: List of 15-minute historical candles
             candles_1h: List of 1-hour historical candles
             initial_balance: Starting wallet balance in USDT
+            candles_5m: Optional list of 5-minute historical candles for multi-TF analysis
+            candles_4h: Optional list of 4-hour historical candles for multi-TF analysis
             
         Returns:
             Dictionary containing performance metrics:
@@ -79,13 +114,21 @@ class BacktestEngine:
         self.equity_curve = [initial_balance]
         self.trades = []
         
-        # We need to align 15m and 1h candles
-        # For simplicity, we'll iterate through 15m candles and update 1h when needed
-        # In production, this would need more sophisticated time alignment
+        # Store multi-timeframe data for synchronized access
+        self._candles_5m = candles_5m if candles_5m else []
+        self._candles_4h = candles_4h if candles_4h else []
+        
+        # Build synchronized timeframe indices
+        # This ensures all timeframes are properly aligned by timestamp
+        timeframe_indices = self._build_timeframe_indices(
+            candles_15m, candles_1h, self._candles_5m, self._candles_4h
+        )
         
         # Build a sliding window of candles for indicator calculation
         min_candles_15m = 50  # Enough for all indicators
         min_candles_1h = 30
+        min_candles_5m = 100 if self._candles_5m else 0
+        min_candles_4h = 5 if self._candles_4h else 0  # Reduced to allow earlier 4h data
         
         # Iterate through 15m candles
         for i in range(min_candles_15m, len(candles_15m)):
@@ -100,8 +143,40 @@ class BacktestEngine:
             if len(current_candles_1h) < min_candles_1h:
                 continue
             
-            # Update indicators
-            self.strategy.update_indicators(current_candles_15m, current_candles_1h)
+            # Get synchronized 5m and 4h candles if available
+            current_candles_5m = None
+            current_candles_4h = None
+            
+            if self._candles_5m:
+                # Get 5m candles synchronized to current 15m timestamp
+                current_timestamp = candles_15m[i].timestamp
+                idx_5m = timeframe_indices.get('5m', {}).get(current_timestamp)
+                if idx_5m is not None and idx_5m >= min_candles_5m:
+                    current_candles_5m = self._candles_5m[max(0, idx_5m - 300):idx_5m + 1]
+            
+            if self._candles_4h:
+                # Get 4h candles synchronized to current 15m timestamp
+                current_timestamp = candles_15m[i].timestamp
+                idx_4h = timeframe_indices.get('4h', {}).get(current_timestamp)
+                
+                if idx_4h is not None and idx_4h >= min_candles_4h:
+                    current_candles_4h = self._candles_4h[max(0, idx_4h - 50):idx_4h + 1]
+            
+            # Update indicators (pass multi-timeframe data if available)
+            self.strategy.update_indicators(
+                current_candles_15m, 
+                current_candles_1h,
+                current_candles_5m,
+                current_candles_4h
+            )
+            
+            # Simulate adaptive features if enabled
+            self._simulate_adaptive_features(
+                current_candles_15m,
+                current_candles_1h,
+                current_candles_5m,
+                current_candles_4h
+            )
             
             # Get current candle
             current_candle = candles_15m[i]
@@ -163,6 +238,9 @@ class BacktestEngine:
                     
                     # Update signal price with simulated execution price
                     signal.price = entry_price
+                    
+                    # Track feature influence on this trade
+                    self._track_feature_influence(signal, current_price)
                     
                     # Open position
                     atr = self.strategy.current_indicators.atr_15m
@@ -303,7 +381,8 @@ class BacktestEngine:
                 'average_loss': 0.0,
                 'largest_win': 0.0,
                 'largest_loss': 0.0,
-                'average_trade_duration': 0
+                'average_trade_duration': 0,
+                'feature_metrics': self.feature_metrics
             }
         
         # Basic trade statistics
@@ -354,7 +433,8 @@ class BacktestEngine:
             'average_loss': average_loss,
             'largest_win': largest_win,
             'largest_loss': largest_loss,
-            'average_trade_duration': average_trade_duration
+            'average_trade_duration': average_trade_duration,
+            'feature_metrics': self.feature_metrics
         }
     
     def _calculate_max_drawdown(self) -> float:
@@ -453,3 +533,444 @@ class BacktestEngine:
             List of Trade objects
         """
         return self.trades.copy()
+    
+    def _build_timeframe_indices(
+        self,
+        candles_15m: List[Candle],
+        candles_1h: List[Candle],
+        candles_5m: List[Candle],
+        candles_4h: List[Candle]
+    ) -> Dict[str, Dict[int, int]]:
+        """Build indices to synchronize all timeframes.
+        
+        Creates a mapping from 15m timestamps to the corresponding index
+        in each timeframe's candle list. This ensures all timeframes are
+        properly aligned during backtesting.
+        
+        Args:
+            candles_15m: 15-minute candles (reference timeframe)
+            candles_1h: 1-hour candles
+            candles_5m: 5-minute candles
+            candles_4h: 4-hour candles
+            
+        Returns:
+            Dictionary mapping timeframe to {timestamp: index} mappings
+        """
+        indices = {
+            '5m': {},
+            '1h': {},
+            '4h': {}
+        }
+        
+        # Build index for 5m candles
+        # For each 15m timestamp, find the most recent 5m candle
+        if candles_5m:
+            for ts_15m in [c.timestamp for c in candles_15m]:
+                # Find the most recent 5m candle at or before this 15m timestamp
+                for idx in range(len(candles_5m) - 1, -1, -1):
+                    if candles_5m[idx].timestamp <= ts_15m:
+                        indices['5m'][ts_15m] = idx
+                        break
+        
+        # Build index for 1h candles
+        # For each 15m timestamp, find the most recent 1h candle
+        if candles_1h:
+            for ts_15m in [c.timestamp for c in candles_15m]:
+                # Find the most recent 1h candle at or before this 15m timestamp
+                for idx in range(len(candles_1h) - 1, -1, -1):
+                    if candles_1h[idx].timestamp <= ts_15m:
+                        indices['1h'][ts_15m] = idx
+                        break
+        
+        # Build index for 4h candles
+        # For each 15m timestamp, find the most recent 4h candle
+        if candles_4h:
+            for ts_15m in [c.timestamp for c in candles_15m]:
+                # Find the most recent 4h candle at or before this 15m timestamp
+                for idx in range(len(candles_4h) - 1, -1, -1):
+                    if candles_4h[idx].timestamp <= ts_15m:
+                        indices['4h'][ts_15m] = idx
+                        break
+        
+        return indices
+    
+    def fetch_multi_timeframe_data(
+        self,
+        days: int = 90,
+        client: Optional[Client] = None
+    ) -> Dict[str, List[Candle]]:
+        """Fetch historical data for all timeframes needed for backtesting.
+        
+        This is a convenience method that fetches 5m, 15m, 1h, and 4h data
+        for the specified number of days.
+        
+        Args:
+            days: Number of days of historical data to fetch
+            client: Binance API client (required for fetching data)
+            
+        Returns:
+            Dictionary mapping timeframe to list of Candle objects
+            
+        Raises:
+            ValueError: If client is not provided
+        """
+        if client is None:
+            raise ValueError("Binance client required to fetch historical data")
+        
+        from src.data_manager import DataManager
+        
+        # Create temporary data manager for fetching
+        data_mgr = DataManager(self.config, client)
+        
+        result = {}
+        
+        # Fetch each timeframe
+        for timeframe in ['5m', '15m', '1h', '4h']:
+            try:
+                candles = data_mgr.fetch_historical_data(
+                    days=days,
+                    timeframe=timeframe,
+                    use_cache=False
+                )
+                result[timeframe] = candles
+                logger.info(f"Fetched {len(candles)} {timeframe} candles for backtesting")
+            except Exception as e:
+                logger.error(f"Failed to fetch {timeframe} data: {e}")
+                result[timeframe] = []
+        
+        return result
+    
+    def _simulate_adaptive_features(
+        self,
+        current_candles_15m: List[Candle],
+        current_candles_1h: List[Candle],
+        current_candles_5m: Optional[List[Candle]],
+        current_candles_4h: Optional[List[Candle]]
+    ) -> None:
+        """Simulate adaptive feature adjustments during backtest.
+        
+        This method checks if the strategy has adaptive components and
+        simulates their behavior during backtesting.
+        
+        Args:
+            current_candles_15m: Current 15m candle window
+            current_candles_1h: Current 1h candle window
+            current_candles_5m: Current 5m candle window (optional)
+            current_candles_4h: Current 4h candle window (optional)
+        """
+        # Check for adaptive threshold manager
+        if hasattr(self.strategy, 'adaptive_threshold_mgr') and self.strategy.adaptive_threshold_mgr:
+            self.feature_metrics['adaptive_thresholds']['enabled'] = True
+            
+            # Simulate threshold updates (normally done every hour)
+            # In backtest, we update based on available data
+            try:
+                old_thresholds = self.strategy.adaptive_threshold_mgr.get_current_thresholds()
+                new_thresholds = self.strategy.adaptive_threshold_mgr.update_thresholds(current_candles_1h)
+                
+                # Track if thresholds changed
+                if old_thresholds != new_thresholds:
+                    self.feature_metrics['adaptive_thresholds']['adjustments'] += 1
+            except Exception as e:
+                logger.debug(f"Error simulating adaptive thresholds: {e}")
+        
+        # Check for volume profile analyzer
+        if hasattr(self.strategy, 'volume_profile_analyzer') and self.strategy.volume_profile_analyzer:
+            self.feature_metrics['volume_profile']['enabled'] = True
+            
+            # Simulate volume profile calculation (normally done every 4 hours)
+            try:
+                # Use 1h candles for volume profile (need ~7 days = 168 candles)
+                if len(current_candles_1h) >= 168:
+                    self.strategy.volume_profile_analyzer.calculate_volume_profile(
+                        current_candles_1h[-168:]
+                    )
+            except Exception as e:
+                logger.debug(f"Error simulating volume profile: {e}")
+        
+        # Check for ML predictor
+        if hasattr(self.strategy, 'ml_predictor') and self.strategy.ml_predictor:
+            self.feature_metrics['ml_predictions']['enabled'] = True
+            
+            # Simulate ML prediction
+            try:
+                if hasattr(self.strategy.ml_predictor, 'predict'):
+                    # Use 1h candles for prediction
+                    prediction = self.strategy.ml_predictor.predict(current_candles_1h)
+                    self.feature_metrics['ml_predictions']['total_predictions'] += 1
+                    
+                    # Track high/low confidence predictions
+                    if prediction > 0.7:
+                        self.feature_metrics['ml_predictions']['high_confidence_trades'] += 1
+                    elif prediction < 0.3:
+                        self.feature_metrics['ml_predictions']['low_confidence_filtered'] += 1
+            except Exception as e:
+                logger.debug(f"Error simulating ML prediction: {e}")
+        
+        # Check for market regime detector
+        if hasattr(self.strategy, 'market_regime_detector') and self.strategy.market_regime_detector:
+            self.feature_metrics['market_regime']['enabled'] = True
+            
+            # Simulate regime detection
+            try:
+                old_regime = getattr(self.strategy.market_regime_detector, 'current_regime', None)
+                new_regime = self.strategy.market_regime_detector.detect_regime(current_candles_1h)
+                
+                # Track regime changes
+                if old_regime and old_regime != new_regime:
+                    self.feature_metrics['market_regime']['regime_changes'] += 1
+                
+                # Initialize regime counter if needed
+                if new_regime not in self.feature_metrics['market_regime']['trades_by_regime']:
+                    self.feature_metrics['market_regime']['trades_by_regime'][new_regime] = 0
+            except Exception as e:
+                logger.debug(f"Error simulating market regime detection: {e}")
+    
+    def _track_feature_influence(
+        self,
+        signal: Signal,
+        current_price: float
+    ) -> None:
+        """Track which features influenced the current trade.
+        
+        Args:
+            signal: Trading signal that was generated
+            current_price: Current market price
+        """
+        # Track volume profile influence
+        if self.feature_metrics['volume_profile']['enabled']:
+            try:
+                if hasattr(self.strategy, 'volume_profile_analyzer') and self.strategy.volume_profile_analyzer:
+                    if self.strategy.volume_profile_analyzer.is_near_key_level(current_price):
+                        self.feature_metrics['volume_profile']['trades_at_key_levels'] += 1
+                    self.feature_metrics['volume_profile']['total_trades'] += 1
+            except Exception as e:
+                logger.debug(f"Error tracking volume profile influence: {e}")
+        
+        # Track adaptive threshold influence
+        if self.feature_metrics['adaptive_thresholds']['enabled']:
+            self.feature_metrics['adaptive_thresholds']['trades_influenced'] += 1
+        
+        # Track market regime influence
+        if self.feature_metrics['market_regime']['enabled']:
+            try:
+                if hasattr(self.strategy, 'market_regime_detector') and self.strategy.market_regime_detector:
+                    regime = getattr(self.strategy.market_regime_detector, 'current_regime', 'UNKNOWN')
+                    if regime in self.feature_metrics['market_regime']['trades_by_regime']:
+                        self.feature_metrics['market_regime']['trades_by_regime'][regime] += 1
+            except Exception as e:
+                logger.debug(f"Error tracking market regime influence: {e}")
+    
+    def get_feature_metrics(self) -> Dict:
+        """Get metrics about adaptive feature usage during backtest.
+        
+        Returns:
+            Dictionary containing feature-specific metrics
+        """
+        return self.feature_metrics.copy()
+    
+    def run_ab_comparison(
+        self,
+        candles_15m: List[Candle],
+        candles_1h: List[Candle],
+        initial_balance: float = 10000.0,
+        candles_5m: Optional[List[Candle]] = None,
+        candles_4h: Optional[List[Candle]] = None
+    ) -> Dict:
+        """Run A/B comparison backtest with all features vs. baseline.
+        
+        Runs multiple backtests:
+        1. Baseline (no advanced features)
+        2. All features enabled
+        3. Each feature individually disabled
+        
+        Args:
+            candles_15m: List of 15-minute historical candles
+            candles_1h: List of 1-hour historical candles
+            initial_balance: Starting wallet balance in USDT
+            candles_5m: Optional list of 5-minute historical candles
+            candles_4h: Optional list of 4-hour historical candles
+            
+        Returns:
+            Dictionary containing comparison results for each configuration
+        """
+        logger.info("Starting A/B comparison backtest...")
+        
+        results = {}
+        
+        # Store original feature states
+        original_states = self._save_feature_states()
+        
+        # 1. Run baseline (all features disabled)
+        logger.info("Running baseline backtest (all features disabled)...")
+        self._disable_all_features()
+        results['baseline'] = self.run_backtest(
+            candles_15m, candles_1h, initial_balance, candles_5m, candles_4h
+        )
+        
+        # 2. Run with all features enabled
+        logger.info("Running backtest with all features enabled...")
+        self._restore_feature_states(original_states)
+        results['all_features'] = self.run_backtest(
+            candles_15m, candles_1h, initial_balance, candles_5m, candles_4h
+        )
+        
+        # 3. Run with each feature individually disabled
+        feature_names = [
+            'adaptive_threshold_mgr',
+            'volume_profile_analyzer',
+            'ml_predictor',
+            'market_regime_detector',
+            'timeframe_coordinator'
+        ]
+        
+        for feature_name in feature_names:
+            if hasattr(self.strategy, feature_name):
+                logger.info(f"Running backtest without {feature_name}...")
+                
+                # Restore all features
+                self._restore_feature_states(original_states)
+                
+                # Disable specific feature
+                self._disable_feature(feature_name)
+                
+                # Run backtest
+                results[f'without_{feature_name}'] = self.run_backtest(
+                    candles_15m, candles_1h, initial_balance, candles_5m, candles_4h
+                )
+        
+        # Restore original states
+        self._restore_feature_states(original_states)
+        
+        # Generate comparison report
+        comparison_report = self._generate_comparison_report(results)
+        results['comparison_report'] = comparison_report
+        
+        logger.info("A/B comparison backtest completed")
+        
+        return results
+    
+    def _save_feature_states(self) -> Dict:
+        """Save current state of all adaptive features.
+        
+        Returns:
+            Dictionary mapping feature names to their current state
+        """
+        states = {}
+        
+        feature_names = [
+            'adaptive_threshold_mgr',
+            'volume_profile_analyzer',
+            'ml_predictor',
+            'market_regime_detector',
+            'timeframe_coordinator'
+        ]
+        
+        for feature_name in feature_names:
+            if hasattr(self.strategy, feature_name):
+                states[feature_name] = getattr(self.strategy, feature_name)
+        
+        return states
+    
+    def _restore_feature_states(self, states: Dict) -> None:
+        """Restore saved feature states.
+        
+        Args:
+            states: Dictionary mapping feature names to their saved state
+        """
+        for feature_name, state in states.items():
+            if hasattr(self.strategy, feature_name):
+                setattr(self.strategy, feature_name, state)
+    
+    def _disable_all_features(self) -> None:
+        """Temporarily disable all adaptive features."""
+        feature_names = [
+            'adaptive_threshold_mgr',
+            'volume_profile_analyzer',
+            'ml_predictor',
+            'market_regime_detector',
+            'timeframe_coordinator'
+        ]
+        
+        for feature_name in feature_names:
+            self._disable_feature(feature_name)
+    
+    def _disable_feature(self, feature_name: str) -> None:
+        """Temporarily disable a specific feature.
+        
+        Args:
+            feature_name: Name of the feature to disable
+        """
+        if hasattr(self.strategy, feature_name):
+            setattr(self.strategy, feature_name, None)
+    
+    def _generate_comparison_report(self, results: Dict) -> Dict:
+        """Generate a comparison report from A/B test results.
+        
+        Args:
+            results: Dictionary containing results from all backtest runs
+            
+        Returns:
+            Dictionary containing comparison metrics and analysis
+        """
+        report = {
+            'summary': {},
+            'feature_contributions': {},
+            'recommendations': []
+        }
+        
+        # Get baseline metrics
+        baseline = results.get('baseline', {})
+        all_features = results.get('all_features', {})
+        
+        if not baseline or not all_features:
+            return report
+        
+        # Calculate overall improvement
+        report['summary'] = {
+            'baseline_roi': baseline.get('roi', 0),
+            'all_features_roi': all_features.get('roi', 0),
+            'roi_improvement': all_features.get('roi', 0) - baseline.get('roi', 0),
+            'baseline_win_rate': baseline.get('win_rate', 0),
+            'all_features_win_rate': all_features.get('win_rate', 0),
+            'win_rate_improvement': all_features.get('win_rate', 0) - baseline.get('win_rate', 0),
+            'baseline_profit_factor': baseline.get('profit_factor', 0),
+            'all_features_profit_factor': all_features.get('profit_factor', 0),
+            'profit_factor_improvement': all_features.get('profit_factor', 0) - baseline.get('profit_factor', 0)
+        }
+        
+        # Calculate individual feature contributions
+        feature_names = [
+            'adaptive_threshold_mgr',
+            'volume_profile_analyzer',
+            'ml_predictor',
+            'market_regime_detector',
+            'timeframe_coordinator'
+        ]
+        
+        for feature_name in feature_names:
+            without_key = f'without_{feature_name}'
+            if without_key in results:
+                without_feature = results[without_key]
+                
+                # Calculate contribution (difference when feature is removed)
+                contribution = {
+                    'roi_contribution': all_features.get('roi', 0) - without_feature.get('roi', 0),
+                    'win_rate_contribution': all_features.get('win_rate', 0) - without_feature.get('win_rate', 0),
+                    'profit_factor_contribution': all_features.get('profit_factor', 0) - without_feature.get('profit_factor', 0),
+                    'trade_count_impact': all_features.get('total_trades', 0) - without_feature.get('total_trades', 0)
+                }
+                
+                report['feature_contributions'][feature_name] = contribution
+                
+                # Generate recommendations
+                if contribution['roi_contribution'] > 1.0:
+                    report['recommendations'].append(
+                        f"{feature_name} provides significant ROI improvement (+{contribution['roi_contribution']:.2f}%)"
+                    )
+                elif contribution['roi_contribution'] < -1.0:
+                    report['recommendations'].append(
+                        f"{feature_name} may be degrading performance ({contribution['roi_contribution']:.2f}%)"
+                    )
+        
+        return report

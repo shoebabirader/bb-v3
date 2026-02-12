@@ -13,6 +13,7 @@ from binance import ThreadedWebsocketManager
 
 from src.models import Candle
 from src.config import Config
+from src.rate_limiter import RateLimiter
 
 # Configure logging
 logger = logging.getLogger(__name__)
@@ -38,9 +39,27 @@ class DataManager:
         self.config = config
         self.client = client
         
-        # Circular buffers for candle data (max 500 candles each)
+        # Initialize rate limiter
+        self.rate_limiter = RateLimiter(
+            max_requests_per_minute=config.api_rate_limit_per_minute,
+            warning_threshold=0.7  # Start warning at 70% capacity
+        )
+        logger.info(f"Rate limiter initialized: {config.api_rate_limit_per_minute} requests/min")
+        
+        # Multi-symbol support: Store buffers per symbol
+        # Structure: {symbol: {timeframe: deque}}
+        self._symbol_buffers = {}
+        
+        # Legacy single-symbol buffers (for backward compatibility)
+        self.candles_5m: deque = deque(maxlen=500)
         self.candles_15m: deque = deque(maxlen=500)
         self.candles_1h: deque = deque(maxlen=500)
+        self.candles_4h: deque = deque(maxlen=500)
+        
+        # Cache for fetched data to avoid redundant API calls
+        # Structure: {symbol: {timeframe: {'data': List[Candle], 'timestamp': float}}}
+        self._data_cache = {}
+        self._cache_ttl_seconds = 60  # Cache valid for 60 seconds
         
         # WebSocket manager
         self.websocket_manager: Optional[ThreadedWebsocketManager] = None
@@ -49,21 +68,39 @@ class DataManager:
         self._max_reconnect_attempts = 5
         self._reconnect_lock = threading.Lock()
         
-        # WebSocket stream keys
-        self._stream_keys = {
-            '15m': None,
-            '1h': None
-        }
+        # WebSocket stream keys per symbol
+        # Structure: {symbol: {timeframe: stream_key}}
+        self._stream_keys = {}
         
         # Callback for candle updates (can be set externally)
         self.on_candle_callback: Optional[Callable[[Candle, str], None]] = None
     
-    def fetch_historical_data(self, days: int = 90, timeframe: str = "15m") -> List[Candle]:
+    def _get_symbol_buffer(self, symbol: str, timeframe: str) -> deque:
+        """Get or create buffer for a specific symbol and timeframe.
+        
+        Args:
+            symbol: Trading symbol (e.g., "XRPUSDT")
+            timeframe: Timeframe (e.g., "15m")
+            
+        Returns:
+            Deque buffer for the symbol/timeframe combination
+        """
+        if symbol not in self._symbol_buffers:
+            self._symbol_buffers[symbol] = {}
+        
+        if timeframe not in self._symbol_buffers[symbol]:
+            self._symbol_buffers[symbol][timeframe] = deque(maxlen=500)
+        
+        return self._symbol_buffers[symbol][timeframe]
+    
+    def fetch_historical_data(self, days: int = 90, timeframe: str = "15m", use_cache: bool = True, symbol: Optional[str] = None) -> List[Candle]:
         """Fetch historical kline data from Binance.
         
         Args:
             days: Number of days of historical data to fetch
-            timeframe: Timeframe for candles (e.g., "15m", "1h")
+            timeframe: Timeframe for candles (e.g., "5m", "15m", "1h", "4h")
+            use_cache: Whether to use cached data if available
+            symbol: Trading symbol (uses config.symbol if not provided)
             
         Returns:
             List of Candle objects sorted by timestamp
@@ -75,6 +112,14 @@ class DataManager:
         if self.client is None:
             raise ValueError("Binance client not initialized. Cannot fetch historical data.")
         
+        # Use provided symbol or fall back to config symbol
+        fetch_symbol = symbol if symbol is not None else self.config.symbol
+        
+        # Check cache if enabled
+        if use_cache and self._is_cache_valid(fetch_symbol, timeframe):
+            logger.debug(f"Using cached data for {fetch_symbol} {timeframe}")
+            return self._data_cache[fetch_symbol][timeframe]['data']
+        
         # Calculate start time
         end_time = datetime.now()
         start_time = end_time - timedelta(days=days)
@@ -85,14 +130,26 @@ class DataManager:
         
         # Fetch klines from Binance
         try:
-            klines = self.client.get_historical_klines(
-                symbol=self.config.symbol,
+            # Acquire rate limit permission before making API call
+            if not self.rate_limiter.acquire(timeout=30.0):
+                raise BinanceAPIException("Rate limit timeout - too many requests")
+            
+            logger.debug(f"Fetching historical data: {fetch_symbol} {timeframe} ({days} days)")
+            
+            # Use futures_klines for Futures API
+            klines = self.client.futures_klines(
+                symbol=fetch_symbol,
                 interval=self._convert_timeframe_to_binance_interval(timeframe),
-                start_str=start_ms,
-                end_str=end_ms
+                startTime=start_ms,
+                endTime=end_ms
             )
+            
+            logger.debug(f"Received {len(klines)} klines for {fetch_symbol} {timeframe}")
+            
         except BinanceAPIException as e:
-            raise BinanceAPIException(f"Failed to fetch historical data: {e}")
+            # Re-raise the original exception instead of creating a new one incorrectly
+            logger.error(f"Failed to fetch historical data for {fetch_symbol}: {e}")
+            raise
         
         # Convert to Candle objects
         candles = []
@@ -110,11 +167,23 @@ class DataManager:
         # Validate data completeness
         self._validate_data_completeness(candles, timeframe)
         
-        # Store in appropriate buffer
-        if timeframe == "15m":
-            self.candles_15m.extend(candles)
-        elif timeframe == "1h":
-            self.candles_1h.extend(candles)
+        # Store in symbol-specific buffer
+        buffer = self._get_symbol_buffer(fetch_symbol, timeframe)
+        buffer.extend(candles)
+        
+        # Also store in legacy buffers if this is the primary symbol
+        if fetch_symbol == self.config.symbol:
+            if timeframe == "5m":
+                self.candles_5m.extend(candles)
+            elif timeframe == "15m":
+                self.candles_15m.extend(candles)
+            elif timeframe == "1h":
+                self.candles_1h.extend(candles)
+            elif timeframe == "4h":
+                self.candles_4h.extend(candles)
+        
+        # Update cache
+        self._update_cache(fetch_symbol, timeframe, candles)
         
         return candles
     
@@ -146,6 +215,213 @@ class DataManager:
             raise ValueError(f"Unsupported timeframe: {timeframe}")
         
         return interval_map[timeframe]
+    
+    def _is_cache_valid(self, symbol: str, timeframe: str) -> bool:
+        """Check if cached data is still valid.
+        
+        Args:
+            symbol: Trading symbol
+            timeframe: Timeframe to check
+            
+        Returns:
+            True if cache is valid, False otherwise
+        """
+        if symbol not in self._data_cache:
+            return False
+        
+        if timeframe not in self._data_cache[symbol]:
+            return False
+        
+        cache_entry = self._data_cache[symbol][timeframe]
+        if cache_entry['data'] is None:
+            return False
+        
+        # Check if cache has expired
+        current_time = time.time()
+        cache_age = current_time - cache_entry['timestamp']
+        
+        return cache_age < self._cache_ttl_seconds
+    
+    def _update_cache(self, symbol: str, timeframe: str, data: List[Candle]) -> None:
+        """Update cache with new data.
+        
+        Args:
+            symbol: Trading symbol
+            timeframe: Timeframe
+            data: Candle data to cache
+        """
+        if symbol not in self._data_cache:
+            self._data_cache[symbol] = {}
+        
+        self._data_cache[symbol][timeframe] = {
+            'data': data,
+            'timestamp': time.time()
+        }
+    
+    def clear_cache(self, timeframe: Optional[str] = None) -> None:
+        """Clear cached data.
+        
+        Args:
+            timeframe: Specific timeframe to clear, or None to clear all
+        """
+        if timeframe is None:
+            # Clear all caches
+            for tf in self._data_cache:
+                self._data_cache[tf] = {'data': None, 'timestamp': 0}
+            logger.debug("Cleared all data caches")
+        elif timeframe in self._data_cache:
+            self._data_cache[timeframe] = {'data': None, 'timestamp': 0}
+            logger.debug(f"Cleared cache for {timeframe}")
+    
+    def get_synchronized_candles(self, reference_timestamp: int, timeframes: Optional[List[str]] = None) -> dict:
+        """Get candles from all timeframes synchronized to a reference timestamp.
+        
+        This method ensures all timeframes are aligned by finding the candle that
+        contains or is closest to the reference timestamp for each timeframe.
+        
+        Args:
+            reference_timestamp: Reference timestamp in milliseconds
+            timeframes: List of timeframes to synchronize (default: all supported)
+            
+        Returns:
+            Dictionary mapping timeframe to synchronized Candle, or None if not available
+        """
+        if timeframes is None:
+            timeframes = ['5m', '15m', '1h', '4h']
+        
+        result = {}
+        
+        for tf in timeframes:
+            candle = self._find_candle_at_timestamp(tf, reference_timestamp)
+            result[tf] = candle
+        
+        return result
+    
+    def _find_candle_at_timestamp(self, timeframe: str, timestamp: int) -> Optional[Candle]:
+        """Find the candle that contains or is closest to the given timestamp.
+        
+        Args:
+            timeframe: Timeframe to search
+            timestamp: Target timestamp in milliseconds
+            
+        Returns:
+            Candle object or None if not found
+        """
+        # Get the appropriate buffer
+        if timeframe == '5m':
+            buffer = self.candles_5m
+        elif timeframe == '15m':
+            buffer = self.candles_15m
+        elif timeframe == '1h':
+            buffer = self.candles_1h
+        elif timeframe == '4h':
+            buffer = self.candles_4h
+        else:
+            return None
+        
+        if len(buffer) == 0:
+            return None
+        
+        # Get timeframe duration
+        tf_ms = self._get_timeframe_milliseconds(timeframe)
+        
+        # Find the candle that contains this timestamp
+        # A candle at timestamp T covers the period [T, T + tf_ms)
+        best_candle = None
+        min_distance = float('inf')
+        
+        for candle in buffer:
+            # Check if timestamp falls within this candle's period
+            if candle.timestamp <= timestamp < candle.timestamp + tf_ms:
+                return candle
+            
+            # Track closest candle as fallback
+            distance = abs(candle.timestamp - timestamp)
+            if distance < min_distance:
+                min_distance = distance
+                best_candle = candle
+        
+        # Return closest candle if exact match not found
+        return best_candle
+    
+    def is_data_stale(self, timeframe: str, max_age_seconds: Optional[int] = None) -> bool:
+        """Check if data for a timeframe is stale.
+        
+        Args:
+            timeframe: Timeframe to check
+            max_age_seconds: Maximum age in seconds (default: 2x timeframe period)
+            
+        Returns:
+            True if data is stale or missing, False otherwise
+        """
+        # Get the appropriate buffer
+        if timeframe == '5m':
+            buffer = self.candles_5m
+        elif timeframe == '15m':
+            buffer = self.candles_15m
+        elif timeframe == '1h':
+            buffer = self.candles_1h
+        elif timeframe == '4h':
+            buffer = self.candles_4h
+        else:
+            return True  # Unknown timeframe is considered stale
+        
+        if len(buffer) == 0:
+            return True  # No data is stale
+        
+        # Get the most recent candle
+        latest_candle = buffer[-1]
+        
+        # Calculate age of latest candle
+        current_time_ms = int(time.time() * 1000)
+        age_ms = current_time_ms - latest_candle.timestamp
+        
+        # Determine max allowed age
+        if max_age_seconds is None:
+            # Default: 2x the timeframe period
+            tf_ms = self._get_timeframe_milliseconds(timeframe)
+            max_age_ms = tf_ms * 2
+        else:
+            max_age_ms = max_age_seconds * 1000
+        
+        return age_ms > max_age_ms
+    
+    def get_data_status(self) -> dict:
+        """Get status of all timeframe data buffers.
+        
+        Returns:
+            Dictionary with status information for each timeframe
+        """
+        status = {}
+        
+        for tf in ['5m', '15m', '1h', '4h']:
+            if tf == '5m':
+                buffer = self.candles_5m
+            elif tf == '15m':
+                buffer = self.candles_15m
+            elif tf == '1h':
+                buffer = self.candles_1h
+            else:  # '4h'
+                buffer = self.candles_4h
+            
+            if len(buffer) == 0:
+                status[tf] = {
+                    'available': False,
+                    'count': 0,
+                    'stale': True,
+                    'latest_timestamp': None
+                }
+            else:
+                latest = buffer[-1]
+                status[tf] = {
+                    'available': True,
+                    'count': len(buffer),
+                    'stale': self.is_data_stale(tf),
+                    'latest_timestamp': latest.timestamp,
+                    'latest_close': latest.close
+                }
+        
+        return status
     
     def _get_timeframe_milliseconds(self, timeframe: str) -> int:
         """Get the duration of a timeframe in milliseconds.
@@ -221,22 +497,47 @@ class DataManager:
                 f"the {timeframe} interval:\n{gap_details}"
             )
     
-    def get_latest_candles(self, timeframe: str, count: int) -> List[Candle]:
+    def get_latest_candles(self, timeframe: str, count: int, symbol: Optional[str] = None) -> List[Candle]:
         """Retrieve most recent candles for indicator calculation.
         
         Args:
-            timeframe: Timeframe to retrieve ("15m" or "1h")
+            timeframe: Timeframe to retrieve ("5m", "15m", "1h", or "4h")
             count: Number of candles to retrieve
+            symbol: Trading symbol (uses config.symbol if not provided)
             
         Returns:
             List of most recent Candle objects
         """
-        if timeframe == "15m":
-            buffer = self.candles_15m
-        elif timeframe == "1h":
-            buffer = self.candles_1h
+        # Use provided symbol or fall back to config symbol
+        fetch_symbol = symbol if symbol is not None else self.config.symbol
+        
+        # Try to get from symbol-specific buffer first
+        if fetch_symbol in self._symbol_buffers and timeframe in self._symbol_buffers[fetch_symbol]:
+            buffer = self._symbol_buffers[fetch_symbol][timeframe]
+            result_len = min(len(buffer), count)
+            logger.info(f"get_latest_candles: {fetch_symbol} {timeframe} - found in symbol_buffers, returning {result_len} candles")
         else:
-            raise ValueError(f"Unsupported timeframe: {timeframe}")
+            # Fall back to legacy buffers for primary symbol
+            if fetch_symbol == self.config.symbol:
+                if timeframe == "5m":
+                    buffer = self.candles_5m
+                elif timeframe == "15m":
+                    buffer = self.candles_15m
+                elif timeframe == "1h":
+                    buffer = self.candles_1h
+                elif timeframe == "4h":
+                    buffer = self.candles_4h
+                else:
+                    raise ValueError(f"Unsupported timeframe: {timeframe}")
+                result_len = min(len(buffer), count)
+                logger.info(f"get_latest_candles: {fetch_symbol} {timeframe} - found in legacy buffers, returning {result_len} candles")
+            else:
+                # No data available for this symbol/timeframe
+                logger.warning(f"get_latest_candles: {fetch_symbol} {timeframe} - NOT FOUND in symbol_buffers, returning empty list")
+                logger.warning(f"  Available symbols in _symbol_buffers: {list(self._symbol_buffers.keys())}")
+                if fetch_symbol in self._symbol_buffers:
+                    logger.warning(f"  Available timeframes for {fetch_symbol}: {list(self._symbol_buffers[fetch_symbol].keys())}")
+                return []
         
         # Return last 'count' candles
         if len(buffer) < count:
@@ -244,17 +545,23 @@ class DataManager:
         else:
             return list(buffer)[-count:]
     
-    def start_websocket_streams(self):
+    def start_websocket_streams(self, symbol: Optional[str] = None):
         """Initialize WebSocket connections for real-time data.
         
-        Establishes WebSocket connections for both 15m and 1h kline streams.
+        Establishes WebSocket connections for 5m, 15m, 1h, and 4h kline streams.
         Automatically handles connection management and reconnection.
+        
+        Args:
+            symbol: Symbol to start streams for. If None, uses config.symbol
         
         Raises:
             ValueError: If Binance client is not initialized
         """
         if self.client is None:
             raise ValueError("Binance client not initialized. Cannot start WebSocket streams.")
+        
+        # Use provided symbol or fall back to config.symbol
+        stream_symbol = symbol if symbol is not None else self.config.symbol
         
         # Initialize WebSocket manager if not already created
         if self.websocket_manager is None:
@@ -265,21 +572,41 @@ class DataManager:
             self.websocket_manager.start()
             logger.info("WebSocket manager started")
         
+        # Initialize stream keys for this symbol if not exists
+        if stream_symbol not in self._stream_keys:
+            self._stream_keys[stream_symbol] = {}
+        
+        # Start 5m kline stream
+        self._stream_keys[stream_symbol]['5m'] = self.websocket_manager.start_kline_socket(
+            callback=lambda msg: self._handle_kline_message(msg, '5m'),
+            symbol=stream_symbol.lower(),
+            interval=Client.KLINE_INTERVAL_5MINUTE
+        )
+        logger.info(f"Started 5m kline stream for {stream_symbol}")
+        
         # Start 15m kline stream
-        self._stream_keys['15m'] = self.websocket_manager.start_kline_socket(
+        self._stream_keys[stream_symbol]['15m'] = self.websocket_manager.start_kline_socket(
             callback=lambda msg: self._handle_kline_message(msg, '15m'),
-            symbol=self.config.symbol.lower(),
+            symbol=stream_symbol.lower(),
             interval=Client.KLINE_INTERVAL_15MINUTE
         )
-        logger.info(f"Started 15m kline stream for {self.config.symbol}")
+        logger.info(f"Started 15m kline stream for {stream_symbol}")
         
         # Start 1h kline stream
-        self._stream_keys['1h'] = self.websocket_manager.start_kline_socket(
+        self._stream_keys[stream_symbol]['1h'] = self.websocket_manager.start_kline_socket(
             callback=lambda msg: self._handle_kline_message(msg, '1h'),
-            symbol=self.config.symbol.lower(),
+            symbol=stream_symbol.lower(),
             interval=Client.KLINE_INTERVAL_1HOUR
         )
-        logger.info(f"Started 1h kline stream for {self.config.symbol}")
+        logger.info(f"Started 1h kline stream for {stream_symbol}")
+        
+        # Start 4h kline stream
+        self._stream_keys[stream_symbol]['4h'] = self.websocket_manager.start_kline_socket(
+            callback=lambda msg: self._handle_kline_message(msg, '4h'),
+            symbol=stream_symbol.lower(),
+            interval=Client.KLINE_INTERVAL_4HOUR
+        )
+        logger.info(f"Started 4h kline stream for {stream_symbol}")
         
         self._ws_connected = True
         self._ws_reconnect_attempts = 0
@@ -305,6 +632,9 @@ class DataManager:
             
             kline = msg['k']
             
+            # Extract symbol from message
+            symbol = kline.get('s', self.config.symbol).upper()
+            
             # Only process closed candles
             if not kline['x']:
                 return
@@ -319,8 +649,8 @@ class DataManager:
                 volume=float(kline['v'])
             )
             
-            # Update candle buffer
-            self.on_candle_update(candle, timeframe)
+            # Update candle buffer for this symbol
+            self.on_candle_update(candle, timeframe, symbol)
             
         except Exception as e:
             logger.error(f"Error processing kline message for {timeframe}: {e}")
@@ -334,25 +664,34 @@ class DataManager:
         self._ws_connected = False
         self.reconnect_websocket()
     
-    def on_candle_update(self, candle: Candle, timeframe: str):
+    def on_candle_update(self, candle: Candle, timeframe: str, symbol: Optional[str] = None):
         """Callback for new candle data from WebSocket.
         
         Updates the appropriate candle buffer and calls external callback if set.
         
         Args:
             candle: New candle data
-            timeframe: Timeframe of the candle ('15m' or '1h')
+            timeframe: Timeframe of the candle ('5m', '15m', '1h', or '4h')
+            symbol: Symbol for the candle. If None, uses config.symbol
         """
-        # Add to appropriate buffer
-        if timeframe == '15m':
-            self.candles_15m.append(candle)
-            logger.debug(f"Added 15m candle: timestamp={candle.timestamp}, close={candle.close}")
-        elif timeframe == '1h':
-            self.candles_1h.append(candle)
-            logger.debug(f"Added 1h candle: timestamp={candle.timestamp}, close={candle.close}")
-        else:
-            logger.warning(f"Unknown timeframe: {timeframe}")
-            return
+        # Use provided symbol or fall back to config.symbol
+        candle_symbol = symbol if symbol is not None else self.config.symbol
+        
+        # Add to symbol-specific buffer
+        buffer = self._get_symbol_buffer(candle_symbol, timeframe)
+        buffer.append(candle)
+        logger.debug(f"Added {timeframe} candle for {candle_symbol}: timestamp={candle.timestamp}, close={candle.close}")
+        
+        # Also update legacy buffers for backward compatibility (only for config.symbol)
+        if candle_symbol == self.config.symbol:
+            if timeframe == '5m':
+                self.candles_5m.append(candle)
+            elif timeframe == '15m':
+                self.candles_15m.append(candle)
+            elif timeframe == '1h':
+                self.candles_1h.append(candle)
+            elif timeframe == '4h':
+                self.candles_4h.append(candle)
         
         # Call external callback if set
         if self.on_candle_callback is not None:
@@ -451,3 +790,91 @@ class DataManager:
             int: Number of reconnection attempts made
         """
         return self._ws_reconnect_attempts
+    
+    def cleanup_old_data(self, lookback_days: int = 7):
+        """Remove data older than the specified lookback period.
+        
+        This method removes candles older than the lookback period to free memory.
+        Should be called periodically (e.g., every 6 hours).
+        
+        Args:
+            lookback_days: Number of days to keep (default: 7)
+        """
+        cutoff_timestamp = int((time.time() - (lookback_days * 24 * 60 * 60)) * 1000)
+        
+        removed_counts = {}
+        
+        # Clean up each timeframe buffer
+        for timeframe, buffer_name in [
+            ('5m', 'candles_5m'),
+            ('15m', 'candles_15m'),
+            ('1h', 'candles_1h'),
+            ('4h', 'candles_4h')
+        ]:
+            buffer = getattr(self, buffer_name)
+            original_count = len(buffer)
+            
+            # Remove old candles
+            # Since deque doesn't support efficient filtering, we'll recreate it
+            new_buffer = deque(
+                (candle for candle in buffer if candle.timestamp >= cutoff_timestamp),
+                maxlen=buffer.maxlen
+            )
+            
+            setattr(self, buffer_name, new_buffer)
+            removed_count = original_count - len(new_buffer)
+            removed_counts[timeframe] = removed_count
+            
+            if removed_count > 0:
+                logger.info(
+                    f"Cleaned up {removed_count} old candles from {timeframe} buffer "
+                    f"(kept {len(new_buffer)} candles)"
+                )
+        
+        # Clear old cache entries
+        self.clear_cache()
+        
+        total_removed = sum(removed_counts.values())
+        logger.info(
+            f"Data cleanup complete: removed {total_removed} total candles "
+            f"older than {lookback_days} days"
+        )
+        
+        return removed_counts
+    
+    def get_memory_usage_estimate(self) -> dict:
+        """Estimate memory usage of candle buffers.
+        
+        Returns:
+            Dictionary with memory usage estimates for each timeframe
+        """
+        import sys
+        
+        usage = {}
+        total_bytes = 0
+        
+        for timeframe, buffer_name in [
+            ('5m', 'candles_5m'),
+            ('15m', 'candles_15m'),
+            ('1h', 'candles_1h'),
+            ('4h', 'candles_4h')
+        ]:
+            buffer = getattr(self, buffer_name)
+            
+            # Estimate size: each Candle object is roughly 100 bytes
+            # (6 floats × 8 bytes + overhead)
+            estimated_bytes = len(buffer) * 100
+            total_bytes += estimated_bytes
+            
+            usage[timeframe] = {
+                'candle_count': len(buffer),
+                'estimated_bytes': estimated_bytes,
+                'estimated_mb': estimated_bytes / (1024 * 1024)
+            }
+        
+        usage['total'] = {
+            'estimated_bytes': total_bytes,
+            'estimated_mb': total_bytes / (1024 * 1024)
+        }
+        
+        return usage

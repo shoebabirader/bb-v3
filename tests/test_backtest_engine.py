@@ -296,6 +296,26 @@ class TestBacktestEngineUnit:
         """Create a test backtest engine."""
         return BacktestEngine(config, strategy, risk_manager)
     
+    @pytest.fixture
+    def sample_candles(self):
+        """Create sample candle data for testing."""
+        candles = []
+        base_time = 1000000
+        base_price = 50000.0
+        
+        for i in range(100):
+            candle = Candle(
+                timestamp=base_time + i * 15 * 60 * 1000,  # 15m intervals
+                open=base_price + i * 10,
+                high=base_price + i * 10 + 100,
+                low=base_price + i * 10 - 100,
+                close=base_price + i * 10 + 50,
+                volume=100.0 + i
+            )
+            candles.append(candle)
+        
+        return candles
+    
     def test_apply_fees_and_slippage_buy(self, backtest_engine):
         """Test that fees and slippage are correctly applied to buy orders."""
         price = 50000.0
@@ -664,3 +684,275 @@ class TestBacktestEngineUnit:
         
         # Average trade duration
         assert metrics['average_trade_duration'] > 0
+
+
+
+class TestBacktestEngineEnhanced:
+    """Integration tests for enhanced backtest features."""
+    
+    @pytest.fixture
+    def config(self):
+        """Create a test configuration."""
+        config = Config()
+        config.symbol = "BTCUSDT"
+        config.risk_per_trade = 0.01
+        config.leverage = 3
+        config.trading_fee = 0.0005
+        config.slippage = 0.0002
+        return config
+    
+    @pytest.fixture
+    def strategy(self, config):
+        """Create a test strategy engine."""
+        return StrategyEngine(config)
+    
+    @pytest.fixture
+    def position_sizer(self, config):
+        """Create a test position sizer."""
+        return PositionSizer(config)
+    
+    @pytest.fixture
+    def risk_manager(self, config, position_sizer):
+        """Create a test risk manager."""
+        return RiskManager(config, position_sizer)
+    
+    @pytest.fixture
+    def backtest_engine(self, config, strategy, risk_manager):
+        """Create a test backtest engine."""
+        return BacktestEngine(config, strategy, risk_manager)
+    
+    @pytest.fixture
+    def sample_candles(self):
+        """Create sample candle data for testing."""
+        candles_15m = []
+        candles_1h = []
+        candles_5m = []
+        candles_4h = []
+        
+        # Use a realistic timestamp (Jan 1, 2024)
+        base_time = 1704067200000  # Jan 1, 2024 00:00:00 UTC in milliseconds
+        base_price = 50000.0
+        
+        # Generate 15m candles
+        for i in range(200):
+            candle = Candle(
+                timestamp=base_time + i * 15 * 60 * 1000,
+                open=base_price + i * 10,
+                high=base_price + i * 10 + 100,
+                low=base_price + i * 10 - 100,
+                close=base_price + i * 10 + 50,
+                volume=100.0 + i
+            )
+            candles_15m.append(candle)
+        
+        # Generate 1h candles (every 4th 15m candle)
+        for i in range(0, 200, 4):
+            candle = Candle(
+                timestamp=base_time + i * 15 * 60 * 1000,
+                open=base_price + i * 10,
+                high=base_price + i * 10 + 400,
+                low=base_price + i * 10 - 400,
+                close=base_price + i * 10 + 200,
+                volume=400.0 + i * 4
+            )
+            candles_1h.append(candle)
+        
+        # Generate 5m candles (every 1/3 of 15m candle)
+        for i in range(600):
+            candle = Candle(
+                timestamp=base_time + i * 5 * 60 * 1000,
+                open=base_price + i * 3.33,
+                high=base_price + i * 3.33 + 33,
+                low=base_price + i * 3.33 - 33,
+                close=base_price + i * 3.33 + 16,
+                volume=33.0 + i * 0.33
+            )
+            candles_5m.append(candle)
+        
+        # Generate 4h candles (every 16th 15m candle)
+        for i in range(0, 200, 16):
+            candle = Candle(
+                timestamp=base_time + i * 15 * 60 * 1000,
+                open=base_price + i * 10,
+                high=base_price + i * 10 + 1600,
+                low=base_price + i * 10 - 1600,
+                close=base_price + i * 10 + 800,
+                volume=1600.0 + i * 16
+            )
+            candles_4h.append(candle)
+        
+        return {
+            '15m': candles_15m,
+            '1h': candles_1h,
+            '5m': candles_5m,
+            '4h': candles_4h
+        }
+    
+    def test_multi_timeframe_backtest(self, backtest_engine, sample_candles):
+        """Test backtest with multi-timeframe data."""
+        # Run backtest with all timeframes
+        results = backtest_engine.run_backtest(
+            candles_15m=sample_candles['15m'],
+            candles_1h=sample_candles['1h'],
+            initial_balance=10000.0,
+            candles_5m=sample_candles['5m'],
+            candles_4h=sample_candles['4h']
+        )
+        
+        # Verify results structure
+        assert 'total_trades' in results
+        assert 'roi' in results
+        assert 'feature_metrics' in results
+        
+        # Verify feature metrics structure
+        feature_metrics = results['feature_metrics']
+        assert 'adaptive_thresholds' in feature_metrics
+        assert 'volume_profile' in feature_metrics
+        assert 'ml_predictions' in feature_metrics
+        assert 'market_regime' in feature_metrics
+    
+    def test_feature_metrics_tracking(self, backtest_engine, sample_candles):
+        """Test that feature metrics are tracked during backtest."""
+        # Run backtest
+        results = backtest_engine.run_backtest(
+            candles_15m=sample_candles['15m'],
+            candles_1h=sample_candles['1h'],
+            initial_balance=10000.0
+        )
+        
+        # Get feature metrics
+        feature_metrics = backtest_engine.get_feature_metrics()
+        
+        # Verify structure
+        assert isinstance(feature_metrics, dict)
+        assert 'adaptive_thresholds' in feature_metrics
+        assert 'volume_profile' in feature_metrics
+        assert 'ml_predictions' in feature_metrics
+        assert 'market_regime' in feature_metrics
+        
+        # Verify each feature has expected fields
+        for feature_name, metrics in feature_metrics.items():
+            assert 'enabled' in metrics
+            assert isinstance(metrics['enabled'], bool)
+    
+    def test_ab_comparison_structure(self, backtest_engine, sample_candles):
+        """Test A/B comparison returns proper structure."""
+        # Run A/B comparison
+        results = backtest_engine.run_ab_comparison(
+            candles_15m=sample_candles['15m'],
+            candles_1h=sample_candles['1h'],
+            initial_balance=10000.0
+        )
+        
+        # Verify baseline results exist
+        assert 'baseline' in results
+        assert 'all_features' in results
+        
+        # Verify comparison report exists
+        assert 'comparison_report' in results
+        report = results['comparison_report']
+        
+        assert 'summary' in report
+        assert 'feature_contributions' in report
+        assert 'recommendations' in report
+        
+        # Verify summary metrics
+        summary = report['summary']
+        assert 'baseline_roi' in summary
+        assert 'all_features_roi' in summary
+        assert 'roi_improvement' in summary
+    
+    def test_timeframe_synchronization(self, backtest_engine, sample_candles):
+        """Test that timeframes are properly synchronized."""
+        # Build timeframe indices
+        indices = backtest_engine._build_timeframe_indices(
+            sample_candles['15m'],
+            sample_candles['1h'],
+            sample_candles['5m'],
+            sample_candles['4h']
+        )
+        
+        # Verify structure
+        assert '5m' in indices
+        assert '1h' in indices
+        assert '4h' in indices
+        
+        # Verify indices are dictionaries
+        assert isinstance(indices['5m'], dict)
+        assert isinstance(indices['1h'], dict)
+        assert isinstance(indices['4h'], dict)
+        
+        # Verify indices contain mappings
+        assert len(indices['5m']) > 0
+        assert len(indices['1h']) > 0
+        assert len(indices['4h']) > 0
+    
+    def test_feature_state_management(self, backtest_engine):
+        """Test saving and restoring feature states."""
+        # Save current states
+        states = backtest_engine._save_feature_states()
+        
+        # Verify states is a dictionary
+        assert isinstance(states, dict)
+        
+        # Disable all features
+        backtest_engine._disable_all_features()
+        
+        # Verify features are disabled
+        for feature_name in ['adaptive_threshold_mgr', 'volume_profile_analyzer', 
+                            'ml_predictor', 'market_regime_detector']:
+            if hasattr(backtest_engine.strategy, feature_name):
+                assert getattr(backtest_engine.strategy, feature_name) is None
+        
+        # Restore states
+        backtest_engine._restore_feature_states(states)
+        
+        # Verify features are restored
+        for feature_name, state in states.items():
+            if hasattr(backtest_engine.strategy, feature_name):
+                assert getattr(backtest_engine.strategy, feature_name) == state
+    
+    def test_comparison_report_generation(self, backtest_engine):
+        """Test comparison report generation."""
+        # Create mock results
+        results = {
+            'baseline': {
+                'roi': 5.0,
+                'win_rate': 50.0,
+                'profit_factor': 1.5,
+                'total_trades': 10
+            },
+            'all_features': {
+                'roi': 8.0,
+                'win_rate': 60.0,
+                'profit_factor': 2.0,
+                'total_trades': 12
+            },
+            'without_adaptive_threshold_mgr': {
+                'roi': 7.0,
+                'win_rate': 55.0,
+                'profit_factor': 1.8,
+                'total_trades': 11
+            }
+        }
+        
+        # Generate report
+        report = backtest_engine._generate_comparison_report(results)
+        
+        # Verify report structure
+        assert 'summary' in report
+        assert 'feature_contributions' in report
+        assert 'recommendations' in report
+        
+        # Verify summary calculations
+        summary = report['summary']
+        assert summary['roi_improvement'] == 3.0  # 8.0 - 5.0
+        assert summary['win_rate_improvement'] == 10.0  # 60.0 - 50.0
+        
+        # Verify feature contributions
+        contributions = report['feature_contributions']
+        assert 'adaptive_threshold_mgr' in contributions
+        
+        # Verify contribution calculation
+        # All features ROI (8.0) - Without feature ROI (7.0) = 1.0
+        assert contributions['adaptive_threshold_mgr']['roi_contribution'] == 1.0

@@ -1,0 +1,34 @@
+2026-02-07 14:44:09 - trading_bot.errors - ERROR - Error in TradingBot.start() - ERROR: API authentication failed: Invalid API-key, IP, or permissions for action, request ip: 223.185.43.247. Please check your API key and secret.
+Stack Trace:
+Traceback (most recent call last):
+  File "E:\bb\src\order_executor.py", line 69, in validate_authentication
+    account_info = self.client.futures_account()
+  File "C:\Users\Abdul Hase...t.py", line 8254, in futures_account
+    return self._request_futures_api("get", "account", True, 2, data=params)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Abdul Hase...t.py", line 143, in _request_futures_api
+    return self._request(method, uri, signed, force_params, **kwargs)
+           ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Abdul Hase...t.py", line 106, in _request
+    return self._handle_response(self.response)
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\Abdul Hase...t.py", line 115, in _handle_response
+    raise BinanceAPIException(response, response.status_code, response.text)
+binance.exceptions.BinanceAPIException: APIE...15): Invalid API-key, IP, or permissions for action, request ip: 223.185.43.247
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "E:\bb\src\trading_bot.py", line 173, in start
+    self._run_live_trading()
+    ~~~~~~~~~~~~~~~~~~~~~~^^
+  File "E:\bb\src\trading_bot.py", line 421, in _run_live_trading
+    if not self.order_executor.validate_authentication():
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "E:\bb\src\order_executor.py", line 82, in validate_authentication
+    raise ValueError(
+    ...<2 lines>...
+    )
+ValueError: API authentication failed: Invalid API-key, IP, or permissions for action, request ip: 223.185.43.247. Please check your API key and secret.
+
+None

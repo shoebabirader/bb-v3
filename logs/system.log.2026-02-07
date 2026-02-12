@@ -1,0 +1,142 @@
+2026-02-07 14:32:40 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-07 14:32:41 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=379, tota....90, poc=1.36, vah=1.41, val=1.12
+2026-02-07 14:33:56 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-07 14:33:59 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=368, tota....80, poc=13.25, vah=13.95, val=12.47
+2026-02-07 14:36:43 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-07 14:36:46 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=368, tota....20, poc=13.25, vah=13.95, val=12.47
+2026-02-07 14:36:59 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-07 14:37:00 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=368, tota....20, poc=13.25, vah=13.95, val=12.47
+2026-02-07 14:37:23 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-07 14:37:25 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=368, tota....40, poc=13.25, vah=13.95, val=12.47
+2026-02-07 14:38:19 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-07 14:38:21 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=368, tota....40, poc=13.25, vah=13.95, val=12.47
+2026-02-07 14:38:51 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-07 14:38:52 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=368, tota....00, poc=13.25, vah=13.97, val=12.47
+2026-02-07 14:40:30 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-07 14:40:32 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=368, tota....90, poc=13.25, vah=13.97, val=12.47
+2026-02-07 14:40:54 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-07 14:40:55 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=368, tota....90, poc=13.25, vah=13.97, val=12.47
+2026-02-07 14:42:20 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-07 14:42:21 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=368, tota....50, poc=13.25, vah=13.97, val=12.47
+2026-02-07 14:44:08 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-07 14:44:08 - trading_bot.system - INFO - Starting TradingBot in LIVE mode
+2026-02-07 14:44:09 - trading_bot.system - INFO - Initiating graceful shutdown
+2026-02-07 14:44:09 - trading_bot.system - INFO - Shutdown complete
+2026-02-07 14:46:29 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-07 14:46:29 - trading_bot.system - INFO - Starting TradingBot in LIVE mode
+2026-02-07 14:46:42 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=368, tota....80, poc=13.25, vah=13.98, val=12.47
+2026-02-07 14:46:53 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-07 14:46:54 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=368, tota....60, poc=13.25, vah=13.98, val=12.47
+2026-02-07 14:49:27 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-07 14:49:28 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=368, tota....40, poc=13.25, vah=13.99, val=12.47
+2026-02-07 14:50:15 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-07 14:50:16 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=368, tota....60, poc=13.25, vah=13.99, val=12.47
+2026-02-07 14:52:31 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-07 14:52:32 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=368, tota....40, poc=13.25, vah=13.99, val=12.46
+2026-02-07 14:53:32 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-07 14:53:32 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=368, tota....60, poc=13.25, vah=13.99, val=12.46
+2026-02-07 14:54:35 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-07 14:54:36 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=368, tota....20, poc=13.25, vah=13.99, val=12.46
+2026-02-07 14:55:01 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-07 14:55:02 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=368, tota....30, poc=13.25, vah=13.99, val=12.46
+2026-02-07 14:55:16 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-07 14:55:17 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=368, tota....30, poc=13.25, vah=13.99, val=12.45
+2026-02-07 14:55:34 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-07 14:55:35 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=368, tota....60, poc=13.25, vah=13.99, val=12.45
+2026-02-07 14:56:06 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-07 14:56:08 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=368, tota....90, poc=13.25, vah=13.99, val=12.45
+2026-02-07 14:56:44 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-07 14:56:45 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=368, tota....70, poc=13.25, vah=13.99, val=12.45
+2026-02-07 14:57:22 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-07 14:57:23 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=368, tota....90, poc=13.25, vah=13.99, val=12.45
+2026-02-07 14:57:54 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-07 14:57:55 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=368, tota....60, poc=13.25, vah=13.99, val=12.45
+2026-02-07 14:58:06 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-07 14:58:07 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=368, tota....30, poc=13.25, vah=13.99, val=12.45
+2026-02-07 14:58:30 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-07 14:58:31 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=368, tota....80, poc=13.25, vah=13.99, val=12.45
+2026-02-07 14:59:44 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-07 14:59:45 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=368, tota....00, poc=13.25, vah=13.99, val=12.45
+2026-02-07 15:00:11 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-07 15:00:12 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=368, tota....80, poc=13.25, vah=13.99, val=12.44
+2026-02-07 15:04:24 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-07 15:04:25 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=368, tota....70, poc=13.25, vah=13.99, val=12.42
+2026-02-07 15:05:02 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-07 15:05:03 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=368, tota....40, poc=13.25, vah=13.99, val=12.42
+2026-02-07 15:05:51 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-07 15:05:51 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=368, tota....40, poc=13.25, vah=13.99, val=12.42
+2026-02-07 15:06:37 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-07 15:06:38 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=368, tota....40, poc=13.25, vah=13.99, val=12.42
+2026-02-07 15:07:21 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-07 15:07:21 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=368, tota....70, poc=13.25, vah=13.99, val=12.42
+2026-02-07 15:07:33 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-07 15:07:34 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=368, tota....30, poc=13.25, vah=13.99, val=12.42
+2026-02-07 15:21:08 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-07 15:21:09 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=368, tota....30, poc=13.25, vah=13.99, val=12.40
+2026-02-07 15:25:39 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-07 15:25:40 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=368, tota....60, poc=13.25, vah=13.99, val=12.40
+2026-02-07 15:26:47 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-07 15:26:48 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=368, tota....10, poc=13.25, vah=14.00, val=12.40
+2026-02-07 15:35:36 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-07 15:35:37 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=368, tota....60, poc=13.25, vah=14.00, val=12.39
+2026-02-07 15:51:58 - trading_bot.system - INFO - Initiating graceful shutdown
+2026-02-07 15:51:58 - trading_bot.system - INFO - Performance metrics saved to binance_results.json
+2026-02-07 15:51:58 - trading_bot.system - INFO - Shutdown complete
+2026-02-07 15:52:17 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-07 15:52:18 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=368, tota....20, poc=13.25, vah=14.02, val=12.41
+2026-02-07 16:02:21 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-07 16:02:23 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=368, tota....60, poc=13.25, vah=14.04, val=12.41
+2026-02-07 16:40:17 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-07 16:40:18 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=368, tota....60, poc=13.25, vah=14.10, val=12.48
+2026-02-07 17:08:19 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-07 17:08:20 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=368, tota....70, poc=13.25, vah=14.10, val=12.48
+2026-02-07 17:09:01 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-07 17:09:02 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=222, tota....79, poc=76.26, vah=77.94, val=72.90
+2026-02-07 17:09:02 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-07 17:09:03 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=69, tota....48, poc=4867.98, vah=4947.67, val=4802.35
+2026-02-07 17:09:03 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-07 17:09:03 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=379, tota....10, poc=1.45, vah=1.53, val=1.25
+2026-02-07 17:09:03 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-07 17:09:04 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=287, tota....95, poc=0.00, vah=0.00, val=0.00
+2026-02-07 17:09:04 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-07 17:09:04 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=266, tota....00, poc=0.01, vah=0.01, val=0.01
+2026-02-07 17:09:57 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-07 17:09:59 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=222, tota....96, poc=76.26, vah=77.94, val=72.90
+2026-02-07 17:09:59 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-07 17:10:00 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=69, tota....80, poc=4867.98, vah=4947.67, val=4802.35
+2026-02-07 17:10:00 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-07 17:10:00 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=379, tota....10, poc=1.45, vah=1.53, val=1.25
+2026-02-07 17:10:00 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-07 17:10:01 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=368, tota....80, poc=13.25, vah=14.10, val=12.48
+2026-02-07 17:10:01 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-07 17:10:02 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=289, tota....00, poc=0.25, vah=0.27, val=0.23
+2026-02-07 17:14:26 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-07 17:14:27 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=185, tota....23, poc=32.88, vah=33.72, val=31.76
+2026-02-07 17:14:27 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-07 17:14:27 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=278, tota....00, poc=0.10, vah=0.10, val=0.09
+2026-02-07 17:14:27 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-07 17:14:28 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=379, tota....40, poc=1.45, vah=1.53, val=1.25
+2026-02-07 17:14:28 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-07 17:14:28 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=368, tota....50, poc=13.25, vah=14.10, val=12.48
+2026-02-07 17:14:29 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-07 17:14:29 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=289, tota....00, poc=0.25, vah=0.27, val=0.23
+2026-02-07 17:15:12 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-07 17:15:13 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=185, tota....83, poc=32.88, vah=33.75, val=31.76
+2026-02-07 17:15:13 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-07 17:15:13 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=278, tota....00, poc=0.10, vah=0.10, val=0.09
+2026-02-07 17:15:13 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-07 17:15:14 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=379, tota....10, poc=1.45, vah=1.53, val=1.25
+2026-02-07 17:15:14 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-07 17:15:14 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=368, tota....80, poc=13.25, vah=14.10, val=12.48
+2026-02-07 17:15:14 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-07 17:15:14 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=289, tota....00, poc=0.25, vah=0.27, val=0.23
+2026-02-07 17:15:50 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-07 17:15:55 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=185, tota....80, poc=32.88, vah=33.75, val=31.76
+2026-02-07 17:15:55 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-07 17:15:55 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=278, tota....00, poc=0.10, vah=0.10, val=0.09
+2026-02-07 17:15:55 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-07 17:15:56 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=379, tota....40, poc=1.45, vah=1.53, val=1.25
+2026-02-07 17:15:56 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-07 17:15:56 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=368, tota....30, poc=13.25, vah=14.10, val=12.48
+2026-02-07 17:15:56 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-07 17:15:57 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=289, tota....00, poc=0.25, vah=0.27, val=0.23

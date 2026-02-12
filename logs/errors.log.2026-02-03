@@ -1,0 +1,412 @@
+2026-02-03 03:44:30 - trading_bot.errors - ERROR - Error during backtest execution - ERROR: Cannot open position for XRPUSDT: would exceed portfolio risk limits
+Stack Trace:
+Traceback (most recent call last):
+  File "E:\bb\src\trading_bot.py", line 243, in _run_backtest
+    results = self.backtest_engine.run_backtest(
+        cand...15m,
+    ...<3 lines>...
+        cand...s_4h
+    )
+  File "E:\bb\src\backtest_engine.py", line 247, in run_backtest
+    position = self.risk_mgr.open_position(
+        signal,
+        self.current_balance,
+        atr
+    )
+  File "E:\bb\src\risk_manager.py", line 143, in open_position
+    raise RuntimeError(
+    ...<2 lines>...
+    )
+RuntimeError: Cannot open position for XRPUSDT: would exceed portfolio risk limits
+
+None
+2026-02-03 03:44:30 - trading_bot.errors - ERROR - Error in TradingBot.start() - ERROR: Cannot open position for XRPUSDT: would exceed portfolio risk limits
+Stack Trace:
+Traceback (most recent call last):
+  File "E:\bb\src\trading_bot.py", line 169, in start
+    self._run_backtest()
+    ~~~~~~~~~~~~~~~~~~^^
+  File "E:\bb\src\trading_bot.py", line 243, in _run_backtest
+    results = self.backtest_engine.run_backtest(
+        cand...15m,
+    ...<3 lines>...
+        cand...s_4h
+    )
+  File "E:\bb\src\backtest_engine.py", line 247, in run_backtest
+    position = self.risk_mgr.open_position(
+        signal,
+        self.current_balance,
+        atr
+    )
+  File "E:\bb\src\risk_manager.py", line 143, in open_position
+    raise RuntimeError(
+    ...<2 lines>...
+    )
+RuntimeError: Cannot open position for XRPUSDT: would exceed portfolio risk limits
+
+None
+2026-02-03 14:40:58 - trading_bot.errors - ERROR - Error during paper trading - ERROR: APIE...15): Invalid API-key, IP, or permissions for action, request ip: 223.185.36.129
+Stack Trace:
+Traceback (most recent call last):
+  File "E:\bb\src\trading_bot.py", line 314, in _run_paper_trading
+    self.wallet_balance = self.order_executor.get_account_balance()
+                          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "E:\bb\src\order_executor.py", line 409, in get_account_balance
+    account_info = self.client.futures_account()
+  File "C:\Users\Abdul Hase...t.py", line 8254, in futures_account
+    return self._request_futures_api("get", "account", True, 2, data=params)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Abdul Hase...t.py", line 143, in _request_futures_api
+    return self._request(method, uri, signed, force_params, **kwargs)
+           ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Abdul Hase...t.py", line 106, in _request
+    return self._handle_response(self.response)
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\Abdul Hase...t.py", line 115, in _handle_response
+    raise BinanceAPIException(response, response.status_code, response.text)
+binance.exceptions.BinanceAPIException: APIE...15): Invalid API-key, IP, or permissions for action, request ip: 223.185.36.129
+
+None
+2026-02-03 14:40:58 - trading_bot.errors - ERROR - Error in TradingBot.start() - ERROR: APIE...15): Invalid API-key, IP, or permissions for action, request ip: 223.185.36.129
+Stack Trace:
+Traceback (most recent call last):
+  File "E:\bb\src\trading_bot.py", line 171, in start
+    self._run_paper_trading()
+    ~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "E:\bb\src\trading_bot.py", line 314, in _run_paper_trading
+    self.wallet_balance = self.order_executor.get_account_balance()
+                          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "E:\bb\src\order_executor.py", line 409, in get_account_balance
+    account_info = self.client.futures_account()
+  File "C:\Users\Abdul Hase...t.py", line 8254, in futures_account
+    return self._request_futures_api("get", "account", True, 2, data=params)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Abdul Hase...t.py", line 143, in _request_futures_api
+    return self._request(method, uri, signed, force_params, **kwargs)
+           ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Abdul Hase...t.py", line 106, in _request
+    return self._handle_response(self.response)
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\Abdul Hase...t.py", line 115, in _handle_response
+    raise BinanceAPIException(response, response.status_code, response.text)
+binance.exceptions.BinanceAPIException: APIE...15): Invalid API-key, IP, or permissions for action, request ip: 223.185.36.129
+
+None
+2026-02-03 19:30:55 - trading_bot.errors - ERROR - Error during paper trading - ERROR: BinanceAPIException.__init__() missing 2 required positional arguments: 'status_code' and 'text'
+Stack Trace:
+Traceback (most recent call last):
+  File "E:\bb\src\data_manager.py", line 139, in fetch_historical_data
+    klines = self.client.get_historical_klines(
+        symbol=fetch_symbol,
+    ...<2 lines>...
+        end_str=end_ms
+    )
+  File "C:\Users\Abdul Hase...t.py", line 887, in get_historical_klines
+    return self._historical_klines(
+           ~~~~~~~~~~~~~~~~~~~~~~~^
+        symbol,
+        ^^^^^^^
+    ...<4 lines>...
+        klines_type=klines_type,
+        ^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Abdul Hase...t.py", line 944, in _historical_klines
+    first_valid_ts = self._get_earliest_valid_timestamp(
+        symbol, interval, klines_type
+    )
+  File "C:\Users\Abdul Hase...t.py", line 839, in _get_earliest_valid_timestamp
+    kline = self._klines(
+        klines_type=klines_type,
+    ...<4 lines>...
+        endTime=int(time.time() * 1000),
+    )
+  File "C:\Users\Abdul Hase...t.py", line 794, in _klines
+    return self.get_klines(**params)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "C:\Users\Abdul Hase...t.py", line 766, in get_klines
+    return self._get("klines", data=params)
+           ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Abdul Hase...t.py", line 200, in _get
+    return self._request_api("get", path, signed, version, **kwargs)
+           ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Abdul Hase...t.py", line 134, in _request_api
+    return self._request(method, uri, signed, **kwargs)
+           ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Abdul Hase...t.py", line 106, in _request
+    return self._handle_response(self.response)
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\Abdul Hase...t.py", line 115, in _handle_response
+    raise BinanceAPIException(response, response.status_code, response.text)
+binance.exceptions.BinanceAPIException: APIE...21): Invalid symbol.
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "E:\bb\src\trading_bot.py", line 326, in _run_paper_trading
+    self._fetch_multi_symbol_data(trading_symbols, days=7)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\bb\src\trading_bot.py", line 121, in _fetch_multi_symbol_data
+    candles_15m = self.data_manager.fetch_historical_data(days=days, timeframe="15m", symbol=symbol)
+  File "E:\bb\src\data_manager.py", line 149, in fetch_historical_data
+    raise BinanceAPIException(f"Failed to fetch historical data: {e}")
+          ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: BinanceAPIException.__init__() missing 2 required positional arguments: 'status_code' and 'text'
+
+None
+2026-02-03 19:30:55 - trading_bot.errors - ERROR - Error in TradingBot.start() - ERROR: BinanceAPIException.__init__() missing 2 required positional arguments: 'status_code' and 'text'
+Stack Trace:
+Traceback (most recent call last):
+  File "E:\bb\src\data_manager.py", line 139, in fetch_historical_data
+    klines = self.client.get_historical_klines(
+        symbol=fetch_symbol,
+    ...<2 lines>...
+        end_str=end_ms
+    )
+  File "C:\Users\Abdul Hase...t.py", line 887, in get_historical_klines
+    return self._historical_klines(
+           ~~~~~~~~~~~~~~~~~~~~~~~^
+        symbol,
+        ^^^^^^^
+    ...<4 lines>...
+        klines_type=klines_type,
+        ^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Abdul Hase...t.py", line 944, in _historical_klines
+    first_valid_ts = self._get_earliest_valid_timestamp(
+        symbol, interval, klines_type
+    )
+  File "C:\Users\Abdul Hase...t.py", line 839, in _get_earliest_valid_timestamp
+    kline = self._klines(
+        klines_type=klines_type,
+    ...<4 lines>...
+        endTime=int(time.time() * 1000),
+    )
+  File "C:\Users\Abdul Hase...t.py", line 794, in _klines
+    return self.get_klines(**params)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "C:\Users\Abdul Hase...t.py", line 766, in get_klines
+    return self._get("klines", data=params)
+           ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Abdul Hase...t.py", line 200, in _get
+    return self._request_api("get", path, signed, version, **kwargs)
+           ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Abdul Hase...t.py", line 134, in _request_api
+    return self._request(method, uri, signed, **kwargs)
+           ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Abdul Hase...t.py", line 106, in _request
+    return self._handle_response(self.response)
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\Abdul Hase...t.py", line 115, in _handle_response
+    raise BinanceAPIException(response, response.status_code, response.text)
+binance.exceptions.BinanceAPIException: APIE...21): Invalid symbol.
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "E:\bb\src\trading_bot.py", line 171, in start
+    self._run_paper_trading()
+    ~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "E:\bb\src\trading_bot.py", line 326, in _run_paper_trading
+    self._fetch_multi_symbol_data(trading_symbols, days=7)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\bb\src\trading_bot.py", line 121, in _fetch_multi_symbol_data
+    candles_15m = self.data_manager.fetch_historical_data(days=days, timeframe="15m", symbol=symbol)
+  File "E:\bb\src\data_manager.py", line 149, in fetch_historical_data
+    raise BinanceAPIException(f"Failed to fetch historical data: {e}")
+          ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: BinanceAPIException.__init__() missing 2 required positional arguments: 'status_code' and 'text'
+
+None
+2026-02-03 19:33:54 - trading_bot.errors - ERROR - Error during live trading - ERROR: API not authenticated. Call validate_authentication() first.
+Stack Trace:
+Traceback (most recent call last):
+  File "E:\bb\src\trading_bot.py", line 441, in _run_live_trading
+    self.order_executor.set_leverage(symbol, self.config.leverage)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\bb\src\order_executor.py", line 185, in set_leverage
+    self.ensure_authenticated()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "E:\bb\src\order_executor.py", line 152, in ensure_authenticated
+    raise ValueError(
+        "API not authenticated. Call validate_authentication() first."
+    )
+ValueError: API not authenticated. Call validate_authentication() first.
+
+None
+2026-02-03 19:33:54 - trading_bot.errors - ERROR - Error in TradingBot.start() - ERROR: API not authenticated. Call validate_authentication() first.
+Stack Trace:
+Traceback (most recent call last):
+  File "E:\bb\src\trading_bot.py", line 173, in start
+    self._run_live_trading()
+    ~~~~~~~~~~~~~~~~~~~~~~^^
+  File "E:\bb\src\trading_bot.py", line 441, in _run_live_trading
+    self.order_executor.set_leverage(symbol, self.config.leverage)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\bb\src\order_executor.py", line 185, in set_leverage
+    self.ensure_authenticated()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "E:\bb\src\order_executor.py", line 152, in ensure_authenticated
+    raise ValueError(
+        "API not authenticated. Call validate_authentication() first."
+    )
+ValueError: API not authenticated. Call validate_authentication() first.
+
+None
+2026-02-03 19:35:20 - trading_bot.errors - ERROR - Error during live trading - ERROR: API not authenticated. Call validate_authentication() first.
+Stack Trace:
+Traceback (most recent call last):
+  File "E:\bb\src\trading_bot.py", line 441, in _run_live_trading
+    self.order_executor.set_leverage(symbol, self.config.leverage)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\bb\src\order_executor.py", line 185, in set_leverage
+    self.ensure_authenticated()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "E:\bb\src\order_executor.py", line 152, in ensure_authenticated
+    raise ValueError(
+        "API not authenticated. Call validate_authentication() first."
+    )
+ValueError: API not authenticated. Call validate_authentication() first.
+
+None
+2026-02-03 19:35:20 - trading_bot.errors - ERROR - Error in TradingBot.start() - ERROR: API not authenticated. Call validate_authentication() first.
+Stack Trace:
+Traceback (most recent call last):
+  File "E:\bb\src\trading_bot.py", line 173, in start
+    self._run_live_trading()
+    ~~~~~~~~~~~~~~~~~~~~~~^^
+  File "E:\bb\src\trading_bot.py", line 441, in _run_live_trading
+    self.order_executor.set_leverage(symbol, self.config.leverage)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\bb\src\order_executor.py", line 185, in set_leverage
+    self.ensure_authenticated()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "E:\bb\src\order_executor.py", line 152, in ensure_authenticated
+    raise ValueError(
+        "API not authenticated. Call validate_authentication() first."
+    )
+ValueError: API not authenticated. Call validate_authentication() first.
+
+None
+2026-02-03 19:38:37 - trading_bot.errors - ERROR - Error during live trading - ERROR: APIE...21): Invalid symbol.
+Stack Trace:
+Traceback (most recent call last):
+  File "E:\bb\src\trading_bot.py", line 466, in _run_live_trading
+    self._fetch_multi_symbol_data(trading_symbols, days=7)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\bb\src\trading_bot.py", line 121, in _fetch_multi_symbol_data
+    candles_15m = self.data_manager.fetch_historical_data(days=days, timeframe="15m", symbol=symbol)
+  File "E:\bb\src\data_manager.py", line 139, in fetch_historical_data
+    klines = self.client.get_historical_klines(
+        symbol=fetch_symbol,
+    ...<2 lines>...
+        end_str=end_ms
+    )
+  File "C:\Users\Abdul Hase...t.py", line 887, in get_historical_klines
+    return self._historical_klines(
+           ~~~~~~~~~~~~~~~~~~~~~~~^
+        symbol,
+        ^^^^^^^
+    ...<4 lines>...
+        klines_type=klines_type,
+        ^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Abdul Hase...t.py", line 944, in _historical_klines
+    first_valid_ts = self._get_earliest_valid_timestamp(
+        symbol, interval, klines_type
+    )
+  File "C:\Users\Abdul Hase...t.py", line 839, in _get_earliest_valid_timestamp
+    kline = self._klines(
+        klines_type=klines_type,
+    ...<4 lines>...
+        endTime=int(time.time() * 1000),
+    )
+  File "C:\Users\Abdul Hase...t.py", line 794, in _klines
+    return self.get_klines(**params)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "C:\Users\Abdul Hase...t.py", line 766, in get_klines
+    return self._get("klines", data=params)
+           ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Abdul Hase...t.py", line 200, in _get
+    return self._request_api("get", path, signed, version, **kwargs)
+           ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Abdul Hase...t.py", line 134, in _request_api
+    return self._request(method, uri, signed, **kwargs)
+           ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Abdul Hase...t.py", line 106, in _request
+    return self._handle_response(self.response)
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\Abdul Hase...t.py", line 115, in _handle_response
+    raise BinanceAPIException(response, response.status_code, response.text)
+binance.exceptions.BinanceAPIException: APIE...21): Invalid symbol.
+
+None
+2026-02-03 19:38:37 - trading_bot.errors - ERROR - Error in TradingBot.start() - ERROR: APIE...21): Invalid symbol.
+Stack Trace:
+Traceback (most recent call last):
+  File "E:\bb\src\trading_bot.py", line 173, in start
+    self._run_live_trading()
+    ~~~~~~~~~~~~~~~~~~~~~~^^
+  File "E:\bb\src\trading_bot.py", line 466, in _run_live_trading
+    self._fetch_multi_symbol_data(trading_symbols, days=7)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\bb\src\trading_bot.py", line 121, in _fetch_multi_symbol_data
+    candles_15m = self.data_manager.fetch_historical_data(days=days, timeframe="15m", symbol=symbol)
+  File "E:\bb\src\data_manager.py", line 139, in fetch_historical_data
+    klines = self.client.get_historical_klines(
+        symbol=fetch_symbol,
+    ...<2 lines>...
+        end_str=end_ms
+    )
+  File "C:\Users\Abdul Hase...t.py", line 887, in get_historical_klines
+    return self._historical_klines(
+           ~~~~~~~~~~~~~~~~~~~~~~~^
+        symbol,
+        ^^^^^^^
+    ...<4 lines>...
+        klines_type=klines_type,
+        ^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Abdul Hase...t.py", line 944, in _historical_klines
+    first_valid_ts = self._get_earliest_valid_timestamp(
+        symbol, interval, klines_type
+    )
+  File "C:\Users\Abdul Hase...t.py", line 839, in _get_earliest_valid_timestamp
+    kline = self._klines(
+        klines_type=klines_type,
+    ...<4 lines>...
+        endTime=int(time.time() * 1000),
+    )
+  File "C:\Users\Abdul Hase...t.py", line 794, in _klines
+    return self.get_klines(**params)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "C:\Users\Abdul Hase...t.py", line 766, in get_klines
+    return self._get("klines", data=params)
+           ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Abdul Hase...t.py", line 200, in _get
+    return self._request_api("get", path, signed, version, **kwargs)
+           ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Abdul Hase...t.py", line 134, in _request_api
+    return self._request(method, uri, signed, **kwargs)
+           ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Abdul Hase...t.py", line 106, in _request
+    return self._handle_response(self.response)
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\Abdul Hase...t.py", line 115, in _handle_response
+    raise BinanceAPIException(response, response.status_code, response.text)
+binance.exceptions.BinanceAPIException: APIE...21): Invalid symbol.
+
+None
+2026-02-03 21:26:28 - trading_bot.errors - ERROR - Error during panic close - ERROR: current_price must be positive, got 0.0
+Stack Trace:
+Traceback (most recent call last):
+  File "E:\bb\src\trading_bot.py", line 871, in _trigger_panic_close
+    closed_trades = self.risk_manager.close_all_positions(current_price)
+  File "E:\bb\src\risk_manager.py", line 503, in close_all_positions
+    raise ValueError(f"current_price must be positive, got {current_price}")
+ValueError: current_price must be positive, got 0.0
+
+None

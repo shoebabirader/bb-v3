@@ -1,0 +1,398 @@
+2026-01-31 17:44:50 - trading_bot.errors - ERROR - Error during backtest execution - ERROR: Network error
+Stack Trace:
+Traceback (most recent call last):
+  File "E:\bb\src\trading_bot.py", line 135, in _run_backtest
+    candles_15m = self.data_manager.fetch_historical_data(
+        days=self.config.backtest_days,
+        timeframe="15m"
+    )
+  File "C:\Users\Abdul Haseeb\AppData\Local\Programs\Python\Python314\Lib\unittest\mock.py", line 1175, in __call__
+    return self._mock_call(*args, **kwargs)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\Abdul Haseeb\AppData\Local\Programs\Python\Python314\Lib\unittest\mock.py", line 1179, in _mock_call
+    return self._execute_mock_call(*args, **kwargs)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\Abdul Haseeb\AppData\Local\Programs\Python\Python314\Lib\unittest\mock.py", line 1234, in _execute_mock_call
+    raise effect
+Exception: Network error
+
+None
+2026-01-31 17:45:56 - trading_bot.errors - ERROR - Error during backtest execution - ERROR: Network error
+Stack Trace:
+Traceback (most recent call last):
+  File "E:\bb\src\trading_bot.py", line 135, in _run_backtest
+    candles_15m = self.data_manager.fetch_historical_data(
+        days=self.config.backtest_days,
+        timeframe="15m"
+    )
+  File "C:\Users\Abdul Haseeb\AppData\Local\Programs\Python\Python314\Lib\unittest\mock.py", line 1175, in __call__
+    return self._mock_call(*args, **kwargs)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\Abdul Haseeb\AppData\Local\Programs\Python\Python314\Lib\unittest\mock.py", line 1179, in _mock_call
+    return self._execute_mock_call(*args, **kwargs)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\Abdul Haseeb\AppData\Local\Programs\Python\Python314\Lib\unittest\mock.py", line 1234, in _execute_mock_call
+    raise effect
+Exception: Network error
+
+None
+2026-01-31 17:55:30 - trading_bot.errors - ERROR - Error during backtest execution - ERROR: Network error
+Stack Trace:
+Traceback (most recent call last):
+  File "E:\bb\src\trading_bot.py", line 135, in _run_backtest
+    candles_15m = self.data_manager.fetch_historical_data(
+        days=self.config.backtest_days,
+        timeframe="15m"
+    )
+  File "C:\Users\Abdul Haseeb\AppData\Local\Programs\Python\Python314\Lib\unittest\mock.py", line 1175, in __call__
+    return self._mock_call(*args, **kwargs)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\Abdul Haseeb\AppData\Local\Programs\Python\Python314\Lib\unittest\mock.py", line 1179, in _mock_call
+    return self._execute_mock_call(*args, **kwargs)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\Abdul Haseeb\AppData\Local\Programs\Python\Python314\Lib\unittest\mock.py", line 1234, in _execute_mock_call
+    raise effect
+Exception: Network error
+
+None
+2026-01-31 17:58:41 - trading_bot.errors - ERROR - Error during backtest execution - ERROR: Binance client not initialized. Cannot fetch historical data.
+Stack Trace:
+Traceback (most recent call last):
+  File "E:\bb\src\trading_bot.py", line 135, in _run_backtest
+    candles_15m = self.data_manager.fetch_historical_data(
+        days=self.config.backtest_days,
+        timeframe="15m"
+    )
+  File "E:\bb\src\data_manager.py", line 76, in fetch_historical_data
+    raise ValueError("Binance client not initialized. Cannot fetch historical data.")
+ValueError: Binance client not initialized. Cannot fetch historical data.
+
+None
+2026-01-31 17:58:41 - trading_bot.errors - ERROR - Error in TradingBot.start() - ERROR: Binance client not initialized. Cannot fetch historical data.
+Stack Trace:
+Traceback (most recent call last):
+  File "E:\bb\src\trading_bot.py", line 108, in start
+    self._run_backtest()
+    ~~~~~~~~~~~~~~~~~~^^
+  File "E:\bb\src\trading_bot.py", line 135, in _run_backtest
+    candles_15m = self.data_manager.fetch_historical_data(
+        days=self.config.backtest_days,
+        timeframe="15m"
+    )
+  File "E:\bb\src\data_manager.py", line 76, in fetch_historical_data
+    raise ValueError("Binance client not initialized. Cannot fetch historical data.")
+ValueError: Binance client not initialized. Cannot fetch historical data.
+
+None
+2026-01-31 18:16:33 - trading_bot.errors - ERROR - Error during backtest execution - ERROR: Network error
+Stack Trace:
+Traceback (most recent call last):
+  File "E:\bb\src\trading_bot.py", line 137, in _run_backtest
+    candles_15m = self.data_manager.fetch_historical_data(
+        days=self.config.backtest_days,
+        timeframe="15m"
+    )
+  File "C:\Users\Abdul Haseeb\AppData\Local\Programs\Python\Python314\Lib\unittest\mock.py", line 1175, in __call__
+    return self._mock_call(*args, **kwargs)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\Abdul Haseeb\AppData\Local\Programs\Python\Python314\Lib\unittest\mock.py", line 1179, in _mock_call
+    return self._execute_mock_call(*args, **kwargs)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\Abdul Haseeb\AppData\Local\Programs\Python\Python314\Lib\unittest\mock.py", line 1234, in _execute_mock_call
+    raise effect
+Exception: Network error
+
+None
+2026-01-31 18:25:38 - trading_bot.errors - ERROR - Error during backtest execution - ERROR: Network error
+Stack Trace:
+Traceback (most recent call last):
+  File "E:\bb\src\trading_bot.py", line 137, in _run_backtest
+    candles_15m = self.data_manager.fetch_historical_data(
+        days=self.config.backtest_days,
+        timeframe="15m"
+    )
+  File "C:\Users\Abdul Haseeb\AppData\Local\Programs\Python\Python314\Lib\unittest\mock.py", line 1175, in __call__
+    return self._mock_call(*args, **kwargs)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\Abdul Haseeb\AppData\Local\Programs\Python\Python314\Lib\unittest\mock.py", line 1179, in _mock_call
+    return self._execute_mock_call(*args, **kwargs)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\Abdul Haseeb\AppData\Local\Programs\Python\Python314\Lib\unittest\mock.py", line 1234, in _execute_mock_call
+    raise effect
+Exception: Network error
+
+None
+2026-01-31 18:27:51 - trading_bot.errors - ERROR - Error during backtest execution - ERROR: Network error
+Stack Trace:
+Traceback (most recent call last):
+  File "E:\bb\src\trading_bot.py", line 137, in _run_backtest
+    candles_15m = self.data_manager.fetch_historical_data(
+        days=self.config.backtest_days,
+        timeframe="15m"
+    )
+  File "C:\Users\Abdul Haseeb\AppData\Local\Programs\Python\Python314\Lib\unittest\mock.py", line 1175, in __call__
+    return self._mock_call(*args, **kwargs)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\Abdul Haseeb\AppData\Local\Programs\Python\Python314\Lib\unittest\mock.py", line 1179, in _mock_call
+    return self._execute_mock_call(*args, **kwargs)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\Abdul Haseeb\AppData\Local\Programs\Python\Python314\Lib\unittest\mock.py", line 1234, in _execute_mock_call
+    raise effect
+Exception: Network error
+
+None
+2026-01-31 18:34:03 - trading_bot.errors - ERROR - Error during backtest execution - ERROR: Network error
+Stack Trace:
+Traceback (most recent call last):
+  File "E:\bb\src\trading_bot.py", line 137, in _run_backtest
+    candles_15m = self.data_manager.fetch_historical_data(
+        days=self.config.backtest_days,
+        timeframe="15m"
+    )
+  File "C:\Users\Abdul Haseeb\AppData\Local\Programs\Python\Python314\Lib\unittest\mock.py", line 1175, in __call__
+    return self._mock_call(*args, **kwargs)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\Abdul Haseeb\AppData\Local\Programs\Python\Python314\Lib\unittest\mock.py", line 1179, in _mock_call
+    return self._execute_mock_call(*args, **kwargs)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\Abdul Haseeb\AppData\Local\Programs\Python\Python314\Lib\unittest\mock.py", line 1234, in _execute_mock_call
+    raise effect
+Exception: Network error
+
+None
+2026-01-31 18:35:41 - trading_bot.errors - ERROR - Error during backtest execution - ERROR: Network error
+Stack Trace:
+Traceback (most recent call last):
+  File "E:\bb\src\trading_bot.py", line 137, in _run_backtest
+    candles_15m = self.data_manager.fetch_historical_data(
+        days=self.config.backtest_days,
+        timeframe="15m"
+    )
+  File "C:\Users\Abdul Haseeb\AppData\Local\Programs\Python\Python314\Lib\unittest\mock.py", line 1175, in __call__
+    return self._mock_call(*args, **kwargs)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\Abdul Haseeb\AppData\Local\Programs\Python\Python314\Lib\unittest\mock.py", line 1179, in _mock_call
+    return self._execute_mock_call(*args, **kwargs)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\Abdul Haseeb\AppData\Local\Programs\Python\Python314\Lib\unittest\mock.py", line 1234, in _execute_mock_call
+    raise effect
+Exception: Network error
+
+None
+2026-01-31 18:38:07 - trading_bot.errors - ERROR - Error during backtest execution - ERROR: Network error
+Stack Trace:
+Traceback (most recent call last):
+  File "E:\bb\src\trading_bot.py", line 137, in _run_backtest
+    candles_15m = self.data_manager.fetch_historical_data(
+        days=self.config.backtest_days,
+        timeframe="15m"
+    )
+  File "C:\Users\Abdul Haseeb\AppData\Local\Programs\Python\Python314\Lib\unittest\mock.py", line 1175, in __call__
+    return self._mock_call(*args, **kwargs)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\Abdul Haseeb\AppData\Local\Programs\Python\Python314\Lib\unittest\mock.py", line 1179, in _mock_call
+    return self._execute_mock_call(*args, **kwargs)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\Abdul Haseeb\AppData\Local\Programs\Python\Python314\Lib\unittest\mock.py", line 1234, in _execute_mock_call
+    raise effect
+Exception: Network error
+
+None
+2026-01-31 18:47:03 - trading_bot.errors - ERROR - Error during paper trading - ERROR: APIError(code=-2015): Invalid API-key, IP, or permissions for action, request ip: 223.185.42.144
+Stack Trace:
+Traceback (most recent call last):
+  File "E:\bb\src\trading_bot.py", line 204, in _run_paper_trading
+    self.wallet_balance = self.order_executor.get_account_balance()
+                          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "E:\bb\src\order_executor.py", line 402, in get_account_balance
+    account_info = self.client.futures_account()
+  File "C:\Users\Abdul Haseeb\AppData\Local\Programs\Python\Python314\Lib\site-packages\binance\client.py", line 8254, in futures_account
+    return self._request_futures_api("get", "account", True, 2, data=params)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Abdul Haseeb\AppData\Local\Programs\Python\Python314\Lib\site-packages\binance\client.py", line 143, in _request_futures_api
+    return self._request(method, uri, signed, force_params, **kwargs)
+           ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Abdul Haseeb\AppData\Local\Programs\Python\Python314\Lib\site-packages\binance\client.py", line 106, in _request
+    return self._handle_response(self.response)
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\Abdul Haseeb\AppData\Local\Programs\Python\Python314\Lib\site-packages\binance\client.py", line 115, in _handle_response
+    raise BinanceAPIException(response, response.status_code, response.text)
+binance.exceptions.BinanceAPIException: APIError(code=-2015): Invalid API-key, IP, or permissions for action, request ip: 223.185.42.144
+
+None
+2026-01-31 18:47:03 - trading_bot.errors - ERROR - Error in TradingBot.start() - ERROR: APIError(code=-2015): Invalid API-key, IP, or permissions for action, request ip: 223.185.42.144
+Stack Trace:
+Traceback (most recent call last):
+  File "E:\bb\src\trading_bot.py", line 112, in start
+    self._run_paper_trading()
+    ~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "E:\bb\src\trading_bot.py", line 204, in _run_paper_trading
+    self.wallet_balance = self.order_executor.get_account_balance()
+                          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "E:\bb\src\order_executor.py", line 402, in get_account_balance
+    account_info = self.client.futures_account()
+  File "C:\Users\Abdul Haseeb\AppData\Local\Programs\Python\Python314\Lib\site-packages\binance\client.py", line 8254, in futures_account
+    return self._request_futures_api("get", "account", True, 2, data=params)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Abdul Haseeb\AppData\Local\Programs\Python\Python314\Lib\site-packages\binance\client.py", line 143, in _request_futures_api
+    return self._request(method, uri, signed, force_params, **kwargs)
+           ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Abdul Haseeb\AppData\Local\Programs\Python\Python314\Lib\site-packages\binance\client.py", line 106, in _request
+    return self._handle_response(self.response)
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\Abdul Haseeb\AppData\Local\Programs\Python\Python314\Lib\site-packages\binance\client.py", line 115, in _handle_response
+    raise BinanceAPIException(response, response.status_code, response.text)
+binance.exceptions.BinanceAPIException: APIError(code=-2015): Invalid API-key, IP, or permissions for action, request ip: 223.185.42.144
+
+None
+2026-01-31 18:51:15 - trading_bot.errors - ERROR - Error during backtest execution - ERROR: Network error
+Stack Trace:
+Traceback (most recent call last):
+  File "E:\bb\src\trading_bot.py", line 137, in _run_backtest
+    candles_15m = self.data_manager.fetch_historical_data(
+        days=self.config.backtest_days,
+        timeframe="15m"
+    )
+  File "C:\Users\Abdul Haseeb\AppData\Local\Programs\Python\Python314\Lib\unittest\mock.py", line 1175, in __call__
+    return self._mock_call(*args, **kwargs)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\Abdul Haseeb\AppData\Local\Programs\Python\Python314\Lib\unittest\mock.py", line 1179, in _mock_call
+    return self._execute_mock_call(*args, **kwargs)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\Abdul Haseeb\AppData\Local\Programs\Python\Python314\Lib\unittest\mock.py", line 1234, in _execute_mock_call
+    raise effect
+Exception: Network error
+
+None
+2026-01-31 19:07:39 - trading_bot.errors - ERROR - Error during backtest execution - ERROR: Network error
+Stack Trace:
+Traceback (most recent call last):
+  File "E:\bb\src\trading_bot.py", line 137, in _run_backtest
+    candles_15m = self.data_manager.fetch_historical_data(
+        days=self.config.backtest_days,
+        timeframe="15m"
+    )
+  File "C:\Users\Abdul Hase...py", line 1175, in __call__
+    return self._mock_call(*args, **kwargs)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\Abdul Hase...py", line 1179, in _mock_call
+    return self._execute_mock_call(*args, **kwargs)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\Abdul Hase...py", line 1234, in _execute_mock_call
+    raise effect
+Exception: Network error
+
+None
+2026-01-31 19:18:00 - trading_bot.errors - ERROR - Error during backtest execution - ERROR: Network error
+Stack Trace:
+Traceback (most recent call last):
+  File "E:\bb\src\trading_bot.py", line 137, in _run_backtest
+    candles_15m = self.data_manager.fetch_historical_data(
+        days=self.config.backtest_days,
+        timeframe="15m"
+    )
+  File "C:\Users\Abdul Hase...k.py", line 1175, in __call__
+    return self._mock_call(*args, **kwargs)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\Abdul Hase...k.py", line 1179, in _mock_call
+    return self._execute_mock_call(*args, **kwargs)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\Abdul Hase...k.py", line 1234, in _execute_mock_call
+    raise effect
+Exception: Network error
+
+None
+2026-01-31 19:22:16 - trading_bot.errors - ERROR - Error during paper trading - ERROR: APIE...15): Invalid API-key, IP, or permissions for action, request ip: 223.185.42.144
+Stack Trace:
+Traceback (most recent call last):
+  File "E:\bb\src\trading_bot.py", line 204, in _run_paper_trading
+    self.wallet_balance = self.order_executor.get_account_balance()
+                          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "E:\bb\src\order_executor.py", line 402, in get_account_balance
+    account_info = self.client.futures_account()
+  File "C:\Users\Abdul Hase...t.py", line 8254, in futures_account
+    return self._request_futures_api("get", "account", True, 2, data=params)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Abdul Hase...t.py", line 143, in _request_futures_api
+    return self._request(method, uri, signed, force_params, **kwargs)
+           ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Abdul Hase...t.py", line 106, in _request
+    return self._handle_response(self.response)
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\Abdul Hase...t.py", line 115, in _handle_response
+    raise BinanceAPIException(response, response.status_code, response.text)
+binance.exceptions.BinanceAPIException: APIE...15): Invalid API-key, IP, or permissions for action, request ip: 223.185.42.144
+
+None
+2026-01-31 19:22:16 - trading_bot.errors - ERROR - Error in TradingBot.start() - ERROR: APIE...15): Invalid API-key, IP, or permissions for action, request ip: 223.185.42.144
+Stack Trace:
+Traceback (most recent call last):
+  File "E:\bb\src\trading_bot.py", line 112, in start
+    self._run_paper_trading()
+    ~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "E:\bb\src\trading_bot.py", line 204, in _run_paper_trading
+    self.wallet_balance = self.order_executor.get_account_balance()
+                          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "E:\bb\src\order_executor.py", line 402, in get_account_balance
+    account_info = self.client.futures_account()
+  File "C:\Users\Abdul Hase...t.py", line 8254, in futures_account
+    return self._request_futures_api("get", "account", True, 2, data=params)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Abdul Hase...t.py", line 143, in _request_futures_api
+    return self._request(method, uri, signed, force_params, **kwargs)
+           ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Abdul Hase...t.py", line 106, in _request
+    return self._handle_response(self.response)
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\Abdul Hase...t.py", line 115, in _handle_response
+    raise BinanceAPIException(response, response.status_code, response.text)
+binance.exceptions.BinanceAPIException: APIE...15): Invalid API-key, IP, or permissions for action, request ip: 223.185.42.144
+
+None
+2026-01-31 19:23:54 - trading_bot.errors - ERROR - Error during paper trading - ERROR: APIE...15): Invalid API-key, IP, or permissions for action, request ip: 223.185.42.144
+Stack Trace:
+Traceback (most recent call last):
+  File "E:\bb\src\trading_bot.py", line 204, in _run_paper_trading
+    self.wallet_balance = self.order_executor.get_account_balance()
+                          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "E:\bb\src\order_executor.py", line 402, in get_account_balance
+    account_info = self.client.futures_account()
+  File "C:\Users\Abdul Hase...t.py", line 8254, in futures_account
+    return self._request_futures_api("get", "account", True, 2, data=params)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Abdul Hase...t.py", line 143, in _request_futures_api
+    return self._request(method, uri, signed, force_params, **kwargs)
+           ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Abdul Hase...t.py", line 106, in _request
+    return self._handle_response(self.response)
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\Abdul Hase...t.py", line 115, in _handle_response
+    raise BinanceAPIException(response, response.status_code, response.text)
+binance.exceptions.BinanceAPIException: APIE...15): Invalid API-key, IP, or permissions for action, request ip: 223.185.42.144
+
+None
+2026-01-31 19:23:54 - trading_bot.errors - ERROR - Error in TradingBot.start() - ERROR: APIE...15): Invalid API-key, IP, or permissions for action, request ip: 223.185.42.144
+Stack Trace:
+Traceback (most recent call last):
+  File "E:\bb\src\trading_bot.py", line 112, in start
+    self._run_paper_trading()
+    ~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "E:\bb\src\trading_bot.py", line 204, in _run_paper_trading
+    self.wallet_balance = self.order_executor.get_account_balance()
+                          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "E:\bb\src\order_executor.py", line 402, in get_account_balance
+    account_info = self.client.futures_account()
+  File "C:\Users\Abdul Hase...t.py", line 8254, in futures_account
+    return self._request_futures_api("get", "account", True, 2, data=params)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Abdul Hase...t.py", line 143, in _request_futures_api
+    return self._request(method, uri, signed, force_params, **kwargs)
+           ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Abdul Hase...t.py", line 106, in _request
+    return self._handle_response(self.response)
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\Abdul Hase...t.py", line 115, in _handle_response
+    raise BinanceAPIException(response, response.status_code, response.text)
+binance.exceptions.BinanceAPIException: APIE...15): Invalid API-key, IP, or permissions for action, request ip: 223.185.42.144
+
+None

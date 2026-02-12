@@ -1,0 +1,87 @@
+2026-01-31 17:44:49 - trading_bot.system - INFO - Performance metrics saved to binance_results.json
+2026-01-31 17:44:49 - trading_bot.system - INFO - Performance metrics saved to C:\Users\Abdul Haseeb\AppData\Local\Temp\pytest-of-Abdul Haseeb\pytest-9\test_backtest_results_saved0\test_results.json
+2026-01-31 17:45:53 - trading_bot.system - INFO - Performance metrics saved to binance_results.json
+2026-01-31 17:45:54 - trading_bot.system - INFO - Performance metrics saved to C:\Users\Abdul Haseeb\AppData\Local\Temp\pytest-of-Abdul Haseeb\pytest-10\test_backtest_results_saved0\test_results.json
+2026-01-31 17:46:05 - trading_bot.system - INFO - Performance metrics saved to C:\Users\Abdul Haseeb\AppData\Local\Temp\pytest-of-Abdul Haseeb\pytest-10\test_complete_backtest_workflo0\results.json
+2026-01-31 17:55:27 - trading_bot.system - INFO - Performance metrics saved to binance_results.json
+2026-01-31 17:55:29 - trading_bot.system - INFO - Performance metrics saved to C:\Users\Abdul Haseeb\AppData\Local\Temp\pytest-of-Abdul Haseeb\pytest-11\test_backtest_results_saved0\test_results.json
+2026-01-31 17:58:41 - trading_bot.system - INFO - Starting TradingBot in BACKTEST mode
+2026-01-31 17:58:41 - trading_bot.system - INFO - Initiating graceful shutdown
+2026-01-31 17:58:41 - trading_bot.system - INFO - Shutdown complete
+2026-01-31 17:59:21 - trading_bot.system - INFO - Starting TradingBot in BACKTEST mode
+2026-01-31 18:02:49 - trading_bot.system - INFO - Starting TradingBot in BACKTEST mode
+2026-01-31 18:03:19 - trading_bot.system - INFO - Performance metrics saved to binance_results.json
+2026-01-31 18:03:19 - trading_bot.system - INFO - Initiating graceful shutdown
+2026-01-31 18:03:19 - trading_bot.system - INFO - Shutdown complete
+2026-01-31 18:06:33 - trading_bot.system - INFO - Performance metrics saved to binance_results.json
+2026-01-31 18:06:33 - trading_bot.system - INFO - Initiating graceful shutdown
+2026-01-31 18:06:33 - trading_bot.system - INFO - Shutdown complete
+2026-01-31 18:16:33 - trading_bot.system - INFO - Performance metrics saved to binance_results.json
+2026-01-31 18:16:33 - trading_bot.system - INFO - Performance metrics saved to C:\Users\Abdul Haseeb\AppData\Local\Temp\pytest-of-Abdul Haseeb\pytest-12\test_backtest_results_saved0\test_results.json
+2026-01-31 18:25:38 - trading_bot.system - INFO - Performance metrics saved to binance_results.json
+2026-01-31 18:25:38 - trading_bot.system - INFO - Performance metrics saved to C:\Users\Abdul Haseeb\AppData\Local\Temp\pytest-of-Abdul Haseeb\pytest-13\test_backtest_results_saved0\test_results.json
+2026-01-31 18:27:51 - trading_bot.system - INFO - Performance metrics saved to binance_results.json
+2026-01-31 18:27:51 - trading_bot.system - INFO - Performance metrics saved to C:\Users\Abdul Haseeb\AppData\Local\Temp\pytest-of-Abdul Haseeb\pytest-14\test_backtest_results_saved0\test_results.json
+2026-01-31 18:34:03 - trading_bot.system - INFO - Performance metrics saved to binance_results.json
+2026-01-31 18:34:03 - trading_bot.system - INFO - Performance metrics saved to C:\Users\Abdul Haseeb\AppData\Local\Temp\pytest-of-Abdul Haseeb\pytest-15\test_backtest_results_saved0\test_results.json
+2026-01-31 18:35:41 - trading_bot.system - INFO - Performance metrics saved to binance_results.json
+2026-01-31 18:35:41 - trading_bot.system - INFO - Performance metrics saved to C:\Users\Abdul Haseeb\AppData\Local\Temp\pytest-of-Abdul Haseeb\pytest-16\test_backtest_results_saved0\test_results.json
+2026-01-31 18:38:07 - trading_bot.system - INFO - Performance metrics saved to binance_results.json
+2026-01-31 18:38:07 - trading_bot.system - INFO - Performance metrics saved to C:\Users\Abdul Haseeb\AppData\Local\Temp\pytest-of-Abdul Haseeb\pytest-17\test_backtest_results_saved0\test_results.json
+2026-01-31 18:46:04 - trading_bot.system - INFO - Starting paper trading mode
+2026-01-31 18:47:01 - trading_bot.system - INFO - Starting paper trading mode
+2026-01-31 18:47:02 - trading_bot.system - INFO - Starting TradingBot in PAPER mode
+2026-01-31 18:47:03 - trading_bot.system - INFO - Initiating graceful shutdown
+2026-01-31 18:47:03 - trading_bot.system - INFO - Shutdown complete
+2026-01-31 18:51:14 - trading_bot.system - INFO - Performance metrics saved to binance_results.json
+2026-01-31 18:51:14 - trading_bot.system - INFO - Performance metrics saved to C:\Users\Abdul Haseeb\AppData\Local\Temp\pytest-of-Abdul Haseeb\pytest-18\test_backtest_results_saved0\test_results.json
+2026-01-31 19:07:39 - trading_bot.system - INFO - Performance metrics saved to binance_results.json
+2026-01-31 19:07:39 - trading_bot.system - INFO - Performance metrics saved to C:\Users\Abdul Haseeb\AppData\Local\Temp\pytest-of-Abdul Hase...json
+2026-01-31 19:18:00 - trading_bot.system - INFO - Performance metrics saved to binance_results.json
+2026-01-31 19:18:00 - trading_bot.system - INFO - Performance metrics saved to C:\Users\Abdul Haseeb\AppData\Local\Temp\pytest-of-Abdul Hase...json
+2026-01-31 19:22:14 - trading_bot.system - INFO - Starting paper trading mode
+2026-01-31 19:22:15 - trading_bot.system - INFO - Starting TradingBot in PAPER mode
+2026-01-31 19:22:16 - trading_bot.system - INFO - Initiating graceful shutdown
+2026-01-31 19:22:16 - trading_bot.system - INFO - Shutdown complete
+2026-01-31 19:23:51 - trading_bot.system - INFO - Starting paper trading mode
+2026-01-31 19:23:53 - trading_bot.system - INFO - Starting TradingBot in PAPER mode
+2026-01-31 19:23:54 - trading_bot.system - INFO - Initiating graceful shutdown
+2026-01-31 19:23:54 - trading_bot.system - INFO - Shutdown complete
+2026-01-31 19:25:44 - trading_bot.system - INFO - Starting paper trading mode
+2026-01-31 19:25:45 - trading_bot.system - INFO - Starting TradingBot in PAPER mode
+2026-01-31 19:33:23 - trading_bot.system - INFO - Initiating graceful shutdown
+2026-01-31 19:33:23 - trading_bot.system - INFO - Shutdown complete
+2026-01-31 21:44:35 - trading_bot.system - INFO - Starting paper trading mode
+2026-01-31 21:44:37 - trading_bot.system - INFO - Starting TradingBot in PAPER mode
+2026-01-31 21:48:44 - trading_bot.system - INFO - Initiating graceful shutdown
+2026-01-31 21:48:44 - trading_bot.system - INFO - Shutdown complete
+2026-01-31 21:52:29 - trading_bot.system - INFO - Starting paper trading mode
+2026-01-31 21:52:30 - trading_bot.system - INFO - Starting TradingBot in PAPER mode
+2026-01-31 21:54:21 - trading_bot.system - INFO - Initiating graceful shutdown
+2026-01-31 21:54:21 - trading_bot.system - INFO - Shutdown complete
+2026-01-31 21:56:18 - trading_bot.system - INFO - Starting paper trading mode
+2026-01-31 21:56:19 - trading_bot.system - INFO - Starting TradingBot in PAPER mode
+2026-01-31 21:56:47 - trading_bot.system - INFO - Initiating graceful shutdown
+2026-01-31 21:56:47 - trading_bot.system - INFO - Shutdown complete
+2026-01-31 22:00:34 - trading_bot.system - INFO - Starting TradingBot in BACKTEST mode
+2026-01-31 22:06:00 - trading_bot.system - INFO - Performance metrics saved to binance_results.json
+2026-01-31 22:06:00 - trading_bot.system - INFO - Initiating graceful shutdown
+2026-01-31 22:06:00 - trading_bot.system - INFO - Shutdown complete
+2026-01-31 22:11:31 - trading_bot.system - INFO - Starting TradingBot in PAPER mode
+2026-01-31 22:14:28 - trading_bot.system - INFO - Initiating graceful shutdown
+2026-01-31 22:14:28 - trading_bot.system - INFO - Shutdown complete
+2026-01-31 22:15:35 - trading_bot.system - INFO - Starting TradingBot in PAPER mode
+2026-01-31 22:16:48 - trading_bot.system - INFO - Initiating graceful shutdown
+2026-01-31 22:16:48 - trading_bot.system - INFO - Shutdown complete
+2026-01-31 22:19:14 - trading_bot.system - INFO - Starting TradingBot in PAPER mode
+2026-01-31 22:26:31 - trading_bot.system - INFO - Initiating graceful shutdown
+2026-01-31 22:26:31 - trading_bot.system - INFO - Performance metrics saved to binance_results.json
+2026-01-31 22:26:31 - trading_bot.system - INFO - Shutdown complete
+2026-01-31 22:26:41 - trading_bot.system - INFO - Starting TradingBot in PAPER mode
+2026-01-31 22:27:41 - trading_bot.system - INFO - Initiating graceful shutdown
+2026-01-31 22:27:41 - trading_bot.system - INFO - Performance metrics saved to binance_results.json
+2026-01-31 22:27:41 - trading_bot.system - INFO - Shutdown complete
+2026-01-31 22:28:14 - trading_bot.system - INFO - Starting TradingBot in PAPER mode
+2026-01-31 23:00:10 - trading_bot.system - INFO - Initiating graceful shutdown
+2026-01-31 23:00:10 - trading_bot.system - INFO - Performance metrics saved to binance_results.json
+2026-01-31 23:00:10 - trading_bot.system - INFO - Shutdown complete

@@ -1,9 +1,115 @@
 """Technical indicator calculations for Binance Futures Trading Bot."""
 
-from typing import List, Dict
+from typing import List, Dict, Optional, Tuple
 import pandas as pd
 import numpy as np
+import hashlib
+import time
 from src.models import Candle
+
+
+class IndicatorCache:
+    """Cache for indicator calculations to avoid redundant computations.
+    
+    Uses candle data hash and parameters as cache key.
+    Automatically invalidates cache when new data arrives.
+    """
+    
+    def __init__(self, ttl_seconds: int = 60):
+        """Initialize the indicator cache.
+        
+        Args:
+            ttl_seconds: Time-to-live for cache entries in seconds
+        """
+        self._cache: Dict[str, Tuple[any, float]] = {}
+        self._ttl = ttl_seconds
+    
+    def _generate_key(self, candles: List[Candle], indicator_name: str, **params) -> str:
+        """Generate a cache key from candles and parameters.
+        
+        Args:
+            candles: List of candles
+            indicator_name: Name of the indicator
+            **params: Additional parameters for the indicator
+            
+        Returns:
+            Cache key as string
+        """
+        # Create a hash of the candle data (timestamps and closes)
+        if not candles:
+            return f"{indicator_name}_empty"
+        
+        # Use last candle timestamp and count as quick identifier
+        last_timestamp = candles[-1].timestamp
+        candle_count = len(candles)
+        
+        # Include parameters in key
+        param_str = "_".join(f"{k}={v}" for k, v in sorted(params.items()))
+        
+        return f"{indicator_name}_{last_timestamp}_{candle_count}_{param_str}"
+    
+    def get(self, candles: List[Candle], indicator_name: str, **params) -> Optional[any]:
+        """Get cached indicator value if available and not expired.
+        
+        Args:
+            candles: List of candles
+            indicator_name: Name of the indicator
+            **params: Additional parameters for the indicator
+            
+        Returns:
+            Cached value if available, None otherwise
+        """
+        key = self._generate_key(candles, indicator_name, **params)
+        
+        if key in self._cache:
+            value, timestamp = self._cache[key]
+            
+            # Check if cache entry is still valid
+            if time.time() - timestamp < self._ttl:
+                return value
+            else:
+                # Remove expired entry
+                del self._cache[key]
+        
+        return None
+    
+    def set(self, candles: List[Candle], indicator_name: str, value: any, **params):
+        """Store indicator value in cache.
+        
+        Args:
+            candles: List of candles
+            indicator_name: Name of the indicator
+            value: Calculated indicator value
+            **params: Additional parameters for the indicator
+        """
+        key = self._generate_key(candles, indicator_name, **params)
+        self._cache[key] = (value, time.time())
+    
+    def clear(self):
+        """Clear all cached values."""
+        self._cache.clear()
+    
+    def invalidate_old_entries(self):
+        """Remove expired cache entries."""
+        current_time = time.time()
+        expired_keys = [
+            key for key, (_, timestamp) in self._cache.items()
+            if current_time - timestamp >= self._ttl
+        ]
+        
+        for key in expired_keys:
+            del self._cache[key]
+    
+    def get_cache_stats(self) -> Dict[str, int]:
+        """Get cache statistics.
+        
+        Returns:
+            Dictionary with cache size and other stats
+        """
+        return {
+            'size': len(self._cache),
+            'ttl_seconds': self._ttl
+        }
 
 
 class IndicatorCalculator:
@@ -11,7 +117,43 @@ class IndicatorCalculator:
     
     All methods are static and stateless, taking candle data as input
     and returning calculated indicator values.
+    
+    Supports optional caching to avoid redundant calculations.
     """
+    
+    # Class-level cache instance
+    _cache: Optional[IndicatorCache] = None
+    
+    @classmethod
+    def enable_caching(cls, ttl_seconds: int = 60):
+        """Enable indicator caching.
+        
+        Args:
+            ttl_seconds: Time-to-live for cache entries
+        """
+        cls._cache = IndicatorCache(ttl_seconds=ttl_seconds)
+    
+    @classmethod
+    def disable_caching(cls):
+        """Disable indicator caching."""
+        cls._cache = None
+    
+    @classmethod
+    def clear_cache(cls):
+        """Clear all cached indicators."""
+        if cls._cache:
+            cls._cache.clear()
+    
+    @classmethod
+    def get_cache_stats(cls) -> Optional[Dict[str, int]]:
+        """Get cache statistics.
+        
+        Returns:
+            Cache stats if caching is enabled, None otherwise
+        """
+        if cls._cache:
+            return cls._cache.get_cache_stats()
+        return None
     
     @staticmethod
     def calculate_vwap(candles: List[Candle], anchor_time: int) -> float:
@@ -27,6 +169,14 @@ class IndicatorCalculator:
         Returns:
             VWAP value as float, or 0.0 if insufficient data
         """
+        # Check cache
+        if IndicatorCalculator._cache:
+            cached = IndicatorCalculator._cache.get(
+                candles, 'vwap', anchor_time=anchor_time
+            )
+            if cached is not None:
+                return cached
+        
         if not candles:
             return 0.0
         
@@ -47,7 +197,15 @@ class IndicatorCalculator:
         if cumulative_volume == 0:
             return 0.0
         
-        return cumulative_tpv / cumulative_volume
+        result = cumulative_tpv / cumulative_volume
+        
+        # Store in cache
+        if IndicatorCalculator._cache:
+            IndicatorCalculator._cache.set(
+                candles, 'vwap', result, anchor_time=anchor_time
+            )
+        
+        return result
     
     @staticmethod
     def calculate_atr(candles: List[Candle], period: int = 14) -> float:
@@ -63,6 +221,12 @@ class IndicatorCalculator:
         Returns:
             ATR value as float, or 0.0 if insufficient data
         """
+        # Check cache
+        if IndicatorCalculator._cache:
+            cached = IndicatorCalculator._cache.get(candles, 'atr', period=period)
+            if cached is not None:
+                return cached
+        
         if len(candles) < period + 1:
             return 0.0
         
@@ -93,6 +257,10 @@ class IndicatorCalculator:
         for i in range(period, len(true_ranges)):
             atr = (true_ranges[i] * multiplier) + (atr * (1 - multiplier))
         
+        # Store in cache
+        if IndicatorCalculator._cache:
+            IndicatorCalculator._cache.set(candles, 'atr', atr, period=period)
+        
         return atr
     
     @staticmethod
@@ -109,6 +277,12 @@ class IndicatorCalculator:
         Returns:
             ADX value as float (0-100), or 0.0 if insufficient data
         """
+        # Check cache
+        if IndicatorCalculator._cache:
+            cached = IndicatorCalculator._cache.get(candles, 'adx', period=period)
+            if cached is not None:
+                return cached
+        
         if len(candles) < 2 * period:
             return 0.0
         
@@ -163,7 +337,13 @@ class IndicatorCalculator:
         df['adx'] = df['dx'].ewm(alpha=1/period, adjust=False).mean()
         
         # Return the last ADX value
-        return float(df['adx'].iloc[-1]) if pd.notna(df['adx'].iloc[-1]) else 0.0
+        result = float(df['adx'].iloc[-1]) if pd.notna(df['adx'].iloc[-1]) else 0.0
+        
+        # Store in cache
+        if IndicatorCalculator._cache:
+            IndicatorCalculator._cache.set(candles, 'adx', result, period=period)
+        
+        return result
     
     @staticmethod
     def calculate_rvol(candles: List[Candle], period: int = 20) -> float:
@@ -178,6 +358,12 @@ class IndicatorCalculator:
         Returns:
             RVOL value as float, or 0.0 if insufficient data
         """
+        # Check cache
+        if IndicatorCalculator._cache:
+            cached = IndicatorCalculator._cache.get(candles, 'rvol', period=period)
+            if cached is not None:
+                return cached
+        
         if len(candles) < period + 1:
             return 0.0
         
@@ -193,7 +379,13 @@ class IndicatorCalculator:
         if avg_volume == 0:
             return 0.0
         
-        return current_candle.volume / avg_volume
+        result = current_candle.volume / avg_volume
+        
+        # Store in cache
+        if IndicatorCalculator._cache:
+            IndicatorCalculator._cache.set(candles, 'rvol', result, period=period)
+        
+        return result
     
     @staticmethod
     def calculate_squeeze_momentum(candles: List[Candle]) -> Dict[str, any]:

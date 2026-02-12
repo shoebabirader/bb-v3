@@ -1,0 +1,606 @@
+2026-02-05 02:19:56 - trading_bot.system - INFO - AdaptiveThresholdManager initialized with base thresholds: ADX=20.0, RVOL=1.0
+2026-02-05 02:19:57 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-05 02:19:58 - trading_bot.system - WARNING - Insufficient data for volatility calculation: need 720 candles, have 192. Using default percentile of 50.0
+2026-02-05 02:19:58 - trading_bot.system - INFO - Threshold adjustment: Volatility percentile: 50.0 (moderate), Multiplier: 1.00, ADX: 20.00 -> 20.00, RVOL: 1.00 -> 1.00
+2026-02-05 02:19:58 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=165, tota....65, poc=86.88, vah=88.78, val=83.46
+2026-02-05 02:19:58 - trading_bot.system - INFO - AdaptiveThresholdManager initialized with base thresholds: ADX=20.0, RVOL=1.0
+2026-02-05 02:19:58 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-05 02:19:59 - trading_bot.system - WARNING - Insufficient data for volatility calculation: need 720 candles, have 192. Using default percentile of 50.0
+2026-02-05 02:19:59 - trading_bot.system - INFO - Threshold adjustment: Volatility percentile: 50.0 (moderate), Multiplier: 1.00, ADX: 20.00 -> 20.00, RVOL: 1.00 -> 1.00
+2026-02-05 02:19:59 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=95, tota....04, poc=4924.94, vah=5050.59, val=4873.75
+2026-02-05 02:19:59 - trading_bot.system - INFO - AdaptiveThresholdManager initialized with base thresholds: ADX=20.0, RVOL=1.0
+2026-02-05 02:19:59 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-05 02:19:59 - trading_bot.system - WARNING - Insufficient data for volatility calculation: need 720 candles, have 192. Using default percentile of 50.0
+2026-02-05 02:19:59 - trading_bot.system - INFO - Threshold adjustment: Volatility percentile: 50.0 (moderate), Multiplier: 1.00, ADX: 20.00 -> 20.00, RVOL: 1.00 -> 1.00
+2026-02-05 02:19:59 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=87, tota....50, poc=1.60, vah=1.62, val=1.55
+2026-02-05 02:19:59 - trading_bot.system - INFO - AdaptiveThresholdManager initialized with base thresholds: ADX=20.0, RVOL=1.0
+2026-02-05 02:19:59 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-05 02:20:00 - trading_bot.system - WARNING - Insufficient data for volatility calculation: need 720 candles, have 192. Using default percentile of 50.0
+2026-02-05 02:20:00 - trading_bot.system - INFO - Threshold adjustment: Volatility percentile: 50.0 (moderate), Multiplier: 1.00, ADX: 20.00 -> 20.00, RVOL: 1.00 -> 1.00
+2026-02-05 02:20:00 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=137, tota....80, poc=2274.37, vah=2328.44, val=2155.83
+2026-02-05 02:20:00 - trading_bot.system - INFO - AdaptiveThresholdManager initialized with base thresholds: ADX=20.0, RVOL=1.0
+2026-02-05 02:20:00 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-05 02:20:00 - trading_bot.system - WARNING - Insufficient data for volatility calculation: need 720 candles, have 192. Using default percentile of 50.0
+2026-02-05 02:20:00 - trading_bot.system - INFO - Threshold adjustment: Volatility percentile: 50.0 (moderate), Multiplier: 1.00, ADX: 20.00 -> 20.00, RVOL: 1.00 -> 1.00
+2026-02-05 02:20:00 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=108, tota....51, poc=774.19, vah=778.45, val=736.54
+2026-02-05 02:21:46 - trading_bot.system - INFO - AdaptiveThresholdManager initialized with base thresholds: ADX=20.0, RVOL=1.0
+2026-02-05 02:21:46 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-05 02:21:47 - trading_bot.system - WARNING - Insufficient data for volatility calculation: need 720 candles, have 192. Using default percentile of 50.0
+2026-02-05 02:21:47 - trading_bot.system - INFO - Threshold adjustment: Volatility percentile: 50.0 (moderate), Multiplier: 1.00, ADX: 20.00 -> 20.00, RVOL: 1.00 -> 1.00
+2026-02-05 02:21:47 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=165, tota....33, poc=86.88, vah=88.78, val=83.46
+2026-02-05 02:21:47 - trading_bot.system - INFO - AdaptiveThresholdManager initialized with base thresholds: ADX=20.0, RVOL=1.0
+2026-02-05 02:21:47 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-05 02:21:47 - trading_bot.system - WARNING - Insufficient data for volatility calculation: need 720 candles, have 192. Using default percentile of 50.0
+2026-02-05 02:21:47 - trading_bot.system - INFO - Threshold adjustment: Volatility percentile: 50.0 (moderate), Multiplier: 1.00, ADX: 20.00 -> 20.00, RVOL: 1.00 -> 1.00
+2026-02-05 02:21:47 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=95, tota....73, poc=4924.94, vah=5050.59, val=4873.75
+2026-02-05 02:21:47 - trading_bot.system - INFO - AdaptiveThresholdManager initialized with base thresholds: ADX=20.0, RVOL=1.0
+2026-02-05 02:21:47 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-05 02:21:48 - trading_bot.system - WARNING - Insufficient data for volatility calculation: need 720 candles, have 192. Using default percentile of 50.0
+2026-02-05 02:21:48 - trading_bot.system - INFO - Threshold adjustment: Volatility percentile: 50.0 (moderate), Multiplier: 1.00, ADX: 20.00 -> 20.00, RVOL: 1.00 -> 1.00
+2026-02-05 02:21:48 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=87, tota....70, poc=1.60, vah=1.62, val=1.55
+2026-02-05 02:21:48 - trading_bot.system - INFO - AdaptiveThresholdManager initialized with base thresholds: ADX=20.0, RVOL=1.0
+2026-02-05 02:21:48 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-05 02:21:48 - trading_bot.system - WARNING - Insufficient data for volatility calculation: need 720 candles, have 192. Using default percentile of 50.0
+2026-02-05 02:21:48 - trading_bot.system - INFO - Threshold adjustment: Volatility percentile: 50.0 (moderate), Multiplier: 1.00, ADX: 20.00 -> 20.00, RVOL: 1.00 -> 1.00
+2026-02-05 02:21:48 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=137, tota....55, poc=2274.37, vah=2328.44, val=2155.83
+2026-02-05 02:21:48 - trading_bot.system - INFO - AdaptiveThresholdManager initialized with base thresholds: ADX=20.0, RVOL=1.0
+2026-02-05 02:21:48 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-05 02:21:49 - trading_bot.system - WARNING - Insufficient data for volatility calculation: need 720 candles, have 192. Using default percentile of 50.0
+2026-02-05 02:21:49 - trading_bot.system - INFO - Threshold adjustment: Volatility percentile: 50.0 (moderate), Multiplier: 1.00, ADX: 20.00 -> 20.00, RVOL: 1.00 -> 1.00
+2026-02-05 02:21:49 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=108, tota....72, poc=774.19, vah=778.45, val=736.54
+2026-02-05 02:25:35 - trading_bot.system - INFO - AdaptiveThresholdManager initialized with base thresholds: ADX=20.0, RVOL=1.0
+2026-02-05 02:25:35 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-05 02:25:38 - trading_bot.system - WARNING - Insufficient data for volatility calculation: need 720 candles, have 192. Using default percentile of 50.0
+2026-02-05 02:25:38 - trading_bot.system - INFO - Threshold adjustment: Volatility percentile: 50.0 (moderate), Multiplier: 1.00, ADX: 20.00 -> 20.00, RVOL: 1.00 -> 1.00
+2026-02-05 02:25:38 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=165, tota....31, poc=86.88, vah=88.78, val=83.46
+2026-02-05 02:25:38 - trading_bot.system - INFO - AdaptiveThresholdManager initialized with base thresholds: ADX=20.0, RVOL=1.0
+2026-02-05 02:25:38 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-05 02:25:38 - trading_bot.system - WARNING - Insufficient data for volatility calculation: need 720 candles, have 192. Using default percentile of 50.0
+2026-02-05 02:25:38 - trading_bot.system - INFO - Threshold adjustment: Volatility percentile: 50.0 (moderate), Multiplier: 1.00, ADX: 20.00 -> 20.00, RVOL: 1.00 -> 1.00
+2026-02-05 02:25:38 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=95, tota....61, poc=4924.94, vah=5050.59, val=4873.75
+2026-02-05 02:25:38 - trading_bot.system - INFO - AdaptiveThresholdManager initialized with base thresholds: ADX=20.0, RVOL=1.0
+2026-02-05 02:25:38 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-05 02:25:38 - trading_bot.system - WARNING - Insufficient data for volatility calculation: need 720 candles, have 192. Using default percentile of 50.0
+2026-02-05 02:25:38 - trading_bot.system - INFO - Threshold adjustment: Volatility percentile: 50.0 (moderate), Multiplier: 1.00, ADX: 20.00 -> 20.00, RVOL: 1.00 -> 1.00
+2026-02-05 02:25:38 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=87, tota....40, poc=1.60, vah=1.62, val=1.55
+2026-02-05 02:25:38 - trading_bot.system - INFO - AdaptiveThresholdManager initialized with base thresholds: ADX=20.0, RVOL=1.0
+2026-02-05 02:25:38 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-05 02:25:39 - trading_bot.system - WARNING - Insufficient data for volatility calculation: need 720 candles, have 192. Using default percentile of 50.0
+2026-02-05 02:25:39 - trading_bot.system - INFO - Threshold adjustment: Volatility percentile: 50.0 (moderate), Multiplier: 1.00, ADX: 20.00 -> 20.00, RVOL: 1.00 -> 1.00
+2026-02-05 02:25:39 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=103, tota....02, poc=0.00, vah=0.00, val=0.00
+2026-02-05 02:25:39 - trading_bot.system - INFO - AdaptiveThresholdManager initialized with base thresholds: ADX=20.0, RVOL=1.0
+2026-02-05 02:25:39 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-05 02:25:39 - trading_bot.system - WARNING - Insufficient data for volatility calculation: need 720 candles, have 192. Using default percentile of 50.0
+2026-02-05 02:25:39 - trading_bot.system - INFO - Threshold adjustment: Volatility percentile: 50.0 (moderate), Multiplier: 1.00, ADX: 20.00 -> 20.00, RVOL: 1.00 -> 1.00
+2026-02-05 02:25:39 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=84, tota....00, poc=0.01, vah=0.01, val=0.01
+2026-02-05 02:26:16 - trading_bot.system - INFO - AdaptiveThresholdManager initialized with base thresholds: ADX=20.0, RVOL=1.0
+2026-02-05 02:26:16 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-05 02:26:16 - trading_bot.system - INFO - Starting TradingBot in LIVE mode
+2026-02-05 02:26:17 - trading_bot.system - INFO - Initiating graceful shutdown
+2026-02-05 02:26:17 - trading_bot.system - INFO - Shutdown complete
+2026-02-05 02:28:05 - trading_bot.system - INFO - AdaptiveThresholdManager initialized with base thresholds: ADX=20.0, RVOL=1.0
+2026-02-05 02:28:05 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-05 02:28:05 - trading_bot.system - INFO - Starting TradingBot in LIVE mode
+2026-02-05 02:28:18 - trading_bot.system - WARNING - Insufficient data for volatility calculation: need 720 candles, have 200. Using default percentile of 50.0
+2026-02-05 02:28:18 - trading_bot.system - INFO - Threshold adjustment: Volatility percentile: 50.0 (moderate), Multiplier: 1.00, ADX: 20.00 -> 20.00, RVOL: 1.00 -> 1.00
+2026-02-05 02:28:18 - trading_bot.system - INFO - Volume profile calculated: num_candles=200, num_bins=215, tota....12, poc=78.76, vah=84.01, val=77.02
+2026-02-05 02:30:36 - trading_bot.system - INFO - AdaptiveThresholdManager initialized with base thresholds: ADX=20.0, RVOL=1.0
+2026-02-05 02:30:36 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-05 02:30:37 - trading_bot.system - WARNING - Insufficient data for volatility calculation: need 720 candles, have 192. Using default percentile of 50.0
+2026-02-05 02:30:37 - trading_bot.system - INFO - Threshold adjustment: Volatility percentile: 50.0 (moderate), Multiplier: 1.00, ADX: 20.00 -> 20.00, RVOL: 1.00 -> 1.00
+2026-02-05 02:30:37 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=165, tota....27, poc=86.88, vah=88.78, val=83.46
+2026-02-05 02:30:37 - trading_bot.system - INFO - AdaptiveThresholdManager initialized with base thresholds: ADX=20.0, RVOL=1.0
+2026-02-05 02:30:37 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-05 02:30:37 - trading_bot.system - WARNING - Insufficient data for volatility calculation: need 720 candles, have 192. Using default percentile of 50.0
+2026-02-05 02:30:37 - trading_bot.system - INFO - Threshold adjustment: Volatility percentile: 50.0 (moderate), Multiplier: 1.00, ADX: 20.00 -> 20.00, RVOL: 1.00 -> 1.00
+2026-02-05 02:30:37 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=93, tota....28, poc=4923.29, vah=5054.86, val=4881.00
+2026-02-05 02:30:37 - trading_bot.system - INFO - AdaptiveThresholdManager initialized with base thresholds: ADX=20.0, RVOL=1.0
+2026-02-05 02:30:37 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-05 02:30:38 - trading_bot.system - WARNING - Insufficient data for volatility calculation: need 720 candles, have 192. Using default percentile of 50.0
+2026-02-05 02:30:38 - trading_bot.system - INFO - Threshold adjustment: Volatility percentile: 50.0 (moderate), Multiplier: 1.00, ADX: 20.00 -> 20.00, RVOL: 1.00 -> 1.00
+2026-02-05 02:30:38 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=87, tota....70, poc=1.60, vah=1.62, val=1.55
+2026-02-05 02:30:38 - trading_bot.system - INFO - AdaptiveThresholdManager initialized with base thresholds: ADX=20.0, RVOL=1.0
+2026-02-05 02:30:38 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-05 02:30:38 - trading_bot.system - WARNING - Insufficient data for volatility calculation: need 720 candles, have 192. Using default percentile of 50.0
+2026-02-05 02:30:38 - trading_bot.system - INFO - Threshold adjustment: Volatility percentile: 50.0 (moderate), Multiplier: 1.00, ADX: 20.00 -> 20.00, RVOL: 1.00 -> 1.00
+2026-02-05 02:30:38 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=103, tota....02, poc=0.00, vah=0.00, val=0.00
+2026-02-05 02:30:38 - trading_bot.system - INFO - AdaptiveThresholdManager initialized with base thresholds: ADX=20.0, RVOL=1.0
+2026-02-05 02:30:38 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-05 02:30:39 - trading_bot.system - WARNING - Insufficient data for volatility calculation: need 720 candles, have 192. Using default percentile of 50.0
+2026-02-05 02:30:39 - trading_bot.system - INFO - Threshold adjustment: Volatility percentile: 50.0 (moderate), Multiplier: 1.00, ADX: 20.00 -> 20.00, RVOL: 1.00 -> 1.00
+2026-02-05 02:30:39 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=84, tota....00, poc=0.01, vah=0.01, val=0.01
+2026-02-05 02:45:09 - trading_bot.system - INFO - AdaptiveThresholdManager initialized with base thresholds: ADX=20.0, RVOL=1.0
+2026-02-05 02:45:09 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-05 02:45:10 - trading_bot.system - WARNING - Insufficient data for volatility calculation: need 720 candles, have 192. Using default percentile of 50.0
+2026-02-05 02:45:10 - trading_bot.system - INFO - Threshold adjustment: Volatility percentile: 50.0 (moderate), Multiplier: 1.00, ADX: 20.00 -> 20.00, RVOL: 1.00 -> 1.00
+2026-02-05 02:45:10 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=165, tota....59, poc=86.88, vah=88.78, val=83.46
+2026-02-05 02:45:10 - trading_bot.system - INFO - AdaptiveThresholdManager initialized with base thresholds: ADX=20.0, RVOL=1.0
+2026-02-05 02:45:10 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-05 02:45:11 - trading_bot.system - WARNING - Insufficient data for volatility calculation: need 720 candles, have 192. Using default percentile of 50.0
+2026-02-05 02:45:11 - trading_bot.system - INFO - Threshold adjustment: Volatility percentile: 50.0 (moderate), Multiplier: 1.00, ADX: 20.00 -> 20.00, RVOL: 1.00 -> 1.00
+2026-02-05 02:45:11 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=93, tota....14, poc=4923.29, vah=5054.86, val=4881.00
+2026-02-05 02:45:11 - trading_bot.system - INFO - AdaptiveThresholdManager initialized with base thresholds: ADX=20.0, RVOL=1.0
+2026-02-05 02:45:11 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-05 02:45:11 - trading_bot.system - WARNING - Insufficient data for volatility calculation: need 720 candles, have 192. Using default percentile of 50.0
+2026-02-05 02:45:11 - trading_bot.system - INFO - Threshold adjustment: Volatility percentile: 50.0 (moderate), Multiplier: 1.00, ADX: 20.00 -> 20.00, RVOL: 1.00 -> 1.00
+2026-02-05 02:45:11 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=87, tota....20, poc=1.60, vah=1.62, val=1.55
+2026-02-05 02:45:11 - trading_bot.system - INFO - AdaptiveThresholdManager initialized with base thresholds: ADX=20.0, RVOL=1.0
+2026-02-05 02:45:11 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-05 02:45:12 - trading_bot.system - WARNING - Insufficient data for volatility calculation: need 720 candles, have 192. Using default percentile of 50.0
+2026-02-05 02:45:12 - trading_bot.system - INFO - Threshold adjustment: Volatility percentile: 50.0 (moderate), Multiplier: 1.00, ADX: 20.00 -> 20.00, RVOL: 1.00 -> 1.00
+2026-02-05 02:45:12 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=103, tota....02, poc=0.00, vah=0.00, val=0.00
+2026-02-05 02:45:12 - trading_bot.system - INFO - AdaptiveThresholdManager initialized with base thresholds: ADX=20.0, RVOL=1.0
+2026-02-05 02:45:12 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-05 02:45:12 - trading_bot.system - WARNING - Insufficient data for volatility calculation: need 720 candles, have 192. Using default percentile of 50.0
+2026-02-05 02:45:12 - trading_bot.system - INFO - Threshold adjustment: Volatility percentile: 50.0 (moderate), Multiplier: 1.00, ADX: 20.00 -> 20.00, RVOL: 1.00 -> 1.00
+2026-02-05 02:45:12 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=84, tota....00, poc=0.01, vah=0.01, val=0.01
+2026-02-05 02:50:57 - trading_bot.system - INFO - AdaptiveThresholdManager initialized with base thresholds: ADX=20.0, RVOL=1.0
+2026-02-05 02:50:57 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-05 02:50:58 - trading_bot.system - WARNING - Insufficient data for volatility calculation: need 720 candles, have 192. Using default percentile of 50.0
+2026-02-05 02:50:58 - trading_bot.system - INFO - Threshold adjustment: Volatility percentile: 50.0 (moderate), Multiplier: 1.00, ADX: 20.00 -> 20.00, RVOL: 1.00 -> 1.00
+2026-02-05 02:50:58 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=165, tota....09, poc=86.88, vah=88.78, val=83.46
+2026-02-05 02:55:33 - trading_bot.system - INFO - AdaptiveThresholdManager initialized with base thresholds: ADX=20.0, RVOL=1.0
+2026-02-05 02:55:33 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-05 02:55:34 - trading_bot.system - WARNING - Insufficient data for volatility calculation: need 720 candles, have 192. Using default percentile of 50.0
+2026-02-05 02:55:34 - trading_bot.system - INFO - Threshold adjustment: Volatility percentile: 50.0 (moderate), Multiplier: 1.00, ADX: 20.00 -> 20.00, RVOL: 1.00 -> 1.00
+2026-02-05 02:55:34 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=165, tota....09, poc=86.88, vah=88.78, val=83.46
+2026-02-05 02:55:34 - trading_bot.system - INFO - AdaptiveThresholdManager initialized with base thresholds: ADX=20.0, RVOL=1.0
+2026-02-05 02:55:34 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-05 02:55:35 - trading_bot.system - WARNING - Insufficient data for volatility calculation: need 720 candles, have 192. Using default percentile of 50.0
+2026-02-05 02:55:35 - trading_bot.system - INFO - Threshold adjustment: Volatility percentile: 50.0 (moderate), Multiplier: 1.00, ADX: 20.00 -> 20.00, RVOL: 1.00 -> 1.00
+2026-02-05 02:55:35 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=93, tota....29, poc=4923.29, vah=5054.86, val=4881.00
+2026-02-05 02:55:35 - trading_bot.system - INFO - AdaptiveThresholdManager initialized with base thresholds: ADX=20.0, RVOL=1.0
+2026-02-05 02:55:35 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-05 02:55:35 - trading_bot.system - WARNING - Insufficient data for volatility calculation: need 720 candles, have 192. Using default percentile of 50.0
+2026-02-05 02:55:35 - trading_bot.system - INFO - Threshold adjustment: Volatility percentile: 50.0 (moderate), Multiplier: 1.00, ADX: 20.00 -> 20.00, RVOL: 1.00 -> 1.00
+2026-02-05 02:55:35 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=87, tota....50, poc=1.60, vah=1.62, val=1.55
+2026-02-05 02:55:35 - trading_bot.system - INFO - AdaptiveThresholdManager initialized with base thresholds: ADX=20.0, RVOL=1.0
+2026-02-05 02:55:35 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-05 02:55:35 - trading_bot.system - WARNING - Insufficient data for volatility calculation: need 720 candles, have 192. Using default percentile of 50.0
+2026-02-05 02:55:35 - trading_bot.system - INFO - Threshold adjustment: Volatility percentile: 50.0 (moderate), Multiplier: 1.00, ADX: 20.00 -> 20.00, RVOL: 1.00 -> 1.00
+2026-02-05 02:55:35 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=103, tota....02, poc=0.00, vah=0.00, val=0.00
+2026-02-05 02:55:35 - trading_bot.system - INFO - AdaptiveThresholdManager initialized with base thresholds: ADX=20.0, RVOL=1.0
+2026-02-05 02:55:35 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-05 02:55:36 - trading_bot.system - WARNING - Insufficient data for volatility calculation: need 720 candles, have 192. Using default percentile of 50.0
+2026-02-05 02:55:36 - trading_bot.system - INFO - Threshold adjustment: Volatility percentile: 50.0 (moderate), Multiplier: 1.00, ADX: 20.00 -> 20.00, RVOL: 1.00 -> 1.00
+2026-02-05 02:55:36 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=84, tota....00, poc=0.01, vah=0.01, val=0.01
+2026-02-05 03:03:12 - trading_bot.system - INFO - AdaptiveThresholdManager initialized with base thresholds: ADX=20.0, RVOL=1.0
+2026-02-05 03:03:13 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-05 03:03:14 - trading_bot.system - WARNING - Insufficient data for volatility calculation: need 720 candles, have 192. Using default percentile of 50.0
+2026-02-05 03:03:14 - trading_bot.system - INFO - Threshold adjustment: Volatility percentile: 50.0 (moderate), Multiplier: 1.00, ADX: 20.00 -> 20.00, RVOL: 1.00 -> 1.00
+2026-02-05 03:03:14 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=165, tota....26, poc=86.88, vah=88.70, val=83.46
+2026-02-05 03:03:14 - trading_bot.system - INFO - AdaptiveThresholdManager initialized with base thresholds: ADX=20.0, RVOL=1.0
+2026-02-05 03:03:14 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-05 03:03:14 - trading_bot.system - WARNING - Insufficient data for volatility calculation: need 720 candles, have 192. Using default percentile of 50.0
+2026-02-05 03:03:14 - trading_bot.system - INFO - Threshold adjustment: Volatility percentile: 50.0 (moderate), Multiplier: 1.00, ADX: 20.00 -> 20.00, RVOL: 1.00 -> 1.00
+2026-02-05 03:03:14 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=93, tota....34, poc=4923.29, vah=5054.86, val=4881.00
+2026-02-05 03:03:14 - trading_bot.system - INFO - AdaptiveThresholdManager initialized with base thresholds: ADX=20.0, RVOL=1.0
+2026-02-05 03:03:14 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-05 03:03:15 - trading_bot.system - WARNING - Insufficient data for volatility calculation: need 720 candles, have 192. Using default percentile of 50.0
+2026-02-05 03:03:15 - trading_bot.system - INFO - Threshold adjustment: Volatility percentile: 50.0 (moderate), Multiplier: 1.00, ADX: 20.00 -> 20.00, RVOL: 1.00 -> 1.00
+2026-02-05 03:03:15 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=87, tota....90, poc=1.60, vah=1.62, val=1.55
+2026-02-05 03:03:15 - trading_bot.system - INFO - AdaptiveThresholdManager initialized with base thresholds: ADX=20.0, RVOL=1.0
+2026-02-05 03:03:15 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-05 03:03:15 - trading_bot.system - WARNING - Insufficient data for volatility calculation: need 720 candles, have 192. Using default percentile of 50.0
+2026-02-05 03:03:15 - trading_bot.system - INFO - Threshold adjustment: Volatility percentile: 50.0 (moderate), Multiplier: 1.00, ADX: 20.00 -> 20.00, RVOL: 1.00 -> 1.00
+2026-02-05 03:03:15 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=103, tota....02, poc=0.00, vah=0.00, val=0.00
+2026-02-05 03:03:15 - trading_bot.system - INFO - AdaptiveThresholdManager initialized with base thresholds: ADX=20.0, RVOL=1.0
+2026-02-05 03:03:15 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-05 03:03:16 - trading_bot.system - WARNING - Insufficient data for volatility calculation: need 720 candles, have 192. Using default percentile of 50.0
+2026-02-05 03:03:16 - trading_bot.system - INFO - Threshold adjustment: Volatility percentile: 50.0 (moderate), Multiplier: 1.00, ADX: 20.00 -> 20.00, RVOL: 1.00 -> 1.00
+2026-02-05 03:03:16 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=84, tota....00, poc=0.01, vah=0.01, val=0.01
+2026-02-05 03:08:47 - trading_bot.system - INFO - AdaptiveThresholdManager initialized with base thresholds: ADX=20.0, RVOL=1.0
+2026-02-05 03:08:47 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-05 03:08:48 - trading_bot.system - WARNING - Insufficient data for volatility calculation: need 720 candles, have 192. Using default percentile of 50.0
+2026-02-05 03:08:48 - trading_bot.system - INFO - Threshold adjustment: Volatility percentile: 50.0 (moderate), Multiplier: 1.00, ADX: 20.00 -> 20.00, RVOL: 1.00 -> 1.00
+2026-02-05 03:08:48 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=165, tota....86, poc=86.88, vah=88.70, val=83.46
+2026-02-05 03:08:48 - trading_bot.system - INFO - AdaptiveThresholdManager initialized with base thresholds: ADX=20.0, RVOL=1.0
+2026-02-05 03:08:48 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-05 03:08:48 - trading_bot.system - WARNING - Insufficient data for volatility calculation: need 720 candles, have 192. Using default percentile of 50.0
+2026-02-05 03:08:48 - trading_bot.system - INFO - Threshold adjustment: Volatility percentile: 50.0 (moderate), Multiplier: 1.00, ADX: 20.00 -> 20.00, RVOL: 1.00 -> 1.00
+2026-02-05 03:08:48 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=93, tota....31, poc=4923.29, vah=5054.86, val=4881.00
+2026-02-05 03:08:49 - trading_bot.system - INFO - AdaptiveThresholdManager initialized with base thresholds: ADX=20.0, RVOL=1.0
+2026-02-05 03:08:49 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-05 03:08:49 - trading_bot.system - WARNING - Insufficient data for volatility calculation: need 720 candles, have 192. Using default percentile of 50.0
+2026-02-05 03:08:49 - trading_bot.system - INFO - Threshold adjustment: Volatility percentile: 50.0 (moderate), Multiplier: 1.00, ADX: 20.00 -> 20.00, RVOL: 1.00 -> 1.00
+2026-02-05 03:08:49 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=87, tota....60, poc=1.60, vah=1.62, val=1.55
+2026-02-05 03:08:49 - trading_bot.system - INFO - AdaptiveThresholdManager initialized with base thresholds: ADX=20.0, RVOL=1.0
+2026-02-05 03:08:49 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-05 03:08:49 - trading_bot.system - WARNING - Insufficient data for volatility calculation: need 720 candles, have 192. Using default percentile of 50.0
+2026-02-05 03:08:49 - trading_bot.system - INFO - Threshold adjustment: Volatility percentile: 50.0 (moderate), Multiplier: 1.00, ADX: 20.00 -> 20.00, RVOL: 1.00 -> 1.00
+2026-02-05 03:08:49 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=103, tota....02, poc=0.00, vah=0.00, val=0.00
+2026-02-05 03:08:49 - trading_bot.system - INFO - AdaptiveThresholdManager initialized with base thresholds: ADX=20.0, RVOL=1.0
+2026-02-05 03:08:49 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-05 03:08:50 - trading_bot.system - WARNING - Insufficient data for volatility calculation: need 720 candles, have 192. Using default percentile of 50.0
+2026-02-05 03:08:50 - trading_bot.system - INFO - Threshold adjustment: Volatility percentile: 50.0 (moderate), Multiplier: 1.00, ADX: 20.00 -> 20.00, RVOL: 1.00 -> 1.00
+2026-02-05 03:08:50 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=84, tota....00, poc=0.01, vah=0.01, val=0.01
+2026-02-05 03:12:42 - trading_bot.system - INFO - AdaptiveThresholdManager initialized with base thresholds: ADX=20.0, RVOL=1.0
+2026-02-05 03:12:42 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-05 03:12:43 - trading_bot.system - WARNING - Insufficient data for volatility calculation: need 720 candles, have 192. Using default percentile of 50.0
+2026-02-05 03:12:43 - trading_bot.system - INFO - Threshold adjustment: Volatility percentile: 50.0 (moderate), Multiplier: 1.00, ADX: 20.00 -> 20.00, RVOL: 1.00 -> 1.00
+2026-02-05 03:12:43 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=165, tota....13, poc=86.88, vah=88.70, val=83.46
+2026-02-05 03:12:43 - trading_bot.system - INFO - AdaptiveThresholdManager initialized with base thresholds: ADX=20.0, RVOL=1.0
+2026-02-05 03:12:43 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-05 03:12:44 - trading_bot.system - WARNING - Insufficient data for volatility calculation: need 720 candles, have 192. Using default percentile of 50.0
+2026-02-05 03:12:44 - trading_bot.system - INFO - Threshold adjustment: Volatility percentile: 50.0 (moderate), Multiplier: 1.00, ADX: 20.00 -> 20.00, RVOL: 1.00 -> 1.00
+2026-02-05 03:12:44 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=93, tota....32, poc=4923.29, vah=5054.86, val=4881.00
+2026-02-05 03:12:44 - trading_bot.system - INFO - AdaptiveThresholdManager initialized with base thresholds: ADX=20.0, RVOL=1.0
+2026-02-05 03:12:44 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-05 03:12:45 - trading_bot.system - WARNING - Insufficient data for volatility calculation: need 720 candles, have 192. Using default percentile of 50.0
+2026-02-05 03:12:45 - trading_bot.system - INFO - Threshold adjustment: Volatility percentile: 50.0 (moderate), Multiplier: 1.00, ADX: 20.00 -> 20.00, RVOL: 1.00 -> 1.00
+2026-02-05 03:12:45 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=87, tota....40, poc=1.60, vah=1.62, val=1.55
+2026-02-05 03:12:45 - trading_bot.system - INFO - AdaptiveThresholdManager initialized with base thresholds: ADX=20.0, RVOL=1.0
+2026-02-05 03:12:45 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-05 03:12:46 - trading_bot.system - WARNING - Insufficient data for volatility calculation: need 720 candles, have 192. Using default percentile of 50.0
+2026-02-05 03:12:46 - trading_bot.system - INFO - Threshold adjustment: Volatility percentile: 50.0 (moderate), Multiplier: 1.00, ADX: 20.00 -> 20.00, RVOL: 1.00 -> 1.00
+2026-02-05 03:12:46 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=103, tota....02, poc=0.00, vah=0.00, val=0.00
+2026-02-05 03:12:46 - trading_bot.system - INFO - AdaptiveThresholdManager initialized with base thresholds: ADX=20.0, RVOL=1.0
+2026-02-05 03:12:46 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-05 03:12:46 - trading_bot.system - WARNING - Insufficient data for volatility calculation: need 720 candles, have 192. Using default percentile of 50.0
+2026-02-05 03:12:46 - trading_bot.system - INFO - Threshold adjustment: Volatility percentile: 50.0 (moderate), Multiplier: 1.00, ADX: 20.00 -> 20.00, RVOL: 1.00 -> 1.00
+2026-02-05 03:12:46 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=84, tota....00, poc=0.01, vah=0.01, val=0.01
+2026-02-05 03:17:11 - trading_bot.system - INFO - AdaptiveThresholdManager initialized with base thresholds: ADX=20.0, RVOL=1.0
+2026-02-05 03:17:11 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-05 03:17:12 - trading_bot.system - WARNING - Insufficient data for volatility calculation: need 720 candles, have 192. Using default percentile of 50.0
+2026-02-05 03:17:12 - trading_bot.system - INFO - Threshold adjustment: Volatility percentile: 50.0 (moderate), Multiplier: 1.00, ADX: 20.00 -> 20.00, RVOL: 1.00 -> 1.00
+2026-02-05 03:17:12 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=163, tota....46, poc=86.93, vah=88.68, val=83.42
+2026-02-05 03:17:12 - trading_bot.system - INFO - AdaptiveThresholdManager initialized with base thresholds: ADX=20.0, RVOL=1.0
+2026-02-05 03:17:12 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-05 03:17:13 - trading_bot.system - WARNING - Insufficient data for volatility calculation: need 720 candles, have 192. Using default percentile of 50.0
+2026-02-05 03:17:13 - trading_bot.system - INFO - Threshold adjustment: Volatility percentile: 50.0 (moderate), Multiplier: 1.00, ADX: 20.00 -> 20.00, RVOL: 1.00 -> 1.00
+2026-02-05 03:17:13 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=91, tota....95, poc=4922.81, vah=5054.75, val=4880.41
+2026-02-05 03:17:13 - trading_bot.system - INFO - AdaptiveThresholdManager initialized with base thresholds: ADX=20.0, RVOL=1.0
+2026-02-05 03:17:13 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-05 03:17:13 - trading_bot.system - WARNING - Insufficient data for volatility calculation: need 720 candles, have 192. Using default percentile of 50.0
+2026-02-05 03:17:13 - trading_bot.system - INFO - Threshold adjustment: Volatility percentile: 50.0 (moderate), Multiplier: 1.00, ADX: 20.00 -> 20.00, RVOL: 1.00 -> 1.00
+2026-02-05 03:17:14 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=87, tota....20, poc=1.60, vah=1.62, val=1.55
+2026-02-05 03:17:14 - trading_bot.system - INFO - AdaptiveThresholdManager initialized with base thresholds: ADX=20.0, RVOL=1.0
+2026-02-05 03:17:14 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-05 03:17:14 - trading_bot.system - WARNING - Insufficient data for volatility calculation: need 720 candles, have 192. Using default percentile of 50.0
+2026-02-05 03:17:14 - trading_bot.system - INFO - Threshold adjustment: Volatility percentile: 50.0 (moderate), Multiplier: 1.00, ADX: 20.00 -> 20.00, RVOL: 1.00 -> 1.00
+2026-02-05 03:17:14 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=103, tota....02, poc=0.00, vah=0.00, val=0.00
+2026-02-05 03:17:14 - trading_bot.system - INFO - AdaptiveThresholdManager initialized with base thresholds: ADX=20.0, RVOL=1.0
+2026-02-05 03:17:14 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-05 03:17:14 - trading_bot.system - WARNING - Insufficient data for volatility calculation: need 720 candles, have 192. Using default percentile of 50.0
+2026-02-05 03:17:14 - trading_bot.system - INFO - Threshold adjustment: Volatility percentile: 50.0 (moderate), Multiplier: 1.00, ADX: 20.00 -> 20.00, RVOL: 1.00 -> 1.00
+2026-02-05 03:17:14 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=84, tota....00, poc=0.01, vah=0.01, val=0.01
+2026-02-05 03:28:18 - trading_bot.system - WARNING - Insufficient data for volatility calculation: need 720 candles, have 200. Using default percentile of 50.0
+2026-02-05 03:28:18 - trading_bot.system - INFO - Threshold adjustment: Volatility percentile: 50.0 (moderate), Multiplier: 1.00, ADX: 20.00 -> 20.00, RVOL: 1.00 -> 1.00
+2026-02-05 03:32:23 - trading_bot.system - INFO - AdaptiveThresholdManager initialized with base thresholds: ADX=20.0, RVOL=1.0
+2026-02-05 03:32:23 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-05 03:32:24 - trading_bot.system - WARNING - Insufficient data for volatility calculation: need 720 candles, have 192. Using default percentile of 50.0
+2026-02-05 03:32:24 - trading_bot.system - INFO - Threshold adjustment: Volatility percentile: 50.0 (moderate), Multiplier: 1.00, ADX: 20.00 -> 20.00, RVOL: 1.00 -> 1.00
+2026-02-05 03:32:24 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=163, tota....72, poc=86.93, vah=88.68, val=83.42
+2026-02-05 03:32:24 - trading_bot.system - INFO - AdaptiveThresholdManager initialized with base thresholds: ADX=20.0, RVOL=1.0
+2026-02-05 03:32:24 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-05 03:32:25 - trading_bot.system - WARNING - Insufficient data for volatility calculation: need 720 candles, have 192. Using default percentile of 50.0
+2026-02-05 03:32:25 - trading_bot.system - INFO - Threshold adjustment: Volatility percentile: 50.0 (moderate), Multiplier: 1.00, ADX: 20.00 -> 20.00, RVOL: 1.00 -> 1.00
+2026-02-05 03:32:25 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=91, tota....84, poc=4923.10, vah=5054.81, val=4880.76
+2026-02-05 03:32:25 - trading_bot.system - INFO - AdaptiveThresholdManager initialized with base thresholds: ADX=20.0, RVOL=1.0
+2026-02-05 03:32:25 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-05 03:32:25 - trading_bot.system - WARNING - Insufficient data for volatility calculation: need 720 candles, have 192. Using default percentile of 50.0
+2026-02-05 03:32:25 - trading_bot.system - INFO - Threshold adjustment: Volatility percentile: 50.0 (moderate), Multiplier: 1.00, ADX: 20.00 -> 20.00, RVOL: 1.00 -> 1.00
+2026-02-05 03:32:25 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=87, tota....10, poc=1.60, vah=1.62, val=1.55
+2026-02-05 03:32:25 - trading_bot.system - INFO - AdaptiveThresholdManager initialized with base thresholds: ADX=20.0, RVOL=1.0
+2026-02-05 03:32:25 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-05 03:32:26 - trading_bot.system - WARNING - Insufficient data for volatility calculation: need 720 candles, have 192. Using default percentile of 50.0
+2026-02-05 03:32:26 - trading_bot.system - INFO - Threshold adjustment: Volatility percentile: 50.0 (moderate), Multiplier: 1.00, ADX: 20.00 -> 20.00, RVOL: 1.00 -> 1.00
+2026-02-05 03:32:26 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=103, tota....02, poc=0.00, vah=0.00, val=0.00
+2026-02-05 03:32:26 - trading_bot.system - INFO - AdaptiveThresholdManager initialized with base thresholds: ADX=20.0, RVOL=1.0
+2026-02-05 03:32:26 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-05 03:32:26 - trading_bot.system - WARNING - Insufficient data for volatility calculation: need 720 candles, have 192. Using default percentile of 50.0
+2026-02-05 03:32:26 - trading_bot.system - INFO - Threshold adjustment: Volatility percentile: 50.0 (moderate), Multiplier: 1.00, ADX: 20.00 -> 20.00, RVOL: 1.00 -> 1.00
+2026-02-05 03:32:26 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=84, tota....00, poc=0.01, vah=0.01, val=0.01
+2026-02-05 03:45:20 - trading_bot.system - INFO - AdaptiveThresholdManager initialized with base thresholds: ADX=20.0, RVOL=1.0
+2026-02-05 03:45:20 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-05 03:45:21 - trading_bot.system - WARNING - Insufficient data for volatility calculation: need 720 candles, have 192. Using default percentile of 50.0
+2026-02-05 03:45:21 - trading_bot.system - INFO - Threshold adjustment: Volatility percentile: 50.0 (moderate), Multiplier: 1.00, ADX: 20.00 -> 20.00, RVOL: 1.00 -> 1.00
+2026-02-05 03:45:21 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=163, tota....83, poc=86.94, vah=88.69, val=83.44
+2026-02-05 03:45:21 - trading_bot.system - INFO - AdaptiveThresholdManager initialized with base thresholds: ADX=20.0, RVOL=1.0
+2026-02-05 03:45:21 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-05 03:45:22 - trading_bot.system - WARNING - Insufficient data for volatility calculation: need 720 candles, have 192. Using default percentile of 50.0
+2026-02-05 03:45:22 - trading_bot.system - INFO - Threshold adjustment: Volatility percentile: 50.0 (moderate), Multiplier: 1.00, ADX: 20.00 -> 20.00, RVOL: 1.00 -> 1.00
+2026-02-05 03:45:22 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=91, tota....42, poc=4923.10, vah=5054.81, val=4880.76
+2026-02-05 03:45:22 - trading_bot.system - INFO - AdaptiveThresholdManager initialized with base thresholds: ADX=20.0, RVOL=1.0
+2026-02-05 03:45:22 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-05 03:45:22 - trading_bot.system - WARNING - Insufficient data for volatility calculation: need 720 candles, have 192. Using default percentile of 50.0
+2026-02-05 03:45:22 - trading_bot.system - INFO - Threshold adjustment: Volatility percentile: 50.0 (moderate), Multiplier: 1.00, ADX: 20.00 -> 20.00, RVOL: 1.00 -> 1.00
+2026-02-05 03:45:22 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=94, tota....80, poc=1.60, vah=1.62, val=1.55
+2026-02-05 03:45:22 - trading_bot.system - INFO - AdaptiveThresholdManager initialized with base thresholds: ADX=20.0, RVOL=1.0
+2026-02-05 03:45:22 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-05 03:45:23 - trading_bot.system - WARNING - Insufficient data for volatility calculation: need 720 candles, have 192. Using default percentile of 50.0
+2026-02-05 03:45:23 - trading_bot.system - INFO - Threshold adjustment: Volatility percentile: 50.0 (moderate), Multiplier: 1.00, ADX: 20.00 -> 20.00, RVOL: 1.00 -> 1.00
+2026-02-05 03:45:23 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=103, tota....02, poc=0.00, vah=0.00, val=0.00
+2026-02-05 03:45:23 - trading_bot.system - INFO - AdaptiveThresholdManager initialized with base thresholds: ADX=20.0, RVOL=1.0
+2026-02-05 03:45:23 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-05 03:45:23 - trading_bot.system - WARNING - Insufficient data for volatility calculation: need 720 candles, have 192. Using default percentile of 50.0
+2026-02-05 03:45:23 - trading_bot.system - INFO - Threshold adjustment: Volatility percentile: 50.0 (moderate), Multiplier: 1.00, ADX: 20.00 -> 20.00, RVOL: 1.00 -> 1.00
+2026-02-05 03:45:23 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=84, tota....00, poc=0.01, vah=0.01, val=0.01
+2026-02-05 04:28:18 - trading_bot.system - WARNING - Insufficient data for volatility calculation: need 720 candles, have 200. Using default percentile of 50.0
+2026-02-05 04:28:18 - trading_bot.system - INFO - Threshold adjustment: Volatility percentile: 50.0 (moderate), Multiplier: 1.00, ADX: 20.00 -> 20.00, RVOL: 1.00 -> 1.00
+2026-02-05 04:28:26 - trading_bot.system - INFO - AdaptiveThresholdManager initialized with base thresholds: ADX=20.0, RVOL=1.0
+2026-02-05 04:28:26 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-05 04:28:27 - trading_bot.system - WARNING - Insufficient data for volatility calculation: need 720 candles, have 192. Using default percentile of 50.0
+2026-02-05 04:28:27 - trading_bot.system - INFO - Threshold adjustment: Volatility percentile: 50.0 (moderate), Multiplier: 1.00, ADX: 20.00 -> 20.00, RVOL: 1.00 -> 1.00
+2026-02-05 04:28:27 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=162, tota....53, poc=86.94, vah=88.69, val=83.43
+2026-02-05 04:28:27 - trading_bot.system - INFO - AdaptiveThresholdManager initialized with base thresholds: ADX=20.0, RVOL=1.0
+2026-02-05 04:28:27 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-05 04:28:27 - trading_bot.system - WARNING - Insufficient data for volatility calculation: need 720 candles, have 192. Using default percentile of 50.0
+2026-02-05 04:28:27 - trading_bot.system - INFO - Threshold adjustment: Volatility percentile: 50.0 (moderate), Multiplier: 1.00, ADX: 20.00 -> 20.00, RVOL: 1.00 -> 1.00
+2026-02-05 04:28:27 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=90, tota....09, poc=4922.61, vah=5049.98, val=4880.16
+2026-02-05 04:28:27 - trading_bot.system - INFO - AdaptiveThresholdManager initialized with base thresholds: ADX=20.0, RVOL=1.0
+2026-02-05 04:28:27 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-05 04:28:28 - trading_bot.system - WARNING - Insufficient data for volatility calculation: need 720 candles, have 192. Using default percentile of 50.0
+2026-02-05 04:28:28 - trading_bot.system - INFO - Threshold adjustment: Volatility percentile: 50.0 (moderate), Multiplier: 1.00, ADX: 20.00 -> 20.00, RVOL: 1.00 -> 1.00
+2026-02-05 04:28:28 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=94, tota....30, poc=1.60, vah=1.62, val=1.55
+2026-02-05 04:28:28 - trading_bot.system - INFO - AdaptiveThresholdManager initialized with base thresholds: ADX=20.0, RVOL=1.0
+2026-02-05 04:28:28 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-05 04:28:28 - trading_bot.system - WARNING - Insufficient data for volatility calculation: need 720 candles, have 192. Using default percentile of 50.0
+2026-02-05 04:28:28 - trading_bot.system - INFO - Threshold adjustment: Volatility percentile: 50.0 (moderate), Multiplier: 1.00, ADX: 20.00 -> 20.00, RVOL: 1.00 -> 1.00
+2026-02-05 04:28:28 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=103, tota....02, poc=0.00, vah=0.00, val=0.00
+2026-02-05 04:28:28 - trading_bot.system - INFO - AdaptiveThresholdManager initialized with base thresholds: ADX=20.0, RVOL=1.0
+2026-02-05 04:28:28 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-05 04:28:28 - trading_bot.system - WARNING - Insufficient data for volatility calculation: need 720 candles, have 192. Using default percentile of 50.0
+2026-02-05 04:28:28 - trading_bot.system - INFO - Threshold adjustment: Volatility percentile: 50.0 (moderate), Multiplier: 1.00, ADX: 20.00 -> 20.00, RVOL: 1.00 -> 1.00
+2026-02-05 04:28:28 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=84, tota....00, poc=0.01, vah=0.01, val=0.01
+2026-02-05 04:29:24 - trading_bot.system - INFO - AdaptiveThresholdManager initialized with base thresholds: ADX=20.0, RVOL=1.0
+2026-02-05 04:29:24 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-05 04:29:25 - trading_bot.system - WARNING - Insufficient data for volatility calculation: need 720 candles, have 500. Using default percentile of 50.0
+2026-02-05 04:29:25 - trading_bot.system - INFO - Threshold adjustment: Volatility percentile: 50.0 (moderate), Multiplier: 1.00, ADX: 20.00 -> 20.00, RVOL: 1.00 -> 1.00
+2026-02-05 04:29:25 - trading_bot.system - INFO - Volume profile calculated: num_candles=500, num_bins=676, tota....36, poc=85.36, vah=99.76, val=72.65
+2026-02-05 04:29:41 - trading_bot.system - INFO - AdaptiveThresholdManager initialized with base thresholds: ADX=20.0, RVOL=1.0
+2026-02-05 04:29:41 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-05 04:29:42 - trading_bot.system - WARNING - Insufficient data for volatility calculation: need 720 candles, have 192. Using default percentile of 50.0
+2026-02-05 04:29:42 - trading_bot.system - INFO - Threshold adjustment: Volatility percentile: 50.0 (moderate), Multiplier: 1.00, ADX: 20.00 -> 20.00, RVOL: 1.00 -> 1.00
+2026-02-05 04:29:42 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=162, tota....50, poc=86.94, vah=88.69, val=83.43
+2026-02-05 05:04:15 - trading_bot.system - INFO - AdaptiveThresholdManager initialized with base thresholds: ADX=20.0, RVOL=1.0
+2026-02-05 05:04:15 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-05 05:04:16 - trading_bot.system - WARNING - Insufficient data for volatility calculation: need 720 candles, have 192. Using default percentile of 50.0
+2026-02-05 05:04:16 - trading_bot.system - INFO - Threshold adjustment: Volatility percentile: 50.0 (moderate), Multiplier: 1.00, ADX: 20.00 -> 20.00, RVOL: 1.00 -> 1.00
+2026-02-05 05:04:16 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=135, tota....18, poc=86.88, vah=88.84, val=83.69
+2026-02-05 05:04:41 - trading_bot.system - INFO - AdaptiveThresholdManager initialized with base thresholds: ADX=20.0, RVOL=1.0
+2026-02-05 05:04:41 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-05 05:04:42 - trading_bot.system - WARNING - Insufficient data for volatility calculation: need 720 candles, have 192. Using default percentile of 50.0
+2026-02-05 05:04:42 - trading_bot.system - INFO - Threshold adjustment: Volatility percentile: 50.0 (moderate), Multiplier: 1.00, ADX: 20.00 -> 20.00, RVOL: 1.00 -> 1.00
+2026-02-05 05:04:42 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=135, tota....42, poc=86.88, vah=88.84, val=83.69
+2026-02-05 05:04:42 - trading_bot.system - INFO - AdaptiveThresholdManager initialized with base thresholds: ADX=20.0, RVOL=1.0
+2026-02-05 05:04:42 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-05 05:04:42 - trading_bot.system - WARNING - Insufficient data for volatility calculation: need 720 candles, have 192. Using default percentile of 50.0
+2026-02-05 05:04:42 - trading_bot.system - INFO - Threshold adjustment: Volatility percentile: 50.0 (moderate), Multiplier: 1.00, ADX: 20.00 -> 20.00, RVOL: 1.00 -> 1.00
+2026-02-05 05:04:42 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=76, tota....08, poc=4925.82, vah=5049.58, val=4882.99
+2026-02-05 05:04:42 - trading_bot.system - INFO - AdaptiveThresholdManager initialized with base thresholds: ADX=20.0, RVOL=1.0
+2026-02-05 05:04:42 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-05 05:04:43 - trading_bot.system - WARNING - Insufficient data for volatility calculation: need 720 candles, have 192. Using default percentile of 50.0
+2026-02-05 05:04:43 - trading_bot.system - INFO - Threshold adjustment: Volatility percentile: 50.0 (moderate), Multiplier: 1.00, ADX: 20.00 -> 20.00, RVOL: 1.00 -> 1.00
+2026-02-05 05:04:43 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=94, tota....30, poc=1.60, vah=1.62, val=1.55
+2026-02-05 05:04:43 - trading_bot.system - INFO - AdaptiveThresholdManager initialized with base thresholds: ADX=20.0, RVOL=1.0
+2026-02-05 05:04:43 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-05 05:04:43 - trading_bot.system - WARNING - Insufficient data for volatility calculation: need 720 candles, have 192. Using default percentile of 50.0
+2026-02-05 05:04:43 - trading_bot.system - INFO - Threshold adjustment: Volatility percentile: 50.0 (moderate), Multiplier: 1.00, ADX: 20.00 -> 20.00, RVOL: 1.00 -> 1.00
+2026-02-05 05:04:43 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=103, tota....02, poc=0.00, vah=0.00, val=0.00
+2026-02-05 05:04:43 - trading_bot.system - INFO - AdaptiveThresholdManager initialized with base thresholds: ADX=20.0, RVOL=1.0
+2026-02-05 05:04:43 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-05 05:04:44 - trading_bot.system - WARNING - Insufficient data for volatility calculation: need 720 candles, have 192. Using default percentile of 50.0
+2026-02-05 05:04:44 - trading_bot.system - INFO - Threshold adjustment: Volatility percentile: 50.0 (moderate), Multiplier: 1.00, ADX: 20.00 -> 20.00, RVOL: 1.00 -> 1.00
+2026-02-05 05:04:44 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=84, tota....00, poc=0.01, vah=0.01, val=0.01
+2026-02-05 05:05:21 - trading_bot.system - INFO - Initiating graceful shutdown
+2026-02-05 05:05:21 - trading_bot.system - INFO - Shutdown complete
+2026-02-05 05:07:31 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-05 05:07:31 - trading_bot.system - INFO - Starting TradingBot in PAPER mode
+2026-02-05 05:07:41 - trading_bot.system - INFO - Volume profile calculated: num_candles=200, num_bins=215, tota....30, poc=82.04, vah=84.52, val=77.67
+2026-02-05 05:08:05 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-05 05:08:06 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=135, tota....80, poc=86.88, vah=88.84, val=83.69
+2026-02-05 05:08:06 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-05 05:08:06 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=76, tota....05, poc=4925.82, vah=5049.58, val=4882.99
+2026-02-05 05:08:06 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-05 05:08:06 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=94, tota....00, poc=1.60, vah=1.62, val=1.54
+2026-02-05 05:08:06 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-05 05:08:07 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=103, tota....02, poc=0.00, vah=0.00, val=0.00
+2026-02-05 05:08:07 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-05 05:08:07 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=84, tota....00, poc=0.01, vah=0.01, val=0.01
+2026-02-05 05:09:16 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-05 05:09:17 - trading_bot.system - INFO - Volume profile calculated: num_candles=500, num_bins=676, tota....77, poc=85.36, vah=99.54, val=72.65
+2026-02-05 05:09:27 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-05 05:09:28 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=135, tota....93, poc=86.88, vah=88.84, val=83.69
+2026-02-05 05:09:28 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-05 05:09:28 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=76, tota....71, poc=4925.82, vah=5049.58, val=4882.99
+2026-02-05 05:09:28 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-05 05:09:29 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=94, tota....40, poc=1.60, vah=1.62, val=1.54
+2026-02-05 05:09:29 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-05 05:09:29 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=103, tota....02, poc=0.00, vah=0.00, val=0.00
+2026-02-05 05:09:29 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-05 05:09:30 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=84, tota....00, poc=0.01, vah=0.01, val=0.01
+2026-02-05 05:11:09 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-05 05:11:10 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=135, tota....63, poc=86.88, vah=88.84, val=83.69
+2026-02-05 05:11:10 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-05 05:11:10 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=76, tota....72, poc=4925.82, vah=5049.58, val=4882.99
+2026-02-05 05:11:10 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-05 05:11:11 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=94, tota....20, poc=1.60, vah=1.62, val=1.54
+2026-02-05 05:11:11 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-05 05:11:11 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=103, tota....02, poc=0.00, vah=0.00, val=0.00
+2026-02-05 05:11:11 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-05 05:11:11 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=84, tota....00, poc=0.01, vah=0.01, val=0.01
+2026-02-05 05:11:31 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-05 05:11:32 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=135, tota....62, poc=86.88, vah=88.84, val=83.69
+2026-02-05 05:13:01 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-05 05:13:02 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=135, tota....82, poc=86.88, vah=88.84, val=83.69
+2026-02-05 05:13:02 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-05 05:13:02 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=76, tota....45, poc=4925.82, vah=5049.58, val=4882.99
+2026-02-05 05:13:02 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-05 05:13:02 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=94, tota....30, poc=1.60, vah=1.62, val=1.54
+2026-02-05 05:13:03 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-05 05:13:03 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=103, tota....02, poc=0.00, vah=0.00, val=0.00
+2026-02-05 05:13:03 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-05 05:13:03 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=84, tota....00, poc=0.01, vah=0.01, val=0.01
+2026-02-05 05:13:44 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-05 05:13:45 - trading_bot.system - INFO - Volume profile calculated: num_candles=500, num_bins=676, tota....77, poc=85.36, vah=99.54, val=72.65
+2026-02-05 05:15:56 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-05 05:15:57 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=135, tota....34, poc=86.88, vah=88.84, val=83.70
+2026-02-05 05:18:02 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-05 05:18:03 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=135, tota....56, poc=86.88, vah=88.84, val=83.70
+2026-02-05 05:18:03 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-05 05:18:03 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=73, tota....71, poc=4926.21, vah=5049.69, val=4883.47
+2026-02-05 05:18:03 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-05 05:18:04 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=94, tota....40, poc=1.60, vah=1.62, val=1.54
+2026-02-05 05:18:04 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-05 05:18:04 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=103, tota....02, poc=0.00, vah=0.00, val=0.00
+2026-02-05 05:18:04 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-05 05:18:04 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=84, tota....00, poc=0.01, vah=0.01, val=0.01
+2026-02-05 05:18:22 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-05 05:18:23 - trading_bot.system - INFO - Volume profile calculated: num_candles=500, num_bins=676, tota....32, poc=85.36, vah=99.46, val=72.65
+2026-02-05 05:23:48 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-05 05:23:49 - trading_bot.system - INFO - Volume profile calculated: num_candles=500, num_bins=676, tota....32, poc=85.36, vah=99.46, val=72.65
+2026-02-05 05:23:55 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-05 05:23:56 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=135, tota....72, poc=86.88, vah=88.84, val=83.70
+2026-02-05 05:23:56 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-05 05:23:56 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=73, tota....53, poc=4926.21, vah=5049.69, val=4883.47
+2026-02-05 05:23:56 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-05 05:23:57 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=94, tota....20, poc=1.60, vah=1.62, val=1.54
+2026-02-05 05:23:57 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-05 05:23:57 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=103, tota....02, poc=0.00, vah=0.00, val=0.00
+2026-02-05 05:23:57 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-05 05:23:58 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=84, tota....00, poc=0.01, vah=0.01, val=0.01
+2026-02-05 05:25:47 - trading_bot.system - INFO - Initiating graceful shutdown
+2026-02-05 05:25:47 - trading_bot.system - INFO - Shutdown complete
+2026-02-05 05:26:07 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-05 05:26:07 - trading_bot.system - INFO - Starting TradingBot in PAPER mode
+2026-02-05 05:26:12 - trading_bot.system - INFO - Volume profile calculated: num_candles=200, num_bins=215, tota....15, poc=82.04, vah=84.52, val=77.67
+2026-02-05 05:26:29 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-05 05:26:30 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=135, tota....36, poc=86.88, vah=88.84, val=83.70
+2026-02-05 05:31:16 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-05 05:31:16 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=135, tota....15, poc=86.88, vah=88.84, val=83.70
+2026-02-05 05:31:45 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-05 05:31:46 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=135, tota....75, poc=86.88, vah=88.84, val=83.70
+2026-02-05 05:31:55 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-05 05:31:56 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=135, tota....30, poc=86.88, vah=88.84, val=83.70
+2026-02-05 05:32:06 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-05 05:32:09 - trading_bot.system - INFO - Volume profile calculated: num_candles=500, num_bins=676, tota....23, poc=85.36, vah=99.39, val=72.65
+2026-02-05 05:32:20 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-05 05:32:21 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=135, tota....12, poc=86.88, vah=88.84, val=83.70
+2026-02-05 06:30:58 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-05 06:30:59 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=135, tota....08, poc=86.88, vah=88.92, val=83.86
+2026-02-05 06:31:48 - trading_bot.system - INFO - Initiating graceful shutdown
+2026-02-05 06:31:48 - trading_bot.system - INFO - Shutdown complete
+2026-02-05 06:32:09 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-05 06:32:09 - trading_bot.system - INFO - Starting TradingBot in PAPER mode
+2026-02-05 06:32:17 - trading_bot.system - INFO - Volume profile calculated: num_candles=200, num_bins=215, tota....44, poc=83.43, vah=84.52, val=77.75
+2026-02-05 06:33:24 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-05 06:33:30 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=135, tota....31, poc=86.88, vah=88.92, val=83.86
+2026-02-05 06:33:50 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-05 06:33:51 - trading_bot.system - INFO - Volume profile calculated: num_candles=500, num_bins=676, tota....75, poc=85.36, vah=99.17, val=72.65
+2026-02-05 06:34:03 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-05 06:34:04 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=135, tota....00, poc=86.88, vah=88.92, val=83.78
+2026-02-05 06:54:25 - trading_bot.system - INFO - Initiating graceful shutdown
+2026-02-05 06:54:25 - trading_bot.system - INFO - Performance metrics saved to binance_results.json
+2026-02-05 06:54:25 - trading_bot.system - INFO - Shutdown complete
+2026-02-05 06:56:09 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-05 06:56:09 - trading_bot.system - INFO - Starting TradingBot in BACKTEST mode
+2026-02-05 06:56:11 - trading_bot.system - INFO - Volume profile calculated: num_candles=117, num_bins=128, tota....88, poc=78.62, vah=79.87, val=76.49
+2026-02-05 06:56:31 - trading_bot.system - INFO - Performance metrics saved to binance_results.json
+2026-02-05 06:56:31 - trading_bot.system - INFO - Initiating graceful shutdown
+2026-02-05 06:56:31 - trading_bot.system - INFO - Shutdown complete
+2026-02-05 07:00:13 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-05 07:00:13 - trading_bot.system - INFO - Starting TradingBot in BACKTEST mode
+2026-02-05 07:00:15 - trading_bot.system - INFO - Volume profile calculated: num_candles=117, num_bins=128, tota....88, poc=78.62, vah=79.87, val=76.49
+2026-02-05 07:00:36 - trading_bot.system - INFO - Performance metrics saved to binance_results.json
+2026-02-05 07:00:36 - trading_bot.system - INFO - Initiating graceful shutdown
+2026-02-05 07:00:36 - trading_bot.system - INFO - Shutdown complete
+2026-02-05 07:07:51 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-05 07:07:51 - trading_bot.system - INFO - Starting TradingBot in BACKTEST mode
+2026-02-05 07:07:55 - trading_bot.system - INFO - Volume profile calculated: num_candles=117, num_bins=128, tota....88, poc=78.62, vah=79.87, val=76.49
+2026-02-05 07:08:16 - trading_bot.system - INFO - Performance metrics saved to binance_results.json
+2026-02-05 07:08:16 - trading_bot.system - INFO - Initiating graceful shutdown
+2026-02-05 07:08:16 - trading_bot.system - INFO - Shutdown complete
+2026-02-05 07:11:00 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-05 07:11:00 - trading_bot.system - INFO - Starting TradingBot in BACKTEST mode
+2026-02-05 07:11:01 - trading_bot.system - INFO - Volume profile calculated: num_candles=117, num_bins=128, tota....88, poc=78.62, vah=79.87, val=76.49
+2026-02-05 07:11:22 - trading_bot.system - INFO - Performance metrics saved to binance_results.json
+2026-02-05 07:11:22 - trading_bot.system - INFO - Initiating graceful shutdown
+2026-02-05 07:11:22 - trading_bot.system - INFO - Shutdown complete
+2026-02-05 07:12:45 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-05 07:12:45 - trading_bot.system - INFO - Starting TradingBot in BACKTEST mode
+2026-02-05 07:12:47 - trading_bot.system - INFO - Volume profile calculated: num_candles=117, num_bins=128, tota....88, poc=78.62, vah=79.87, val=76.49
+2026-02-05 07:13:08 - trading_bot.system - INFO - Performance metrics saved to binance_results.json
+2026-02-05 07:13:08 - trading_bot.system - INFO - Initiating graceful shutdown
+2026-02-05 07:13:08 - trading_bot.system - INFO - Shutdown complete
+2026-02-05 07:16:08 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-05 07:16:08 - trading_bot.system - INFO - Starting TradingBot in BACKTEST mode
+2026-02-05 07:16:09 - trading_bot.system - INFO - Volume profile calculated: num_candles=117, num_bins=128, tota....88, poc=78.62, vah=79.87, val=76.49
+2026-02-05 07:16:30 - trading_bot.system - INFO - Performance metrics saved to binance_results.json
+2026-02-05 07:16:30 - trading_bot.system - INFO - Initiating graceful shutdown
+2026-02-05 07:16:30 - trading_bot.system - INFO - Shutdown complete
+2026-02-05 07:29:18 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-05 07:29:18 - trading_bot.system - INFO - Starting TradingBot in PAPER mode
+2026-02-05 07:29:23 - trading_bot.system - INFO - Volume profile calculated: num_candles=200, num_bins=215, tota....69, poc=83.43, vah=85.25, val=78.33
+2026-02-05 07:53:07 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-05 07:53:08 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=141, tota....15, poc=86.91, vah=89.18, val=84.06
+2026-02-05 07:53:26 - trading_bot.system - INFO - Initiating graceful shutdown
+2026-02-05 07:53:26 - trading_bot.system - INFO - Shutdown complete
+2026-02-05 07:53:43 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-05 07:53:43 - trading_bot.system - INFO - Starting TradingBot in LIVE mode
+2026-02-05 07:53:48 - trading_bot.system - INFO - Volume profile calculated: num_candles=200, num_bins=215, tota....53, poc=83.43, vah=85.25, val=78.33
+2026-02-05 07:58:51 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-05 07:58:52 - trading_bot.system - INFO - Volume profile calculated: num_candles=500, num_bins=259, tota....30, poc=1.59, vah=1.74, val=1.53
+2026-02-05 07:59:09 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-05 07:59:10 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=141, tota....65, poc=86.91, vah=89.18, val=84.06
+2026-02-05 07:59:50 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-05 07:59:51 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=141, tota....28, poc=86.91, vah=89.26, val=84.06
+2026-02-05 08:00:51 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-05 08:00:52 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=141, tota....78, poc=86.91, vah=88.94, val=83.82
+2026-02-05 08:11:49 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-05 08:11:51 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=141, tota....71, poc=86.91, vah=88.94, val=83.74
+2026-02-05 08:14:48 - trading_bot.system - INFO - Initiating graceful shutdown
+2026-02-05 08:14:48 - trading_bot.system - INFO - Shutdown complete
+2026-02-05 08:15:08 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-05 08:15:08 - trading_bot.system - INFO - Starting TradingBot in LIVE mode
+2026-02-05 08:15:13 - trading_bot.system - INFO - Volume profile calculated: num_candles=200, num_bins=215, tota....63, poc=83.43, vah=85.25, val=78.25
+2026-02-05 08:20:47 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-05 08:20:48 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=205, tota....89, poc=86.90, vah=88.97, val=83.60
+2026-02-05 08:22:08 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-05 08:22:10 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=221, tota....88, poc=86.89, vah=89.01, val=83.63
+2026-02-05 08:23:22 - trading_bot.system - INFO - Initiating graceful shutdown
+2026-02-05 08:23:22 - trading_bot.system - INFO - Shutdown complete
+2026-02-05 08:23:50 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-05 08:23:50 - trading_bot.system - INFO - Starting TradingBot in LIVE mode
+2026-02-05 08:23:56 - trading_bot.system - INFO - Volume profile calculated: num_candles=200, num_bins=215, tota....63, poc=83.43, vah=85.25, val=78.25
+2026-02-05 08:25:12 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-05 08:25:14 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=225, tota....13, poc=86.92, vah=89.11, val=83.60
+2026-02-05 08:29:30 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-05 08:29:30 - trading_bot.system - INFO - Starting TradingBot in LIVE mode
+2026-02-05 08:29:37 - trading_bot.system - INFO - Volume profile calculated: num_candles=200, num_bins=215, tota....63, poc=83.43, vah=85.25, val=78.25
+2026-02-05 08:30:13 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-05 08:30:14 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=243, tota....85, poc=86.92, vah=89.15, val=83.58
+2026-02-05 08:31:25 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-05 08:31:26 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=248, tota....96, poc=86.93, vah=89.16, val=83.59
+2026-02-05 08:35:28 - trading_bot.system - INFO - Initiating graceful shutdown
+2026-02-05 08:35:28 - trading_bot.system - INFO - Shutdown complete
+2026-02-05 08:35:43 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-05 08:35:43 - trading_bot.system - INFO - Starting TradingBot in LIVE mode
+2026-02-05 08:35:50 - trading_bot.system - INFO - Volume profile calculated: num_candles=200, num_bins=215, tota....77, poc=83.43, vah=85.25, val=78.18
+2026-02-05 08:36:37 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-05 08:36:38 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=248, tota....02, poc=86.93, vah=89.23, val=83.59
+2026-02-05 08:37:37 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-05 08:37:39 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=248, tota....71, poc=86.93, vah=89.23, val=83.59
+2026-02-05 08:37:46 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-05 08:37:47 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=248, tota....12, poc=86.93, vah=89.23, val=83.59
+2026-02-05 08:42:44 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-05 08:43:04 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-05 08:43:24 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-05 08:43:25 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=248, tota....19, poc=86.93, vah=89.31, val=83.59
+2026-02-05 08:47:23 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-05 08:47:24 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=248, tota....30, poc=86.93, vah=89.38, val=83.59
+2026-02-05 08:48:47 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-05 08:48:47 - trading_bot.system - INFO - Starting TradingBot in LIVE mode
+2026-02-05 08:48:48 - trading_bot.system - INFO - Initiating graceful shutdown
+2026-02-05 08:49:48 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-05 08:49:48 - trading_bot.system - INFO - Starting TradingBot in LIVE mode
+2026-02-05 08:49:53 - trading_bot.system - INFO - Volume profile calculated: num_candles=200, num_bins=215, tota....26, poc=83.43, vah=85.25, val=78.11
+2026-02-05 08:50:39 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-05 08:50:41 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=248, tota....06, poc=86.93, vah=89.38, val=83.59
+2026-02-05 08:53:05 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-05 08:53:05 - trading_bot.system - INFO - Starting TradingBot in LIVE mode
+2026-02-05 08:53:10 - trading_bot.system - INFO - Volume profile calculated: num_candles=200, num_bins=215, tota....26, poc=83.43, vah=85.25, val=78.11
+2026-02-05 08:54:09 - trading_bot.system - INFO - VolumeProfileAnalyzer initialized: lookback_days=7, upda...400, bin_size=0.001, value_area_pct=0.7
+2026-02-05 08:54:10 - trading_bot.system - INFO - Volume profile calculated: num_candles=192, num_bins=248, tota....70, poc=86.93, vah=89.38, val=83.59
+2026-02-05 08:54:18 - trading_bot.system - INFO - Initiating graceful shutdown
+2026-02-05 08:54:18 - trading_bot.system - INFO - Shutdown complete

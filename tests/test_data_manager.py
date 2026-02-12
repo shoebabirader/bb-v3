@@ -537,6 +537,380 @@ class TestDataManagerUnit:
         assert data_manager.candles_15m[0].open == 30100.0
 
 
+class TestMultiTimeframeDataManager:
+    """Unit tests for multi-timeframe data management."""
+    
+    def test_fetch_5m_data(self):
+        """Test fetching 5m historical data."""
+        config = Config()
+        config.symbol = "BTCUSDT"
+        mock_client = Mock()
+        data_manager = DataManager(config, client=mock_client)
+        
+        # Mock API response
+        mock_klines = [
+            [1609459200000, '30000', '30100', '29900', '30050', '100'],
+            [1609459500000, '30050', '30150', '29950', '30100', '110'],
+        ]
+        mock_client.get_historical_klines.return_value = mock_klines
+        
+        # Fetch data
+        candles = data_manager.fetch_historical_data(days=1, timeframe="5m", use_cache=False)
+        
+        # Verify
+        assert len(candles) == 2
+        assert candles[0].timestamp == 1609459200000
+        assert len(data_manager.candles_5m) == 2
+    
+    def test_fetch_4h_data(self):
+        """Test fetching 4h historical data."""
+        config = Config()
+        config.symbol = "BTCUSDT"
+        mock_client = Mock()
+        data_manager = DataManager(config, client=mock_client)
+        
+        # Mock API response
+        mock_klines = [
+            [1609459200000, '30000', '30100', '29900', '30050', '100'],
+            [1609473600000, '30050', '30150', '29950', '30100', '110'],
+        ]
+        mock_client.get_historical_klines.return_value = mock_klines
+        
+        # Fetch data
+        candles = data_manager.fetch_historical_data(days=1, timeframe="4h", use_cache=False)
+        
+        # Verify
+        assert len(candles) == 2
+        assert candles[0].timestamp == 1609459200000
+        assert len(data_manager.candles_4h) == 2
+    
+    def test_get_latest_candles_5m(self):
+        """Test retrieving latest candles from 5m buffer."""
+        config = Config()
+        data_manager = DataManager(config, client=Mock())
+        
+        # Add candles to buffer
+        base_timestamp = 1609459200000
+        timeframe_ms = 5 * 60 * 1000
+        
+        for i in range(50):
+            candle = Candle(
+                timestamp=base_timestamp + i * timeframe_ms,
+                open=30000.0 + i,
+                high=30100.0 + i,
+                low=29900.0 + i,
+                close=30050.0 + i,
+                volume=100.0 + i
+            )
+            data_manager.candles_5m.append(candle)
+        
+        # Get latest 10 candles
+        latest = data_manager.get_latest_candles("5m", 10)
+        
+        assert len(latest) == 10
+        assert latest[0].open == 30040.0
+        assert latest[-1].open == 30049.0
+    
+    def test_get_latest_candles_4h(self):
+        """Test retrieving latest candles from 4h buffer."""
+        config = Config()
+        data_manager = DataManager(config, client=Mock())
+        
+        # Add candles to buffer
+        base_timestamp = 1609459200000
+        timeframe_ms = 4 * 60 * 60 * 1000
+        
+        for i in range(30):
+            candle = Candle(
+                timestamp=base_timestamp + i * timeframe_ms,
+                open=30000.0 + i,
+                high=30100.0 + i,
+                low=29900.0 + i,
+                close=30050.0 + i,
+                volume=100.0 + i
+            )
+            data_manager.candles_4h.append(candle)
+        
+        # Get latest 5 candles
+        latest = data_manager.get_latest_candles("4h", 5)
+        
+        assert len(latest) == 5
+        assert latest[0].open == 30025.0
+        assert latest[-1].open == 30029.0
+    
+    def test_cache_functionality(self):
+        """Test that caching works correctly."""
+        config = Config()
+        config.symbol = "BTCUSDT"
+        mock_client = Mock()
+        data_manager = DataManager(config, client=mock_client)
+        
+        # Mock API response
+        mock_klines = [
+            [1609459200000, '30000', '30100', '29900', '30050', '100'],
+        ]
+        mock_client.get_historical_klines.return_value = mock_klines
+        
+        # First fetch - should call API
+        candles1 = data_manager.fetch_historical_data(days=1, timeframe="5m", use_cache=True)
+        assert mock_client.get_historical_klines.call_count == 1
+        
+        # Second fetch with cache - should NOT call API again
+        candles2 = data_manager.fetch_historical_data(days=1, timeframe="5m", use_cache=True)
+        assert mock_client.get_historical_klines.call_count == 1  # Still 1
+        
+        # Verify same data returned
+        assert len(candles1) == len(candles2)
+        assert candles1[0].timestamp == candles2[0].timestamp
+    
+    def test_cache_expiration(self):
+        """Test that cache expires after TTL."""
+        config = Config()
+        config.symbol = "BTCUSDT"
+        mock_client = Mock()
+        data_manager = DataManager(config, client=mock_client)
+        data_manager._cache_ttl_seconds = 1  # 1 second TTL for testing
+        
+        # Mock API response
+        mock_klines = [
+            [1609459200000, '30000', '30100', '29900', '30050', '100'],
+        ]
+        mock_client.get_historical_klines.return_value = mock_klines
+        
+        # First fetch
+        data_manager.fetch_historical_data(days=1, timeframe="5m", use_cache=True)
+        assert mock_client.get_historical_klines.call_count == 1
+        
+        # Wait for cache to expire
+        time.sleep(1.1)
+        
+        # Second fetch - cache expired, should call API again
+        data_manager.fetch_historical_data(days=1, timeframe="5m", use_cache=True)
+        assert mock_client.get_historical_klines.call_count == 2
+    
+    def test_clear_cache(self):
+        """Test clearing cache."""
+        config = Config()
+        config.symbol = "BTCUSDT"
+        mock_client = Mock()
+        data_manager = DataManager(config, client=mock_client)
+        
+        # Mock API response
+        mock_klines = [
+            [1609459200000, '30000', '30100', '29900', '30050', '100'],
+        ]
+        mock_client.get_historical_klines.return_value = mock_klines
+        
+        # Fetch and cache
+        data_manager.fetch_historical_data(days=1, timeframe="5m", use_cache=True)
+        assert data_manager._is_cache_valid("5m")
+        
+        # Clear cache
+        data_manager.clear_cache("5m")
+        assert not data_manager._is_cache_valid("5m")
+        
+        # Next fetch should call API
+        data_manager.fetch_historical_data(days=1, timeframe="5m", use_cache=True)
+        assert mock_client.get_historical_klines.call_count == 2
+    
+    def test_clear_all_caches(self):
+        """Test clearing all caches."""
+        config = Config()
+        config.symbol = "BTCUSDT"
+        mock_client = Mock()
+        data_manager = DataManager(config, client=mock_client)
+        
+        # Mock API response
+        mock_klines = [
+            [1609459200000, '30000', '30100', '29900', '30050', '100'],
+        ]
+        mock_client.get_historical_klines.return_value = mock_klines
+        
+        # Fetch and cache multiple timeframes
+        data_manager.fetch_historical_data(days=1, timeframe="5m", use_cache=True)
+        data_manager.fetch_historical_data(days=1, timeframe="15m", use_cache=True)
+        
+        assert data_manager._is_cache_valid("5m")
+        assert data_manager._is_cache_valid("15m")
+        
+        # Clear all caches
+        data_manager.clear_cache()
+        
+        assert not data_manager._is_cache_valid("5m")
+        assert not data_manager._is_cache_valid("15m")
+    
+    def test_on_candle_update_5m(self):
+        """Test that on_candle_update correctly adds candles to 5m buffer."""
+        config = Config()
+        data_manager = DataManager(config, client=Mock())
+        
+        candle = Candle(
+            timestamp=1609459200000,
+            open=30000.0,
+            high=30100.0,
+            low=29900.0,
+            close=30050.0,
+            volume=100.0
+        )
+        
+        data_manager.on_candle_update(candle, '5m')
+        
+        assert len(data_manager.candles_5m) == 1
+        assert data_manager.candles_5m[0] == candle
+    
+    def test_on_candle_update_4h(self):
+        """Test that on_candle_update correctly adds candles to 4h buffer."""
+        config = Config()
+        data_manager = DataManager(config, client=Mock())
+        
+        candle = Candle(
+            timestamp=1609459200000,
+            open=30000.0,
+            high=30100.0,
+            low=29900.0,
+            close=30050.0,
+            volume=100.0
+        )
+        
+        data_manager.on_candle_update(candle, '4h')
+        
+        assert len(data_manager.candles_4h) == 1
+        assert data_manager.candles_4h[0] == candle
+    
+    def test_get_synchronized_candles(self):
+        """Test synchronizing candles across timeframes."""
+        config = Config()
+        data_manager = DataManager(config, client=Mock())
+        
+        # Add candles to different timeframes
+        base_timestamp = 1609459200000
+        
+        # 5m candles
+        for i in range(10):
+            candle = Candle(
+                timestamp=base_timestamp + i * 5 * 60 * 1000,
+                open=30000.0 + i,
+                high=30100.0 + i,
+                low=29900.0 + i,
+                close=30050.0 + i,
+                volume=100.0 + i
+            )
+            data_manager.candles_5m.append(candle)
+        
+        # 15m candles
+        for i in range(5):
+            candle = Candle(
+                timestamp=base_timestamp + i * 15 * 60 * 1000,
+                open=30000.0 + i * 3,
+                high=30100.0 + i * 3,
+                low=29900.0 + i * 3,
+                close=30050.0 + i * 3,
+                volume=100.0 + i * 3
+            )
+            data_manager.candles_15m.append(candle)
+        
+        # Get synchronized candles at base timestamp
+        synced = data_manager.get_synchronized_candles(base_timestamp, ['5m', '15m'])
+        
+        assert synced['5m'] is not None
+        assert synced['15m'] is not None
+        assert synced['5m'].timestamp == base_timestamp
+        assert synced['15m'].timestamp == base_timestamp
+    
+    def test_is_data_stale_fresh_data(self):
+        """Test staleness detection with fresh data."""
+        config = Config()
+        data_manager = DataManager(config, client=Mock())
+        
+        # Add recent candle
+        current_time_ms = int(time.time() * 1000)
+        candle = Candle(
+            timestamp=current_time_ms - 5 * 60 * 1000,  # 5 minutes ago
+            open=30000.0,
+            high=30100.0,
+            low=29900.0,
+            close=30050.0,
+            volume=100.0
+        )
+        data_manager.candles_5m.append(candle)
+        
+        # Should not be stale (default is 2x timeframe = 10 minutes for 5m)
+        assert not data_manager.is_data_stale('5m')
+    
+    def test_is_data_stale_old_data(self):
+        """Test staleness detection with old data."""
+        config = Config()
+        data_manager = DataManager(config, client=Mock())
+        
+        # Add old candle
+        current_time_ms = int(time.time() * 1000)
+        candle = Candle(
+            timestamp=current_time_ms - 30 * 60 * 1000,  # 30 minutes ago
+            open=30000.0,
+            high=30100.0,
+            low=29900.0,
+            close=30050.0,
+            volume=100.0
+        )
+        data_manager.candles_5m.append(candle)
+        
+        # Should be stale (30 min > 2x5min = 10 min)
+        assert data_manager.is_data_stale('5m')
+    
+    def test_is_data_stale_no_data(self):
+        """Test staleness detection with no data."""
+        config = Config()
+        data_manager = DataManager(config, client=Mock())
+        
+        # No data added
+        assert data_manager.is_data_stale('5m')
+    
+    def test_get_data_status(self):
+        """Test getting status of all timeframe buffers."""
+        config = Config()
+        data_manager = DataManager(config, client=Mock())
+        
+        # Add data to some timeframes
+        current_time_ms = int(time.time() * 1000)
+        
+        candle_5m = Candle(
+            timestamp=current_time_ms - 3 * 60 * 1000,
+            open=30000.0,
+            high=30100.0,
+            low=29900.0,
+            close=30050.0,
+            volume=100.0
+        )
+        data_manager.candles_5m.append(candle_5m)
+        
+        candle_15m = Candle(
+            timestamp=current_time_ms - 10 * 60 * 1000,
+            open=30100.0,
+            high=30200.0,
+            low=30000.0,
+            close=30150.0,
+            volume=200.0
+        )
+        data_manager.candles_15m.append(candle_15m)
+        
+        # Get status
+        status = data_manager.get_data_status()
+        
+        # Verify 5m status
+        assert status['5m']['available'] == True
+        assert status['5m']['count'] == 1
+        assert status['5m']['latest_close'] == 30050.0
+        
+        # Verify 15m status
+        assert status['15m']['available'] == True
+        assert status['15m']['count'] == 1
+        assert status['15m']['latest_close'] == 30150.0
+        
+        # Verify 1h and 4h have no data
+        assert status['1h']['available'] == False
+        assert status['4h']['available'] == False
+
+
 # Feature: binance-futures-bot, Property 2: WebSocket Reconnection Backoff
 @given(
     failure_attempt=st.integers(min_value=1, max_value=5)

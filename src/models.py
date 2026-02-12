@@ -87,11 +87,15 @@ class Signal:
         timestamp: Unix timestamp when signal was generated
         price: Price at which signal was generated
         indicators: Snapshot of indicator values at signal generation
+        confidence: Signal confidence from multi-timeframe analysis (0.0-1.0)
+        symbol: Trading pair symbol (optional, defaults to None for backward compatibility)
     """
     type: str  # "LONG_ENTRY", "SHORT_ENTRY", "EXIT"
     timestamp: int
     price: float
     indicators: Dict[str, float] = field(default_factory=dict)
+    confidence: float = 1.0  # Default to 1.0 for backward compatibility
+    symbol: Optional[str] = None  # Optional symbol for multi-symbol support
 
 
 @dataclass
@@ -170,3 +174,101 @@ class PerformanceMetrics:
     largest_win: float = 0.0
     largest_loss: float = 0.0
     average_trade_duration: int = 0
+
+
+@dataclass
+class TimeframeData:
+    """Data for a single timeframe analysis.
+    
+    Attributes:
+        trend: Trend direction ("BULLISH", "BEARISH", "NEUTRAL")
+        momentum: Momentum value (float)
+        volatility: Volatility measure (ATR)
+        volume_trend: Volume trend ("INCREASING", "DECREASING", "STABLE")
+    """
+    trend: str  # "BULLISH", "BEARISH", "NEUTRAL"
+    momentum: float
+    volatility: float
+    volume_trend: str  # "INCREASING", "DECREASING", "STABLE"
+
+
+@dataclass
+class TimeframeAnalysis:
+    """Complete multi-timeframe analysis result.
+    
+    Attributes:
+        timeframe_5m: Analysis for 5-minute timeframe
+        timeframe_15m: Analysis for 15-minute timeframe
+        timeframe_1h: Analysis for 1-hour timeframe
+        timeframe_4h: Analysis for 4-hour timeframe
+        alignment_score: Number of aligned timeframes (0-4)
+        confidence: Signal confidence (0.0-1.0)
+        overall_direction: Overall trend direction ("BULLISH", "BEARISH", "NEUTRAL")
+    """
+    timeframe_5m: Optional['TimeframeData']
+    timeframe_15m: Optional['TimeframeData']
+    timeframe_1h: Optional['TimeframeData']
+    timeframe_4h: Optional['TimeframeData']
+    alignment_score: int  # 0-4
+    confidence: float  # 0.0-1.0
+    overall_direction: str  # "BULLISH", "BEARISH", "NEUTRAL"
+
+
+@dataclass
+class VolumeProfile:
+    """Volume profile data showing volume distribution at price levels.
+    
+    Attributes:
+        price_levels: List of price levels (bin centers)
+        volumes: List of volumes at each price level
+        poc: Point of Control (price level with highest volume)
+        vah: Value Area High (upper bound of 70% volume area)
+        val: Value Area Low (lower bound of 70% volume area)
+        total_volume: Total volume across all price levels
+        timestamp: Unix timestamp when profile was calculated
+    """
+    price_levels: List[float]
+    volumes: List[float]
+    poc: float  # Point of Control
+    vah: float  # Value Area High
+    val: float  # Value Area Low
+    total_volume: float
+    timestamp: int
+
+
+@dataclass
+class RegimeParameters:
+    """Parameters for trading in a specific market regime.
+    
+    Attributes:
+        regime: Current regime classification
+        stop_multiplier: ATR multiplier for stop-loss
+        threshold_multiplier: Multiplier for indicator thresholds
+        position_size_multiplier: Multiplier for position sizing
+        strategy_type: Strategy to use in this regime
+    """
+    regime: str
+    stop_multiplier: float
+    threshold_multiplier: float
+    position_size_multiplier: float
+    strategy_type: str  # "TREND_FOLLOWING", "MEAN_REVERSION", "NONE"
+
+
+@dataclass
+class PortfolioMetrics:
+    """Portfolio-level performance metrics.
+    
+    Attributes:
+        total_value: Total portfolio value in quote currency
+        total_pnl: Total profit/loss across all symbols
+        per_symbol_pnl: PnL breakdown by symbol
+        correlation_matrix: Correlation coefficients between symbols
+        total_risk: Total portfolio risk as percentage
+        diversification_ratio: Measure of portfolio diversification
+    """
+    total_value: float
+    total_pnl: float
+    per_symbol_pnl: Dict[str, float]
+    correlation_matrix: Dict[tuple, float]
+    total_risk: float
+    diversification_ratio: float

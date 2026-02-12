@@ -285,3 +285,484 @@ def test_api_key_redaction():
     empty_key = ""
     redacted_empty = config.redact_api_key(empty_key)
     assert redacted_empty == "****"
+
+
+# ===== ADVANCED FEATURES CONFIGURATION TESTS =====
+
+# Feature: advanced-trading-enhancements, Property 27: Configuration validation
+@given(
+    enable_adaptive_thresholds=st.booleans(),
+    enable_multi_timeframe=st.booleans(),
+    enable_volume_profile=st.booleans(),
+    enable_ml_prediction=st.booleans(),
+    enable_portfolio_management=st.booleans(),
+    enable_advanced_exits=st.booleans(),
+    enable_regime_detection=st.booleans(),
+    adaptive_threshold_min_adx=st.floats(min_value=10.0, max_value=29.9),
+    adaptive_threshold_max_adx=st.floats(min_value=30.1, max_value=50.0),
+    adaptive_threshold_min_rvol=st.floats(min_value=0.5, max_value=1.4),
+    adaptive_threshold_max_rvol=st.floats(min_value=1.6, max_value=3.0),
+    min_timeframe_alignment=st.integers(min_value=1, max_value=4),
+    volume_profile_lookback_days=st.integers(min_value=3, max_value=30),
+    volume_profile_value_area_pct=st.floats(min_value=0.60, max_value=0.80),
+    ml_min_accuracy=st.floats(min_value=0.50, max_value=0.70),
+    ml_low_confidence_threshold=st.floats(min_value=0.1, max_value=0.4),
+    ml_high_confidence_threshold=st.floats(min_value=0.6, max_value=0.9),
+    portfolio_max_symbols=st.integers(min_value=1, max_value=5),
+    portfolio_correlation_threshold=st.floats(min_value=0.5, max_value=0.9),
+    portfolio_max_total_risk=st.floats(min_value=0.01, max_value=0.20),
+    exit_partial_1_atr_multiplier=st.floats(min_value=1.0, max_value=2.0),
+    exit_partial_2_atr_multiplier=st.floats(min_value=2.5, max_value=4.0),
+    exit_final_atr_multiplier=st.floats(min_value=4.5, max_value=7.0),
+    regime_ranging_adx_threshold=st.floats(min_value=15.0, max_value=24.9),
+    regime_trending_adx_threshold=st.floats(min_value=25.1, max_value=40.0),
+    max_memory_mb=st.integers(min_value=100, max_value=2000),
+    api_rate_limit_per_minute=st.integers(min_value=100, max_value=2000)
+)
+def test_valid_advanced_features_configuration_passes_validation(
+    enable_adaptive_thresholds, enable_multi_timeframe, enable_volume_profile,
+    enable_ml_prediction, enable_portfolio_management, enable_advanced_exits,
+    enable_regime_detection, adaptive_threshold_min_adx, adaptive_threshold_max_adx,
+    adaptive_threshold_min_rvol, adaptive_threshold_max_rvol, min_timeframe_alignment,
+    volume_profile_lookback_days, volume_profile_value_area_pct, ml_min_accuracy,
+    ml_low_confidence_threshold, ml_high_confidence_threshold, portfolio_max_symbols,
+    portfolio_correlation_threshold, portfolio_max_total_risk, exit_partial_1_atr_multiplier,
+    exit_partial_2_atr_multiplier, exit_final_atr_multiplier, regime_ranging_adx_threshold,
+    regime_trending_adx_threshold, max_memory_mb, api_rate_limit_per_minute
+):
+    """For any valid advanced features configuration parameters, validation should pass without errors.
+    
+    Property 27: Configuration validation
+    Validates: Requirements 8.7
+    """
+    config = Config()
+    
+    # Set feature toggles
+    config.enable_adaptive_thresholds = enable_adaptive_thresholds
+    config.enable_multi_timeframe = enable_multi_timeframe
+    config.enable_volume_profile = enable_volume_profile
+    config.enable_ml_prediction = enable_ml_prediction
+    config.enable_portfolio_management = enable_portfolio_management
+    config.enable_advanced_exits = enable_advanced_exits
+    config.enable_regime_detection = enable_regime_detection
+    
+    # Set adaptive threshold parameters
+    config.adaptive_threshold_min_adx = adaptive_threshold_min_adx
+    config.adaptive_threshold_max_adx = adaptive_threshold_max_adx
+    config.adaptive_threshold_min_rvol = adaptive_threshold_min_rvol
+    config.adaptive_threshold_max_rvol = adaptive_threshold_max_rvol
+    
+    # Set multi-timeframe parameters
+    config.min_timeframe_alignment = min_timeframe_alignment
+    config.timeframe_weights = {
+        "5m": 0.1,
+        "15m": 0.2,
+        "1h": 0.3,
+        "4h": 0.4
+    }
+    
+    # Set volume profile parameters
+    config.volume_profile_lookback_days = volume_profile_lookback_days
+    config.volume_profile_value_area_pct = volume_profile_value_area_pct
+    
+    # Set ML parameters
+    config.ml_min_accuracy = ml_min_accuracy
+    config.ml_low_confidence_threshold = ml_low_confidence_threshold
+    config.ml_high_confidence_threshold = ml_high_confidence_threshold
+    
+    # Set portfolio parameters
+    config.portfolio_max_symbols = portfolio_max_symbols
+    config.portfolio_symbols = ["BTCUSDT"]  # Valid single symbol
+    config.portfolio_correlation_threshold = portfolio_correlation_threshold
+    config.portfolio_max_total_risk = portfolio_max_total_risk
+    
+    # Set exit parameters
+    config.exit_partial_1_atr_multiplier = exit_partial_1_atr_multiplier
+    config.exit_partial_2_atr_multiplier = exit_partial_2_atr_multiplier
+    config.exit_final_atr_multiplier = exit_final_atr_multiplier
+    
+    # Set regime parameters
+    config.regime_ranging_adx_threshold = regime_ranging_adx_threshold
+    config.regime_trending_adx_threshold = regime_trending_adx_threshold
+    
+    # Set performance parameters
+    config.max_memory_mb = max_memory_mb
+    config.api_rate_limit_per_minute = api_rate_limit_per_minute
+    
+    # Should not raise any exception
+    config.validate()
+
+
+class TestAdvancedFeaturesConfiguration:
+    """Unit tests for advanced features configuration validation.
+    
+    Validates: Requirements 8.1, 8.6, 8.7
+    """
+    
+    def test_valid_advanced_features_config_accepted(self):
+        """Valid advanced features configuration should be accepted."""
+        config = Config()
+        config.enable_adaptive_thresholds = True
+        config.enable_multi_timeframe = True
+        config.enable_volume_profile = True
+        config.enable_ml_prediction = True
+        config.enable_portfolio_management = True
+        config.enable_advanced_exits = True
+        config.enable_regime_detection = True
+        
+        # Should not raise any exception
+        config.validate()
+    
+    def test_feature_toggles_work_correctly(self):
+        """Feature toggles should enable/disable features independently."""
+        config = Config()
+        
+        # All features disabled by default
+        assert config.enable_adaptive_thresholds == False
+        assert config.enable_multi_timeframe == False
+        assert config.enable_volume_profile == False
+        assert config.enable_ml_prediction == False
+        assert config.enable_portfolio_management == False
+        assert config.enable_advanced_exits == False
+        assert config.enable_regime_detection == False
+        
+        # Enable individual features
+        config.enable_adaptive_thresholds = True
+        assert config.enable_adaptive_thresholds == True
+        assert config.enable_multi_timeframe == False  # Others still disabled
+        
+        config.validate()
+    
+    def test_invalid_adaptive_threshold_min_max_rejected(self):
+        """Adaptive threshold min >= max should be rejected."""
+        config = Config()
+        config.adaptive_threshold_min_adx = 30.0
+        config.adaptive_threshold_max_adx = 20.0
+        
+        with pytest.raises(ValueError) as exc_info:
+            config.validate()
+        
+        assert "adaptive_threshold_min_adx" in str(exc_info.value).lower()
+        assert "adaptive_threshold_max_adx" in str(exc_info.value).lower()
+    
+    def test_invalid_adaptive_threshold_update_interval_rejected(self):
+        """Update interval < 60 seconds should be rejected."""
+        config = Config()
+        config.adaptive_threshold_update_interval = 30
+        
+        with pytest.raises(ValueError) as exc_info:
+            config.validate()
+        
+        assert "adaptive_threshold_update_interval" in str(exc_info.value).lower()
+    
+    def test_invalid_timeframe_weights_rejected(self):
+        """Timeframe weights not summing to 1.0 should be rejected."""
+        config = Config()
+        config.timeframe_weights = {
+            "5m": 0.2,
+            "15m": 0.2,
+            "1h": 0.2,
+            "4h": 0.2  # Sum = 0.8, not 1.0
+        }
+        
+        with pytest.raises(ValueError) as exc_info:
+            config.validate()
+        
+        assert "timeframe_weights" in str(exc_info.value).lower()
+        assert "sum" in str(exc_info.value).lower()
+    
+    def test_missing_timeframe_weight_keys_rejected(self):
+        """Missing required timeframe weight keys should be rejected."""
+        config = Config()
+        config.timeframe_weights = {
+            "5m": 0.5,
+            "15m": 0.5
+            # Missing 1h and 4h
+        }
+        
+        with pytest.raises(ValueError) as exc_info:
+            config.validate()
+        
+        assert "timeframe_weights" in str(exc_info.value).lower()
+    
+    def test_invalid_min_timeframe_alignment_rejected(self):
+        """Min timeframe alignment outside 1-4 range should be rejected."""
+        config = Config()
+        config.min_timeframe_alignment = 5
+        
+        with pytest.raises(ValueError) as exc_info:
+            config.validate()
+        
+        assert "min_timeframe_alignment" in str(exc_info.value).lower()
+    
+    def test_invalid_volume_profile_lookback_rejected(self):
+        """Volume profile lookback outside valid range should be rejected."""
+        config = Config()
+        config.volume_profile_lookback_days = 50
+        
+        with pytest.raises(ValueError) as exc_info:
+            config.validate()
+        
+        assert "volume_profile_lookback_days" in str(exc_info.value).lower()
+    
+    def test_invalid_volume_profile_value_area_rejected(self):
+        """Volume profile value area > 1.0 should be rejected."""
+        config = Config()
+        config.volume_profile_value_area_pct = 1.5
+        
+        with pytest.raises(ValueError) as exc_info:
+            config.validate()
+        
+        assert "volume_profile_value_area_pct" in str(exc_info.value).lower()
+    
+    def test_invalid_ml_confidence_thresholds_rejected(self):
+        """ML low confidence >= high confidence should be rejected."""
+        config = Config()
+        config.ml_low_confidence_threshold = 0.8
+        config.ml_high_confidence_threshold = 0.6
+        
+        with pytest.raises(ValueError) as exc_info:
+            config.validate()
+        
+        assert "ml_low_confidence_threshold" in str(exc_info.value).lower()
+        assert "ml_high_confidence_threshold" in str(exc_info.value).lower()
+    
+    def test_invalid_ml_min_accuracy_rejected(self):
+        """ML min accuracy outside 0-1 range should be rejected."""
+        config = Config()
+        config.ml_min_accuracy = 1.5
+        
+        with pytest.raises(ValueError) as exc_info:
+            config.validate()
+        
+        assert "ml_min_accuracy" in str(exc_info.value).lower()
+    
+    def test_invalid_ml_prediction_horizon_rejected(self):
+        """ML prediction horizon outside valid range should be rejected."""
+        config = Config()
+        config.ml_prediction_horizon_hours = 48
+        
+        with pytest.raises(ValueError) as exc_info:
+            config.validate()
+        
+        assert "ml_prediction_horizon_hours" in str(exc_info.value).lower()
+    
+    def test_empty_portfolio_symbols_rejected(self):
+        """Empty portfolio symbols list should be rejected."""
+        config = Config()
+        config.portfolio_symbols = []
+        
+        with pytest.raises(ValueError) as exc_info:
+            config.validate()
+        
+        assert "portfolio_symbols" in str(exc_info.value).lower()
+    
+    def test_too_many_portfolio_symbols_rejected(self):
+        """Portfolio symbols exceeding max should be rejected."""
+        config = Config()
+        config.portfolio_max_symbols = 3
+        config.portfolio_symbols = ["BTCUSDT", "ETHUSDT", "BNBUSDT", "ADAUSDT"]
+        
+        with pytest.raises(ValueError) as exc_info:
+            config.validate()
+        
+        assert "portfolio_symbols" in str(exc_info.value).lower()
+    
+    def test_invalid_portfolio_correlation_threshold_rejected(self):
+        """Portfolio correlation threshold outside 0-1 range should be rejected."""
+        config = Config()
+        config.portfolio_correlation_threshold = 1.5
+        
+        with pytest.raises(ValueError) as exc_info:
+            config.validate()
+        
+        assert "portfolio_correlation_threshold" in str(exc_info.value).lower()
+    
+    def test_invalid_portfolio_max_total_risk_rejected(self):
+        """Portfolio max total risk > 20% should be rejected."""
+        config = Config()
+        config.portfolio_max_total_risk = 0.3
+        
+        with pytest.raises(ValueError) as exc_info:
+            config.validate()
+        
+        assert "portfolio_max_total_risk" in str(exc_info.value).lower()
+    
+    def test_invalid_exit_levels_order_rejected(self):
+        """Exit levels not in ascending order should be rejected."""
+        config = Config()
+        config.exit_partial_1_atr_multiplier = 3.0
+        config.exit_partial_2_atr_multiplier = 1.5  # Should be > partial_1
+        
+        with pytest.raises(ValueError) as exc_info:
+            config.validate()
+        
+        assert "exit_partial_1_atr_multiplier" in str(exc_info.value).lower()
+        assert "exit_partial_2_atr_multiplier" in str(exc_info.value).lower()
+    
+    def test_invalid_exit_percentage_rejected(self):
+        """Exit percentage outside 0-1 range should be rejected."""
+        config = Config()
+        config.exit_partial_1_percentage = 1.5
+        
+        with pytest.raises(ValueError) as exc_info:
+            config.validate()
+        
+        assert "exit_partial_1_percentage" in str(exc_info.value).lower()
+    
+    def test_invalid_regime_adx_thresholds_rejected(self):
+        """Regime ranging ADX >= trending ADX should be rejected."""
+        config = Config()
+        config.regime_ranging_adx_threshold = 35.0
+        config.regime_trending_adx_threshold = 25.0
+        
+        with pytest.raises(ValueError) as exc_info:
+            config.validate()
+        
+        assert "regime_ranging_adx_threshold" in str(exc_info.value).lower()
+        assert "regime_trending_adx_threshold" in str(exc_info.value).lower()
+    
+    def test_invalid_regime_update_interval_rejected(self):
+        """Regime update interval < 60 seconds should be rejected."""
+        config = Config()
+        config.regime_update_interval = 30
+        
+        with pytest.raises(ValueError) as exc_info:
+            config.validate()
+        
+        assert "regime_update_interval" in str(exc_info.value).lower()
+    
+    def test_invalid_regime_volatile_size_reduction_rejected(self):
+        """Regime volatile size reduction outside 0-1 range should be rejected."""
+        config = Config()
+        config.regime_volatile_size_reduction = 1.5
+        
+        with pytest.raises(ValueError) as exc_info:
+            config.validate()
+        
+        assert "regime_volatile_size_reduction" in str(exc_info.value).lower()
+    
+    def test_invalid_max_memory_rejected(self):
+        """Max memory < 100 MB should be rejected."""
+        config = Config()
+        config.max_memory_mb = 50
+        
+        with pytest.raises(ValueError) as exc_info:
+            config.validate()
+        
+        assert "max_memory_mb" in str(exc_info.value).lower()
+    
+    def test_invalid_ml_prediction_timeout_rejected(self):
+        """ML prediction timeout < 10 ms should be rejected."""
+        config = Config()
+        config.ml_prediction_timeout_ms = 5
+        
+        with pytest.raises(ValueError) as exc_info:
+            config.validate()
+        
+        assert "ml_prediction_timeout_ms" in str(exc_info.value).lower()
+    
+    def test_invalid_api_rate_limit_rejected(self):
+        """API rate limit < 100 should be rejected."""
+        config = Config()
+        config.api_rate_limit_per_minute = 50
+        
+        with pytest.raises(ValueError) as exc_info:
+            config.validate()
+        
+        assert "api_rate_limit_per_minute" in str(exc_info.value).lower()
+    
+    def test_multiple_advanced_feature_errors_reported_together(self):
+        """Multiple advanced feature validation errors should be reported together."""
+        config = Config()
+        config.adaptive_threshold_min_adx = 50.0
+        config.adaptive_threshold_max_adx = 30.0
+        config.ml_low_confidence_threshold = 0.9
+        config.ml_high_confidence_threshold = 0.5
+        config.portfolio_symbols = []
+        
+        with pytest.raises(ValueError) as exc_info:
+            config.validate()
+        
+        error_msg = str(exc_info.value).lower()
+        # Should contain multiple error messages
+        assert "adaptive_threshold" in error_msg
+        assert "ml_" in error_msg
+        assert "portfolio_symbols" in error_msg
+    
+    def test_advanced_features_config_from_file(self):
+        """Advanced features configuration should load from file correctly."""
+        config_data = {
+            "run_mode": "BACKTEST",
+            "enable_adaptive_thresholds": True,
+            "enable_multi_timeframe": True,
+            "adaptive_threshold_min_adx": 18.0,
+            "adaptive_threshold_max_adx": 32.0,
+            "timeframe_weights": {
+                "5m": 0.15,
+                "15m": 0.25,
+                "1h": 0.30,
+                "4h": 0.30
+            },
+            "portfolio_symbols": ["BTCUSDT", "ETHUSDT"],
+            "portfolio_max_symbols": 5
+        }
+        
+        # Write to temporary file
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as f:
+            json.dump(config_data, f)
+            temp_path = f.name
+        
+        try:
+            # Load config from file
+            config = Config.load_from_file(temp_path)
+            
+            # Verify advanced features loaded correctly
+            assert config.enable_adaptive_thresholds == True
+            assert config.enable_multi_timeframe == True
+            assert config.adaptive_threshold_min_adx == 18.0
+            assert config.adaptive_threshold_max_adx == 32.0
+            assert config.timeframe_weights["5m"] == 0.15
+            assert config.portfolio_symbols == ["BTCUSDT", "ETHUSDT"]
+            
+            # Verify config is valid
+            config.validate()
+            
+        finally:
+            # Clean up temp file
+            os.unlink(temp_path)
+    
+    def test_advanced_features_use_defaults_when_missing(self):
+        """Advanced features should use defaults when not specified in config."""
+        config_data = {
+            "run_mode": "BACKTEST"
+            # No advanced features specified
+        }
+        
+        # Write to temporary file
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as f:
+            json.dump(config_data, f)
+            temp_path = f.name
+        
+        try:
+            # Load config from file
+            config = Config.load_from_file(temp_path)
+            
+            # Verify defaults are applied
+            assert config.enable_adaptive_thresholds == False
+            assert config.enable_multi_timeframe == False
+            assert config.adaptive_threshold_update_interval == 3600
+            assert config.volume_profile_lookback_days == 7
+            assert config.ml_min_accuracy == 0.55
+            assert config.portfolio_max_symbols == 5
+            
+            # Verify defaults were tracked
+            applied_defaults = config.get_applied_defaults()
+            assert len(applied_defaults) > 0
+            
+            # Verify config is valid with defaults
+            config.validate()
+            
+        finally:
+            # Clean up temp file
+            os.unlink(temp_path)

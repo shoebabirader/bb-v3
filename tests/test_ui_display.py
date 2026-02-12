@@ -441,3 +441,315 @@ class TestUIDisplay:
         assert panel is not None
         panel_str = render_panel_to_string(panel)
         assert "35" in panel_str
+
+    def test_render_dashboard_with_market_regime(self):
+        """Test dashboard rendering with market regime data."""
+        positions = []
+        trades = []
+        indicators = {
+            'trend_1h': 'BULLISH',
+            'trend_15m': 'BULLISH',
+            'rvol': 1.2,
+            'adx': 28.0,
+            'current_price': 50000.0
+        }
+        wallet_balance = 10000.0
+        
+        panel = self.ui.render_dashboard(
+            positions, trades, indicators, wallet_balance, "LIVE",
+            market_regime="TRENDING_BULLISH"
+        )
+        
+        assert panel is not None
+        panel_str = render_panel_to_string(panel)
+        assert "TRENDING" in panel_str or "BULLISH" in panel_str
+    
+    def test_render_dashboard_with_ml_prediction(self):
+        """Test dashboard rendering with ML prediction data."""
+        positions = []
+        trades = []
+        indicators = {
+            'trend_1h': 'NEUTRAL',
+            'trend_15m': 'NEUTRAL',
+            'rvol': 1.0,
+            'adx': 20.0,
+            'current_price': 50000.0
+        }
+        wallet_balance = 10000.0
+        
+        panel = self.ui.render_dashboard(
+            positions, trades, indicators, wallet_balance, "LIVE",
+            ml_prediction=0.75
+        )
+        
+        assert panel is not None
+        panel_str = render_panel_to_string(panel)
+        assert "0.75" in panel_str or "75" in panel_str
+    
+    def test_render_dashboard_with_volume_profile(self):
+        """Test dashboard rendering with volume profile data."""
+        positions = []
+        trades = []
+        indicators = {
+            'trend_1h': 'NEUTRAL',
+            'trend_15m': 'NEUTRAL',
+            'rvol': 1.0,
+            'adx': 20.0,
+            'current_price': 50000.0
+        }
+        wallet_balance = 10000.0
+        volume_profile = {
+            'poc': 49800.0,
+            'vah': 50200.0,
+            'val': 49400.0
+        }
+        
+        panel = self.ui.render_dashboard(
+            positions, trades, indicators, wallet_balance, "LIVE",
+            volume_profile=volume_profile
+        )
+        
+        assert panel is not None
+        panel_str = render_panel_to_string(panel)
+        assert "49800" in panel_str or "50200" in panel_str or "49400" in panel_str
+    
+    def test_render_dashboard_with_adaptive_thresholds(self):
+        """Test dashboard rendering with adaptive threshold data."""
+        positions = []
+        trades = []
+        indicators = {
+            'trend_1h': 'NEUTRAL',
+            'trend_15m': 'NEUTRAL',
+            'rvol': 1.0,
+            'adx': 20.0,
+            'current_price': 50000.0
+        }
+        wallet_balance = 10000.0
+        adaptive_thresholds = {
+            'adx': 28.5,
+            'rvol': 1.35
+        }
+        
+        panel = self.ui.render_dashboard(
+            positions, trades, indicators, wallet_balance, "LIVE",
+            adaptive_thresholds=adaptive_thresholds
+        )
+        
+        assert panel is not None
+        panel_str = render_panel_to_string(panel)
+        assert "28" in panel_str or "1.35" in panel_str
+    
+    def test_render_dashboard_with_all_advanced_features(self):
+        """Test dashboard rendering with all advanced features."""
+        positions = []
+        trades = []
+        indicators = {
+            'trend_1h': 'BULLISH',
+            'trend_15m': 'BULLISH',
+            'rvol': 1.5,
+            'adx': 30.0,
+            'current_price': 50000.0
+        }
+        wallet_balance = 10000.0
+        
+        panel = self.ui.render_dashboard(
+            positions, trades, indicators, wallet_balance, "LIVE",
+            market_regime="TRENDING_BULLISH",
+            ml_prediction=0.82,
+            volume_profile={'poc': 49800.0, 'vah': 50200.0, 'val': 49400.0},
+            adaptive_thresholds={'adx': 28.5, 'rvol': 1.35}
+        )
+        
+        assert panel is not None
+        panel_str = render_panel_to_string(panel)
+        # Should contain data from all features
+        assert "TRENDING" in panel_str or "BULLISH" in panel_str
+        assert "0.82" in panel_str or "82" in panel_str
+    
+    def test_render_portfolio_view_no_data(self):
+        """Test portfolio view rendering with no data."""
+        panel = self.ui.render_portfolio_view(None)
+        
+        assert panel is not None
+        panel_str = render_panel_to_string(panel)
+        assert "No portfolio data" in panel_str
+    
+    def test_render_portfolio_view_with_data(self):
+        """Test portfolio view rendering with portfolio data."""
+        portfolio_metrics = {
+            'symbols': ['BTCUSDT', 'ETHUSDT', 'BNBUSDT'],
+            'per_symbol_pnl': {
+                'BTCUSDT': 150.0,
+                'ETHUSDT': -50.0,
+                'BNBUSDT': 75.0
+            },
+            'correlation_matrix': {
+                ('BTCUSDT', 'ETHUSDT'): 0.85,
+                ('BTCUSDT', 'BNBUSDT'): 0.65,
+                ('ETHUSDT', 'BNBUSDT'): 0.72
+            },
+            'total_value': 10175.0,
+            'total_pnl': 175.0,
+            'total_risk': 2.5,
+            'diversification_ratio': 0.75
+        }
+        
+        panel = self.ui.render_portfolio_view(portfolio_metrics)
+        
+        assert panel is not None
+        panel_str = render_panel_to_string(panel)
+        assert "BTCUSDT" in panel_str
+        assert "ETHUSDT" in panel_str
+        assert "BNBUSDT" in panel_str
+        assert "175" in panel_str  # Total PnL
+    
+    def test_render_portfolio_view_correlation_matrix(self):
+        """Test portfolio view correlation matrix rendering."""
+        portfolio_metrics = {
+            'symbols': ['BTCUSDT', 'ETHUSDT'],
+            'per_symbol_pnl': {
+                'BTCUSDT': 100.0,
+                'ETHUSDT': 50.0
+            },
+            'correlation_matrix': {
+                ('BTCUSDT', 'ETHUSDT'): 0.92
+            },
+            'total_value': 10150.0,
+            'total_pnl': 150.0,
+            'total_risk': 2.0,
+            'diversification_ratio': 0.65
+        }
+        
+        panel = self.ui.render_portfolio_view(portfolio_metrics)
+        
+        assert panel is not None
+        panel_str = render_panel_to_string(panel)
+        assert "0.92" in panel_str or "92" in panel_str
+    
+    def test_render_portfolio_view_single_symbol(self):
+        """Test portfolio view with single symbol (no correlation)."""
+        portfolio_metrics = {
+            'symbols': ['BTCUSDT'],
+            'per_symbol_pnl': {
+                'BTCUSDT': 200.0
+            },
+            'correlation_matrix': {},
+            'total_value': 10200.0,
+            'total_pnl': 200.0,
+            'total_risk': 1.5,
+            'diversification_ratio': 1.0
+        }
+        
+        panel = self.ui.render_portfolio_view(portfolio_metrics)
+        
+        assert panel is not None
+        panel_str = render_panel_to_string(panel)
+        assert "BTCUSDT" in panel_str
+        assert "200" in panel_str
+    
+    def test_render_feature_status_no_data(self):
+        """Test feature status rendering with no data."""
+        panel = self.ui.render_feature_status(None)
+        
+        assert panel is not None
+        panel_str = render_panel_to_string(panel)
+        assert "No feature status" in panel_str
+    
+    def test_render_feature_status_all_enabled(self):
+        """Test feature status rendering with all features enabled."""
+        feature_status = {
+            'adaptive_thresholds': True,
+            'ml_predictor': True,
+            'volume_profile': True,
+            'market_regime': True,
+            'portfolio_manager': True,
+            'advanced_exits': True,
+            'ml_accuracy': 0.62,
+            'last_threshold_adjustment': int(datetime.now().timestamp()) - 1800
+        }
+        
+        panel = self.ui.render_feature_status(feature_status)
+        
+        assert panel is not None
+        panel_str = render_panel_to_string(panel)
+        assert "ENABLED" in panel_str
+        assert "62" in panel_str  # ML accuracy
+    
+    def test_render_feature_status_mixed(self):
+        """Test feature status rendering with mixed enabled/disabled features."""
+        feature_status = {
+            'adaptive_thresholds': True,
+            'ml_predictor': False,
+            'volume_profile': True,
+            'market_regime': True,
+            'portfolio_manager': False,
+            'advanced_exits': True,
+            'ml_accuracy': 0.48,
+            'last_threshold_adjustment': int(datetime.now().timestamp()) - 3600
+        }
+        
+        panel = self.ui.render_feature_status(feature_status)
+        
+        assert panel is not None
+        panel_str = render_panel_to_string(panel)
+        assert "ENABLED" in panel_str
+        assert "DISABLED" in panel_str
+        assert "48" in panel_str  # ML accuracy
+    
+    def test_render_feature_status_ml_accuracy_low(self):
+        """Test feature status rendering with low ML accuracy."""
+        feature_status = {
+            'adaptive_thresholds': True,
+            'ml_predictor': True,
+            'volume_profile': True,
+            'market_regime': True,
+            'portfolio_manager': True,
+            'advanced_exits': True,
+            'ml_accuracy': 0.52,  # Below 55% threshold
+            'last_threshold_adjustment': int(datetime.now().timestamp())
+        }
+        
+        panel = self.ui.render_feature_status(feature_status)
+        
+        assert panel is not None
+        panel_str = render_panel_to_string(panel)
+        assert "52" in panel_str
+    
+    def test_render_feature_status_time_formatting(self):
+        """Test feature status time formatting for last adjustment."""
+        # Test recent adjustment (minutes ago)
+        feature_status = {
+            'adaptive_thresholds': True,
+            'ml_predictor': True,
+            'volume_profile': True,
+            'market_regime': True,
+            'portfolio_manager': True,
+            'advanced_exits': True,
+            'ml_accuracy': 0.60,
+            'last_threshold_adjustment': int(datetime.now().timestamp()) - 600  # 10 minutes ago
+        }
+        
+        panel = self.ui.render_feature_status(feature_status)
+        
+        assert panel is not None
+        panel_str = render_panel_to_string(panel)
+        assert "m ago" in panel_str or "10" in panel_str
+    
+    def test_render_feature_status_hours_ago(self):
+        """Test feature status time formatting for hours ago."""
+        feature_status = {
+            'adaptive_thresholds': True,
+            'ml_predictor': True,
+            'volume_profile': True,
+            'market_regime': True,
+            'portfolio_manager': True,
+            'advanced_exits': True,
+            'ml_accuracy': 0.60,
+            'last_threshold_adjustment': int(datetime.now().timestamp()) - 7200  # 2 hours ago
+        }
+        
+        panel = self.ui.render_feature_status(feature_status)
+        
+        assert panel is not None
+        panel_str = render_panel_to_string(panel)
+        assert "h ago" in panel_str or "2" in panel_str
