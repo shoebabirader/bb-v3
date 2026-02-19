@@ -35,6 +35,10 @@ class StrategyEngine:
         self.current_indicators = IndicatorState()
         self._previous_squeeze_color = "gray"
         
+        # Track last candle close time for signal generation
+        self._last_candle_close_time = 0
+        self._candle_just_closed = False
+        
         # Initialize feature manager for error isolation
         self.feature_manager = FeatureManager(max_errors=3, error_window=300.0)
         
@@ -116,6 +120,20 @@ class StrategyEngine:
             candles_5m: Optional list of 5-minute candles (for multi-timeframe)
             candles_4h: Optional list of 4-hour candles (for multi-timeframe)
         """
+        # Store candles for momentum continuation check
+        self._candles_15m = candles_15m
+        self._candles_1h = candles_1h
+        
+        # Check if a new candle just closed (for signal generation timing)
+        if candles_15m and len(candles_15m) > 0:
+            latest_candle_time = candles_15m[-1].timestamp
+            if latest_candle_time != self._last_candle_close_time:
+                self._candle_just_closed = True
+                self._last_candle_close_time = latest_candle_time
+                logger.debug(f"New 15m candle closed at {latest_candle_time}")
+            else:
+                self._candle_just_closed = False
+        
         # Check if we have sufficient data
         if not self._has_sufficient_data(candles_15m, candles_1h):
             logger.warning("Insufficient data for indicator calculation")
@@ -281,6 +299,104 @@ class StrategyEngine:
         else:
             self.current_indicators.price_vs_vwap = "BELOW"
     
+    def _check_momentum_continuation(self, candles_15m: List[Candle], direction: str) -> bool:
+        """Check if momentum is continuing in the signal direction.
+        
+        This prevents entering trades on exhausted moves by checking:
+        1. Recent price action (last 3 candles) is moving in signal direction
+        2. Price hasn't moved too far from EMA (overextension check)
+        3. Current candle is still moving in the right direction
+        
+        Args:
+            candles_15m: List of 15-minute candles
+            direction: "LONG" or "SHORT"
+            
+        Returns:
+            True if momentum is continuing, False if move is exhausted
+        """
+        if len(candles_15m) < 20:
+            return False
+        
+        current_candle = candles_15m[-1]
+        prev_candle_1 = candles_15m[-2]
+        prev_candle_2 = candles_15m[-3]
+        prev_candle_3 = candles_15m[-4]
+        
+        # Calculate 20-period EMA for overextension check
+        closes = [c.close for c in candles_15m[-20:]]
+        ema_20 = self._calculate_simple_ema(closes, 20)
+        
+        if direction == "LONG":
+            # For LONG signals, check:
+            # 1. At least 2 of last 3 candles are green (close > open)
+            green_candles = sum([
+                1 if prev_candle_1.close > prev_candle_1.open else 0,
+                1 if prev_candle_2.close > prev_candle_2.open else 0,
+                1 if prev_candle_3.close > prev_candle_3.open else 0
+            ])
+            
+            # 2. Current candle is green or at least not strongly red
+            current_candle_ok = (current_candle.close >= current_candle.open * 0.998)
+            
+            # 3. Price hasn't moved too far above EMA (not overextended)
+            # Allow up to 3% above EMA (relaxed from 2%)
+            not_overextended = (current_candle.close <= ema_20 * 1.03)
+            
+            # 4. Price is making higher lows (last 3 candles)
+            higher_lows = (prev_candle_1.low >= prev_candle_3.low * 0.998)
+            
+            # Accept if momentum is strong (3 green candles) OR (2 green + not overextended)
+            strong_momentum = green_candles >= 3
+            moderate_momentum = green_candles >= 2 and not_overextended
+            
+            return (strong_momentum or moderate_momentum) and current_candle_ok and higher_lows
+        
+        else:  # SHORT
+            # For SHORT signals, check:
+            # 1. At least 2 of last 3 candles are red (close < open)
+            red_candles = sum([
+                1 if prev_candle_1.close < prev_candle_1.open else 0,
+                1 if prev_candle_2.close < prev_candle_2.open else 0,
+                1 if prev_candle_3.close < prev_candle_3.open else 0
+            ])
+            
+            # 2. Current candle is red or at least not strongly green
+            current_candle_ok = (current_candle.close <= current_candle.open * 1.002)
+            
+            # 3. Price hasn't moved too far below EMA (not overextended)
+            # Allow up to 3% below EMA (relaxed from 2%)
+            not_overextended = (current_candle.close >= ema_20 * 0.97)
+            
+            # 4. Price is making lower highs (last 3 candles)
+            lower_highs = (prev_candle_1.high <= prev_candle_3.high * 1.002)
+            
+            # Accept if momentum is strong (3 red candles) OR (2 red + not overextended)
+            strong_momentum = red_candles >= 3
+            moderate_momentum = red_candles >= 2 and not_overextended
+            
+            return (strong_momentum or moderate_momentum) and current_candle_ok and lower_highs
+    
+    def _calculate_simple_ema(self, values: List[float], period: int) -> float:
+        """Calculate simple Exponential Moving Average.
+        
+        Args:
+            values: List of values (should have at least 'period' elements)
+            period: EMA period
+            
+        Returns:
+            EMA value
+        """
+        if len(values) < period:
+            return values[-1] if values else 0.0
+        
+        multiplier = 2.0 / (period + 1)
+        ema = sum(values[:period]) / period  # Start with SMA
+        
+        for value in values[period:]:
+            ema = (value * multiplier) + (ema * (1 - multiplier))
+        
+        return ema
+    
     def check_long_entry(self, symbol: Optional[str] = None) -> Optional[Signal]:
         """Check if long entry conditions are met.
         
@@ -301,6 +417,11 @@ class StrategyEngine:
         Returns:
             Signal object if all conditions met, None otherwise
         """
+        # CRITICAL: Only generate signals when a candle has just closed
+        # This prevents mid-candle entries and ensures indicators are calculated on complete candles
+        if not self._candle_just_closed:
+            return None
+        
         # Check ML prediction first if enabled
         if self.ml_predictor and self.ml_predictor.enabled:
             # If ML shows low confidence for bullish (<0.3), skip entry
@@ -355,6 +476,12 @@ class StrategyEngine:
         if not conditions_met:
             return None
         
+        # MOMENTUM CONTINUATION CHECK - Prevent entering exhausted moves
+        if hasattr(self, '_candles_15m') and self._candles_15m:
+            if not self._check_momentum_continuation(self._candles_15m, "LONG"):
+                logger.info(f"[{symbol if symbol else self.config.symbol}] LONG signal rejected - momentum exhausted or overextended")
+                return None
+        
         # Create signal with indicator snapshot
         signal = Signal(
             type="LONG_ENTRY",
@@ -396,6 +523,11 @@ class StrategyEngine:
         Returns:
             Signal object if all conditions met, None otherwise
         """
+        # CRITICAL: Only generate signals when a candle has just closed
+        # This prevents mid-candle entries and ensures indicators are calculated on complete candles
+        if not self._candle_just_closed:
+            return None
+        
         # Check ML prediction first if enabled
         if self.ml_predictor and self.ml_predictor.enabled:
             # If ML shows high confidence for bullish (>0.7), skip short entry
@@ -449,6 +581,12 @@ class StrategyEngine:
         
         if not conditions_met:
             return None
+        
+        # MOMENTUM CONTINUATION CHECK - Prevent entering exhausted moves
+        if hasattr(self, '_candles_15m') and self._candles_15m:
+            if not self._check_momentum_continuation(self._candles_15m, "SHORT"):
+                logger.info(f"[{symbol if symbol else self.config.symbol}] SHORT signal rejected - momentum exhausted or overextended")
+                return None
         
         # Create signal with indicator snapshot
         signal = Signal(

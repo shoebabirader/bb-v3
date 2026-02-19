@@ -108,7 +108,11 @@ class PositionSizer:
         current_price: float, 
         atr: float
     ) -> float:
-        """Calculate trailing stop price at 1.5x ATR from current price.
+        """Calculate trailing stop price with activation threshold.
+        
+        The trailing stop only activates after the position has moved favorably
+        by trailing_stop_activation_atr (default 2.0x ATR). Once activated, it
+        trails at trailing_stop_atr_multiplier (default 2.5x ATR) from current price.
         
         The trailing stop only moves in the favorable direction (tightens),
         never widens. For long positions, it moves up. For short positions,
@@ -131,10 +135,21 @@ class PositionSizer:
         if atr <= 0:
             raise ValueError(f"atr must be positive, got {atr}")
         
-        # Calculate trailing stop distance (1.5x ATR)
-        trailing_distance = self.config.trailing_stop_atr_multiplier * atr
+        # Get activation threshold (default 2.0x ATR if not set)
+        activation_threshold = getattr(self.config, 'trailing_stop_activation_atr', 2.0) * atr
         
+        # Check if position has moved enough to activate trailing stop
         if position.side == "LONG":
+            # For long positions, check if price has moved up enough
+            profit_distance = current_price - position.entry_price
+            
+            # If not enough profit yet, keep initial stop
+            if profit_distance < activation_threshold:
+                return position.trailing_stop
+            
+            # Calculate trailing stop distance
+            trailing_distance = self.config.trailing_stop_atr_multiplier * atr
+            
             # For long positions, trailing stop is below current price
             new_trailing_stop = current_price - trailing_distance
             
@@ -146,6 +161,16 @@ class PositionSizer:
                 return position.trailing_stop
         
         elif position.side == "SHORT":
+            # For short positions, check if price has moved down enough
+            profit_distance = position.entry_price - current_price
+            
+            # If not enough profit yet, keep initial stop
+            if profit_distance < activation_threshold:
+                return position.trailing_stop
+            
+            # Calculate trailing stop distance
+            trailing_distance = self.config.trailing_stop_atr_multiplier * atr
+            
             # For short positions, trailing stop is above current price
             new_trailing_stop = current_price + trailing_distance
             

@@ -10,7 +10,14 @@ import signal
 import sys
 from typing import Optional, List, Dict
 from binance.client import Client
-from pynput import keyboard
+
+# Try to import pynput for keyboard listener (optional for headless servers)
+try:
+    from pynput import keyboard
+    KEYBOARD_AVAILABLE = True
+except ImportError:
+    KEYBOARD_AVAILABLE = False
+    keyboard = None
 
 from src.config import Config
 from src.data_manager import DataManager
@@ -68,7 +75,7 @@ class TradingBot:
         self._panic_triggered = False
         
         # Initialize logger
-        self.logger = get_logger()
+        self.logger = get_logger(config=config)
         
         # Initialize Binance client (needed for all modes to fetch data)
         self.client: Optional[Client] = None
@@ -97,11 +104,14 @@ class TradingBot:
         if config.run_mode == "BACKTEST":
             self.backtest_engine = BacktestEngine(config, self.strategy, self.risk_manager)
         
-        # Keyboard listener for panic close
-        self.keyboard_listener: Optional[keyboard.Listener] = None
+        # Keyboard listener for panic close (optional, only on systems with display)
+        self.keyboard_listener: Optional[any] = None
         
         # Wallet balance tracking
         self.wallet_balance = 10000.0  # Default for backtest/paper
+        
+        # Per-symbol indicator storage for dashboard
+        self._symbol_indicators: Dict[str, Dict[str, float]] = {}
         
         # Setup signal handlers for graceful shutdown
         signal.signal(signal.SIGINT, self._signal_handler)
@@ -194,87 +204,187 @@ class TradingBot:
         self.ui_display.show_notification("Starting backtest mode...", "INFO")
         
         try:
-            # Fetch historical data
-            self.ui_display.show_notification(
-                f"Fetching {self.config.backtest_days} days of historical data...",
-                "INFO"
-            )
-            
-            candles_15m = self.data_manager.fetch_historical_data(
-                days=self.config.backtest_days,
-                timeframe="15m"
-            )
-            
-            candles_1h = self.data_manager.fetch_historical_data(
-                days=self.config.backtest_days,
-                timeframe="1h"
-            )
-            
-            # Fetch additional timeframes if multi-timeframe is enabled
-            candles_5m = None
-            candles_4h = None
-            
-            if self.config.enable_multi_timeframe:
+            # Determine which symbols to backtest
+            if self.config.enable_portfolio_management and len(self.config.portfolio_symbols) > 1:
+                symbols_to_test = self.config.portfolio_symbols[:self.config.portfolio_max_symbols]
                 self.ui_display.show_notification(
-                    "Multi-timeframe enabled: Fetching 5m and 4h data...",
+                    f"Portfolio mode: Backtesting {len(symbols_to_test)} symbols: {', '.join(symbols_to_test)}",
+                    "INFO"
+                )
+            else:
+                symbols_to_test = [self.config.symbol]
+                self.ui_display.show_notification(
+                    f"Single symbol mode: Backtesting {self.config.symbol}",
+                    "INFO"
+                )
+            
+            # Store original symbol
+            original_symbol = self.config.symbol
+            
+            # Aggregate results across all symbols
+            all_trades = []
+            total_pnl = 0.0
+            total_balance = 10000.0  # Starting balance
+            
+            # Run backtest for each symbol
+            for symbol_idx, symbol in enumerate(symbols_to_test, 1):
+                self.ui_display.show_notification(
+                    f"[{symbol_idx}/{len(symbols_to_test)}] Backtesting {symbol}...",
                     "INFO"
                 )
                 
-                candles_5m = self.data_manager.fetch_historical_data(
-                    days=self.config.backtest_days,
-                    timeframe="5m"
+                # Temporarily set the symbol for this backtest
+                self.config.symbol = symbol
+                
+                # Fetch historical data for this symbol
+                self.ui_display.show_notification(
+                    f"Fetching {self.config.backtest_days} days of historical data for {symbol}...",
+                    "INFO"
                 )
                 
-                candles_4h = self.data_manager.fetch_historical_data(
+                candles_15m = self.data_manager.fetch_historical_data(
                     days=self.config.backtest_days,
-                    timeframe="4h"
+                    timeframe="15m",
+                    symbol=symbol
                 )
+                
+                candles_1h = self.data_manager.fetch_historical_data(
+                    days=self.config.backtest_days,
+                    timeframe="1h",
+                    symbol=symbol
+                )
+                
+                # Fetch additional timeframes if multi-timeframe is enabled
+                candles_5m = None
+                candles_4h = None
+                
+                if self.config.enable_multi_timeframe:
+                    candles_5m = self.data_manager.fetch_historical_data(
+                        days=self.config.backtest_days,
+                        timeframe="5m",
+                        symbol=symbol
+                    )
+                    
+                    candles_4h = self.data_manager.fetch_historical_data(
+                        days=self.config.backtest_days,
+                        timeframe="4h",
+                        symbol=symbol
+                    )
+                    
+                    self.ui_display.show_notification(
+                        f"[{symbol}] Fetched {len(candles_15m)} 15m, {len(candles_1h)} 1h, "
+                        f"{len(candles_5m)} 5m, {len(candles_4h)} 4h candles",
+                        "SUCCESS"
+                    )
+                else:
+                    self.ui_display.show_notification(
+                        f"[{symbol}] Fetched {len(candles_15m)} 15m and {len(candles_1h)} 1h candles",
+                        "SUCCESS"
+                    )
+                
+                # Run backtest for this symbol
+                self.ui_display.show_notification(f"Running backtest for {symbol}...", "INFO")
+                
+                # Use proportional balance for each symbol in portfolio mode
+                if len(symbols_to_test) > 1:
+                    symbol_balance = total_balance / len(symbols_to_test)
+                else:
+                    symbol_balance = total_balance
+                
+                results = self.backtest_engine.run_backtest(
+                    candles_15m=candles_15m,
+                    candles_1h=candles_1h,
+                    initial_balance=symbol_balance,
+                    candles_5m=candles_5m,
+                    candles_4h=candles_4h
+                )
+                
+                # Collect trades from this symbol
+                symbol_trades = self.backtest_engine.get_trades()
+                all_trades.extend(symbol_trades)
+                total_pnl += results['total_pnl']
                 
                 self.ui_display.show_notification(
-                    f"Fetched {len(candles_15m)} 15m, {len(candles_1h)} 1h, "
-                    f"{len(candles_5m)} 5m, {len(candles_4h)} 4h candles",
+                    f"[{symbol}] Completed: {results['total_trades']} trades, "
+                    f"PnL: ${results['total_pnl']:,.2f}, Win Rate: {results['win_rate']:.1f}%",
                     "SUCCESS"
                 )
+            
+            # Restore original symbol
+            self.config.symbol = original_symbol
+            
+            # Calculate aggregate metrics
+            winning_trades = sum(1 for t in all_trades if t.pnl > 0)
+            losing_trades = sum(1 for t in all_trades if t.pnl < 0)
+            total_trades = len(all_trades)
+            win_rate = (winning_trades / total_trades * 100) if total_trades > 0 else 0.0
+            roi = (total_pnl / total_balance * 100) if total_balance > 0 else 0.0
+            
+            # Calculate other metrics
+            wins = [t.pnl for t in all_trades if t.pnl > 0]
+            losses = [abs(t.pnl) for t in all_trades if t.pnl < 0]
+            
+            average_win = sum(wins) / len(wins) if wins else 0.0
+            average_loss = sum(losses) / len(losses) if losses else 0.0
+            largest_win = max(wins) if wins else 0.0
+            largest_loss = max(losses) if losses else 0.0
+            
+            gross_profit = sum(wins)
+            gross_loss = sum(losses)
+            profit_factor = gross_profit / gross_loss if gross_loss > 0 else 0.0
+            
+            # Calculate max drawdown
+            equity = total_balance
+            peak = equity
+            max_dd = 0.0
+            for trade in all_trades:
+                equity += trade.pnl
+                if equity > peak:
+                    peak = equity
+                drawdown = peak - equity
+                if drawdown > max_dd:
+                    max_dd = drawdown
+            
+            # Calculate Sharpe ratio (simplified)
+            if all_trades:
+                returns = [t.pnl / total_balance for t in all_trades]
+                avg_return = sum(returns) / len(returns)
+                std_return = (sum((r - avg_return) ** 2 for r in returns) / len(returns)) ** 0.5
+                sharpe_ratio = (avg_return / std_return * (252 ** 0.5)) if std_return > 0 else 0.0
             else:
-                self.ui_display.show_notification(
-                    f"Fetched {len(candles_15m)} 15m candles and {len(candles_1h)} 1h candles",
-                    "SUCCESS"
-                )
+                sharpe_ratio = 0.0
             
-            # Run backtest
-            self.ui_display.show_notification("Running backtest...", "INFO")
+            # Calculate average trade duration
+            durations = [(t.exit_time - t.entry_time) / 1000 / 3600 for t in all_trades]  # hours
+            avg_duration = sum(durations) / len(durations) if durations else 0.0
             
-            # Use default balance for backtest (don't fetch from real account)
-            backtest_balance = 10000.0
-            
-            results = self.backtest_engine.run_backtest(
-                candles_15m=candles_15m,
-                candles_1h=candles_1h,
-                initial_balance=backtest_balance,
-                candles_5m=candles_5m,
-                candles_4h=candles_4h
-            )
-            
-            # Convert results dict to PerformanceMetrics
+            # Convert results to PerformanceMetrics
             metrics = PerformanceMetrics(
-                total_trades=results['total_trades'],
-                winning_trades=results['winning_trades'],
-                losing_trades=results['losing_trades'],
-                win_rate=results['win_rate'],
-                total_pnl=results['total_pnl'],
-                roi=results['roi'],
-                max_drawdown=results['max_drawdown'],
-                profit_factor=results['profit_factor'],
-                sharpe_ratio=results['sharpe_ratio'],
-                average_win=results['average_win'],
-                average_loss=results['average_loss'],
-                largest_win=results['largest_win'],
-                largest_loss=results['largest_loss'],
-                average_trade_duration=results['average_trade_duration']
+                total_trades=total_trades,
+                winning_trades=winning_trades,
+                losing_trades=losing_trades,
+                win_rate=win_rate,
+                total_pnl=total_pnl,
+                roi=roi,
+                max_drawdown=max_dd,
+                profit_factor=profit_factor,
+                sharpe_ratio=sharpe_ratio,
+                average_win=average_win,
+                average_loss=average_loss,
+                largest_win=largest_win,
+                largest_loss=largest_loss,
+                average_trade_duration=avg_duration
             )
             
             # Display results
-            self.ui_display.display_backtest_results(metrics, backtest_balance)
+            self.ui_display.display_backtest_results(metrics, total_balance)
+            
+            if len(symbols_to_test) > 1:
+                self.ui_display.show_notification(
+                    f"Portfolio backtest complete: {len(symbols_to_test)} symbols, "
+                    f"{total_trades} total trades, ${total_pnl:,.2f} PnL",
+                    "SUCCESS"
+                )
             
             # Save results
             self.logger.save_performance_metrics(metrics, self.config.log_file)
@@ -284,7 +394,7 @@ class TradingBot:
             )
             
             # Log all trades
-            for trade in self.backtest_engine.get_trades():
+            for trade in all_trades:
                 self.logger.log_trade(trade)
         
         except Exception as e:
@@ -299,6 +409,10 @@ class TradingBot:
         # Validate API authentication
         if not self.order_executor.validate_authentication():
             raise ValueError("API authentication failed. Check your API keys and permissions.")
+        
+        # Validate API permissions
+        if not self.order_executor.validate_permissions():
+            raise ValueError("API permissions validation failed. Check your API key permissions.")
         
         # Get list of symbols to trade
         trading_symbols = self._get_trading_symbols()
@@ -431,6 +545,10 @@ class TradingBot:
         # Validate API authentication
         if not self.order_executor.validate_authentication():
             raise ValueError("API authentication failed. Check your API keys and permissions.")
+        
+        # Validate API permissions
+        if not self.order_executor.validate_permissions():
+            raise ValueError("API permissions validation failed. Check your API key permissions.")
         
         # Get list of symbols to trade
         trading_symbols = self._get_trading_symbols()
@@ -645,6 +763,16 @@ class TradingBot:
             # Get current price
             current_price = candles_15m[-1].close if candles_15m else 0.0
             
+            # Store indicators for this symbol (for dashboard display)
+            # This will be populated with signal value later after signal detection
+            self._symbol_indicators[symbol] = {
+                "adx": self.strategy.current_indicators.adx,
+                "rvol": self.strategy.current_indicators.rvol,
+                "atr": self.strategy.current_indicators.atr_15m,
+                "signal": "NONE",  # Will be updated if signal is detected
+                "timestamp": time.time()
+            }
+            
             # Check for active position
             active_position = self.risk_manager.get_active_position(symbol)
             
@@ -657,8 +785,53 @@ class TradingBot:
                 atr = self.strategy.current_indicators.atr_15m
                 self.risk_manager.update_stops(active_position, current_price, atr)
                 
-                # Check if stop was hit
-                if self.risk_manager.check_stop_hit(active_position, current_price):
+                # Calculate current profit percentage
+                if active_position.side == "LONG":
+                    profit_pct = (current_price - active_position.entry_price) / active_position.entry_price
+                else:  # SHORT
+                    profit_pct = (active_position.entry_price - current_price) / active_position.entry_price
+                
+                # Check if take profit target is reached (PRIORITY 1)
+                take_profit_pct = self.config.take_profit_pct
+                if profit_pct >= take_profit_pct:
+                    # Close position at take profit
+                    trade = self.risk_manager.close_position(
+                        active_position,
+                        current_price,
+                        "TAKE_PROFIT"
+                    )
+                    
+                    # Execute close order (if not simulating)
+                    if not simulate_execution:
+                        side = "SELL" if active_position.side == "LONG" else "BUY"
+                        self.order_executor.place_market_order(
+                            symbol=symbol,
+                            side=side,
+                            quantity=active_position.quantity,
+                            reduce_only=True
+                        )
+                    
+                    # Update balance
+                    self.wallet_balance += trade.pnl
+                    
+                    # Update portfolio manager PnL
+                    if self.portfolio_manager:
+                        self.portfolio_manager.update_pnl(symbol, trade.pnl)
+                        self.portfolio_manager.update_position(symbol, None)
+                    
+                    # Log trade
+                    self.logger.log_trade(trade)
+                    
+                    # Show notification
+                    pnl_text = f"+${trade.pnl:.2f}" if trade.pnl >= 0 else f"${trade.pnl:.2f}"
+                    profit_pct_display = profit_pct * 100
+                    self.ui_display.show_notification(
+                        f"[{symbol}] 🎯 TAKE PROFIT HIT! {trade.side} @ ${trade.exit_price:.2f} | PnL: {pnl_text} ({profit_pct_display:.2f}%)",
+                        "SUCCESS"
+                    )
+                
+                # Check if stop was hit (PRIORITY 2)
+                elif self.risk_manager.check_stop_hit(active_position, current_price):
                     # Close position
                     trade = self.risk_manager.close_position(
                         active_position,
@@ -703,6 +876,15 @@ class TradingBot:
                     
                     long_signal = self.strategy.check_long_entry(symbol)
                     short_signal = self.strategy.check_short_entry(symbol)
+                    
+                    # Update stored indicators with signal value
+                    if symbol in self._symbol_indicators:
+                        if long_signal:
+                            self._symbol_indicators[symbol]["signal"] = "LONG"
+                        elif short_signal:
+                            self._symbol_indicators[symbol]["signal"] = "SHORT"
+                        else:
+                            self._symbol_indicators[symbol]["signal"] = "NONE"
                     
                     # DEBUG LOGGING
                     logger.info(f"[{symbol}] Signal check: LONG={long_signal is not None}, SHORT={short_signal is not None}")
@@ -859,6 +1041,9 @@ class TradingBot:
                     f"requests/min ({rate_stats['utilization_percent']:.1f}% utilization)"
                 )
             
+            # Save real-time state to binance_results.json for Streamlit dashboard
+            self._save_realtime_state(positions, indicators)
+            
             # Render dashboard
             dashboard = self.ui_display.render_dashboard(
                 positions=positions,
@@ -879,18 +1064,143 @@ class TradingBot:
         except Exception as e:
             logger.error(f"Error updating dashboard: {e}")
     
-    def _start_keyboard_listener(self):
-        """Start keyboard listener for panic close (ESC key)."""
-        def on_press(key):
-            try:
-                if key == keyboard.Key.esc:
-                    self._trigger_panic_close()
-            except Exception as e:
-                logger.error(f"Error in keyboard listener: {e}")
+    def _save_realtime_state(self, positions: List, indicators: Dict):
+        """Save real-time bot state to binance_results.json for Streamlit dashboard.
         
-        self.keyboard_listener = keyboard.Listener(on_press=on_press)
-        self.keyboard_listener.start()
-        logger.info("Keyboard listener started (ESC for panic close)")
+        Args:
+            positions: List of active positions
+            indicators: Current indicator values
+        """
+        try:
+            import json
+            from datetime import datetime
+            
+            # Calculate total PnL from closed trades
+            closed_trades = self.risk_manager.get_closed_trades()
+            total_pnl = sum(trade.pnl for trade in closed_trades)
+            total_pnl_percent = (total_pnl / self.wallet_balance * 100) if self.wallet_balance > 0 else 0.0
+            
+            # Get current price from primary symbol
+            current_price = 0.0
+            if positions:
+                # Use price from first position's symbol
+                try:
+                    candles = self.data_manager.get_latest_candles("15m", 1, symbol=positions[0].symbol)
+                    if candles:
+                        current_price = candles[-1].close
+                except:
+                    current_price = indicators.get('current_price', 0.0)
+            else:
+                current_price = indicators.get('current_price', 0.0)
+            
+            # Format positions for JSON with correct current prices
+            positions_data = []
+            for pos in positions:
+                # Get current price for this specific symbol
+                try:
+                    symbol_candles = self.data_manager.get_latest_candles("15m", 1, symbol=pos.symbol)
+                    symbol_price = symbol_candles[-1].close if symbol_candles else 0.0
+                except:
+                    symbol_price = 0.0
+                
+                positions_data.append({
+                    "symbol": pos.symbol,
+                    "side": pos.side,
+                    "entry_price": pos.entry_price,
+                    "current_price": symbol_price,
+                    "quantity": pos.quantity,
+                    "unrealized_pnl": pos.unrealized_pnl,
+                    "stop_loss": pos.stop_loss,
+                    "trailing_stop": pos.trailing_stop,
+                    "entry_time": pos.entry_time.isoformat() if hasattr(pos.entry_time, 'isoformat') else str(pos.entry_time)
+                })
+            
+            # Get list of all trading symbols (from portfolio or single symbol)
+            trading_symbols = self._get_trading_symbols()
+            
+            # Collect per-symbol market data
+            symbols_data = []
+            for symbol in trading_symbols:
+                try:
+                    # Get latest candles for this symbol
+                    symbol_candles = self.data_manager.get_latest_candles("15m", 1, symbol=symbol)
+                    symbol_price = symbol_candles[-1].close if symbol_candles else 0.0
+                    
+                    # Get stored indicators for this symbol
+                    if symbol in self._symbol_indicators:
+                        stored = self._symbol_indicators[symbol]
+                        symbol_adx = stored.get("adx", 0.0)
+                        symbol_rvol = stored.get("rvol", 0.0)
+                        symbol_atr = stored.get("atr", 0.0)
+                        symbol_signal = stored.get("signal", "NONE")
+                    else:
+                        # Symbol not processed yet
+                        symbol_adx = 0.0
+                        symbol_rvol = 0.0
+                        symbol_atr = 0.0
+                        symbol_signal = "NONE"
+                    
+                    symbols_data.append({
+                        "symbol": symbol,
+                        "current_price": symbol_price,
+                        "adx": symbol_adx,
+                        "rvol": symbol_rvol,
+                        "atr": symbol_atr,
+                        "signal": symbol_signal
+                    })
+                except Exception as e:
+                    logger.debug(f"Error getting data for {symbol}: {e}")
+                    continue
+            
+            # Build state data with correct indicators
+            state_data = {
+                "timestamp": datetime.now().isoformat(),
+                "bot_status": "running",
+                "run_mode": self.config.run_mode,
+                "balance": self.wallet_balance,
+                "total_pnl": total_pnl,
+                "total_pnl_percent": total_pnl_percent,
+                "open_positions": positions_data,
+                "current_price": current_price,
+                "adx": indicators.get('adx_15m', indicators.get('adx', 0.0)),
+                "rvol": indicators.get('rvol_15m', indicators.get('rvol', 0.0)),
+                "atr": indicators.get('atr_15m', indicators.get('atr', 0.0)),
+                "signal": indicators.get('signal', 'NONE'),
+                "symbols_data": symbols_data,  # NEW: Per-symbol market data
+                "total_trades": len(closed_trades),
+                "winning_trades": sum(1 for t in closed_trades if t.pnl > 0),
+                "losing_trades": sum(1 for t in closed_trades if t.pnl <= 0)
+            }
+            
+            # Save to file
+            with open(self.config.log_file, 'w') as f:
+                json.dump(state_data, f, indent=2)
+        
+        except Exception as e:
+            logger.error(f"Error saving realtime state: {e}")
+    
+    def _start_keyboard_listener(self):
+        """Start keyboard listener for panic close (ESC key).
+        
+        Only available on systems with display support. Silently skips on headless servers.
+        """
+        if not KEYBOARD_AVAILABLE:
+            logger.info("Keyboard listener not available (headless mode - use API/signals for panic close)")
+            return
+        
+        try:
+            def on_press(key):
+                try:
+                    if key == keyboard.Key.esc:
+                        self._trigger_panic_close()
+                except Exception as e:
+                    logger.error(f"Error in keyboard listener: {e}")
+            
+            self.keyboard_listener = keyboard.Listener(on_press=on_press)
+            self.keyboard_listener.start()
+            logger.info("Keyboard listener started (ESC for panic close)")
+        except Exception as e:
+            logger.warning(f"Could not start keyboard listener: {e}. Running in headless mode.")
     
     def _trigger_panic_close(self):
         """Trigger emergency panic close of all positions."""
@@ -976,14 +1286,32 @@ class TradingBot:
                         "WARNING"
                     )
                     
-                    candles_15m = self.data_manager.get_latest_candles("15m", 1)
-                    current_price = candles_15m[-1].close if candles_15m else 0.0
+                    # Try to get current price, use entry price as fallback
+                    try:
+                        candles_15m = self.data_manager.get_latest_candles("15m", 1)
+                        current_price = candles_15m[-1].close if candles_15m else 0.0
+                    except:
+                        current_price = 0.0
                     
-                    closed_trades = self.risk_manager.close_all_positions(current_price)
-                    
-                    # Log trades
-                    for trade in closed_trades:
-                        self.logger.log_trade(trade)
+                    # If we can't get current price, use position entry prices
+                    if current_price <= 0 and active_positions:
+                        # Close positions individually with their own prices
+                        for pos in active_positions:
+                            try:
+                                symbol_candles = self.data_manager.get_latest_candles("15m", 1, symbol=pos.symbol)
+                                pos_price = symbol_candles[-1].close if symbol_candles else pos.entry_price
+                                trade = self.risk_manager.close_position(pos, pos_price, "PANIC")
+                                if trade:
+                                    self.logger.log_trade(trade)
+                            except Exception as e:
+                                logger.error(f"Error closing position {pos.symbol}: {e}")
+                    else:
+                        # Close all with same price
+                        closed_trades = self.risk_manager.close_all_positions(current_price)
+                        
+                        # Log trades
+                        for trade in closed_trades:
+                            self.logger.log_trade(trade)
             
             # Save final performance metrics (if in PAPER or LIVE mode)
             if self.config.run_mode in ["PAPER", "LIVE"]:

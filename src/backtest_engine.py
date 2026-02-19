@@ -2,6 +2,7 @@
 
 import numpy as np
 import logging
+import time
 from typing import List, Dict, Optional
 from binance.client import Client
 from src.config import Config
@@ -190,31 +191,60 @@ class BacktestEngine:
                 atr = self.strategy.current_indicators.atr_15m
                 self.risk_mgr.update_stops(active_position, current_price, atr)
                 
-                # Check if stop was hit during this candle
-                if self._check_stop_hit_in_candle(active_position, current_candle):
-                    # Simulate stop-loss execution
+                # Calculate current profit percentage
+                if active_position.side == "LONG":
+                    profit_pct = (current_price - active_position.entry_price) / active_position.entry_price
+                else:  # SHORT
+                    profit_pct = (active_position.entry_price - current_price) / active_position.entry_price
+                
+                # Check if take profit target is reached
+                take_profit_pct = self.config.take_profit_pct
+                
+                if profit_pct >= take_profit_pct:
+                    logger.info(f"[BACKTEST] TAKE PROFIT HIT! {self.config.symbol} {active_position.side} at {profit_pct*100:.2f}%")
                     exit_price = self.simulate_trade_execution(
                         signal_type="EXIT",
                         candle=current_candle,
                         is_long=(active_position.side == "LONG")
                     )
                     
-                    # Apply fees and slippage
                     exit_price = self.apply_fees_and_slippage(
                         exit_price, 
                         "SELL" if active_position.side == "LONG" else "BUY"
                     )
                     
-                    # Close position
+                    trade = self.risk_mgr.close_position(
+                        active_position,
+                        exit_price,
+                        "TAKE_PROFIT"
+                    )
+                    
+                    self.current_balance += trade.pnl
+                    self.trades.append(trade)
+                    active_position = None
+                
+                # Check if stop was hit during this candle
+                elif self._check_stop_hit_in_candle(active_position, current_candle):
+                    exit_price = self.simulate_trade_execution(
+                        signal_type="EXIT",
+                        candle=current_candle,
+                        is_long=(active_position.side == "LONG")
+                    )
+                    
+                    exit_price = self.apply_fees_and_slippage(
+                        exit_price, 
+                        "SELL" if active_position.side == "LONG" else "BUY"
+                    )
+                    
                     trade = self.risk_mgr.close_position(
                         active_position,
                         exit_price,
                         "TRAILING_STOP"
                     )
                     
-                    # Update balance
                     self.current_balance += trade.pnl
                     self.trades.append(trade)
+                    active_position = None
             else:
                 # No active position, check for entry signals
                 long_signal = self.strategy.check_long_entry()
