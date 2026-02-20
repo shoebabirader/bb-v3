@@ -1,0 +1,5 @@
+2026-02-20 22:44:25 - trading_bot.system - INFO - Scaled TP Manager initialized with 3 levels
+2026-02-20 22:44:25 - trading_bot.system - INFO -   TP1: profit=3.0%, close=40%
+2026-02-20 22:44:25 - trading_bot.system - INFO -   TP2: profit=5.0%, close=30%
+2026-02-20 22:44:25 - trading_bot.system - INFO -   TP3: profit=8.0%, close=30%
+2026-02-20 22:44:25 - trading_bot.system - INFO -   Min order size: 0.001, Fallback to single TP: True

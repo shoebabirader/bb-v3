@@ -114,13 +114,15 @@ class TradingLogger:
     All logs automatically redact API keys for security.
     """
     
-    def __init__(self, log_dir: str = "logs"):
+    def __init__(self, log_dir: str = "logs", config: Optional['Config'] = None):
         """Initialize the trading logger.
         
         Args:
             log_dir: Directory to store log files
+            config: Optional Config object to determine run mode for trade logging
         """
         self.log_dir = log_dir
+        self.config = config
         self._ensure_log_directory()
         
         # Set up different loggers
@@ -135,6 +137,11 @@ class TradingLogger:
     def _setup_trade_logger(self) -> logging.Logger:
         """Set up logger for trade execution logs.
         
+        Uses mode-specific log files:
+        - BACKTEST: logs/trades_backtest.log
+        - PAPER: logs/trades_paper.log
+        - LIVE: logs/trades_live.log
+        
         Returns:
             Configured trade logger with daily rotation
         """
@@ -145,8 +152,17 @@ class TradingLogger:
         # Remove existing handlers
         logger.handlers.clear()
         
+        # Determine log file based on run mode
+        if self.config and hasattr(self.config, 'run_mode'):
+            run_mode = self.config.run_mode.lower()
+            trade_log_filename = f"trades_{run_mode}.log"
+        else:
+            # Default to generic trades.log if no config provided
+            trade_log_filename = "trades.log"
+        
+        trade_log_path = os.path.join(self.log_dir, trade_log_filename)
+        
         # Create rotating file handler (rotates daily at midnight)
-        trade_log_path = os.path.join(self.log_dir, "trades.log")
         handler = TimedRotatingFileHandler(
             trade_log_path,
             when="midnight",
@@ -164,6 +180,7 @@ class TradingLogger:
         handler.setFormatter(formatter)
         
         logger.addHandler(handler)
+        logger.info(f"Trade logger initialized: {trade_log_filename}")
         return logger
     
     def _setup_error_logger(self) -> logging.Logger:
@@ -352,6 +369,8 @@ class TradingLogger:
     def get_trade_history(self, days: int = 7) -> List[Dict[str, Any]]:
         """Get trade history from log files.
         
+        Reads from mode-specific log file based on current run_mode.
+        
         Args:
             days: Number of days of history to retrieve
             
@@ -360,11 +379,18 @@ class TradingLogger:
         """
         trades = []
         
-        # Read from current and rotated log files
-        trade_log_path = os.path.join(self.log_dir, "trades.log")
+        # Read from mode-specific log file
+        if self.config and hasattr(self.config, 'run_mode'):
+            run_mode = self.config.run_mode.lower()
+            trade_log_filename = f"trades_{run_mode}.log"
+        else:
+            # Default to generic trades.log if no config provided
+            trade_log_filename = "trades.log"
+        
+        trade_log_path = os.path.join(self.log_dir, trade_log_filename)
         
         if os.path.exists(trade_log_path):
-            with open(trade_log_path, 'r') as f:
+            with open(trade_log_path, 'r', encoding='utf-8') as f:
                 for line in f:
                     if "TRADE_EXECUTED:" in line:
                         try:
@@ -382,18 +408,39 @@ class TradingLogger:
 _logger_instance: Optional[TradingLogger] = None
 
 
-def get_logger(log_dir: str = "logs") -> TradingLogger:
+def reset_logger() -> None:
+    """Reset the global logger instance.
+    
+    This is useful when switching between run modes (BACKTEST, PAPER, LIVE)
+    to ensure the correct log files are used.
+    """
+    global _logger_instance
+    _logger_instance = None
+
+
+def get_logger(log_dir: str = "logs", config: Optional['Config'] = None) -> TradingLogger:
     """Get or create the global logger instance.
     
     Args:
         log_dir: Directory to store log files
+        config: Optional Config object to determine run mode for trade logging
         
     Returns:
         TradingLogger instance
     """
     global _logger_instance
     
-    if _logger_instance is None:
-        _logger_instance = TradingLogger(log_dir)
+    # If config is provided and logger exists, check if run_mode changed
+    if _logger_instance is not None and config is not None:
+        if hasattr(config, 'run_mode'):
+            # Check if the run mode has changed
+            current_mode = _logger_instance.config.run_mode if _logger_instance.config else None
+            new_mode = config.run_mode
+            
+            if current_mode != new_mode:
+                # Run mode changed - recreate logger with new config
+                _logger_instance = TradingLogger(log_dir, config)
+    elif _logger_instance is None:
+        _logger_instance = TradingLogger(log_dir, config)
     
     return _logger_instance

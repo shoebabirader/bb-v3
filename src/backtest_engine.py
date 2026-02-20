@@ -9,6 +9,7 @@ from src.config import Config
 from src.models import Candle, Trade, PerformanceMetrics, Signal, Position
 from src.strategy import StrategyEngine
 from src.risk_manager import RiskManager
+from src.scaled_tp_manager import ScaledTakeProfitManager
 
 logger = logging.getLogger(__name__)
 
@@ -42,6 +43,9 @@ class BacktestEngine:
         self.initial_balance = 0.0
         self.current_balance = 0.0
         
+        # Initialize ScaledTakeProfitManager (no client for backtest mode)
+        self.scaled_tp_manager = ScaledTakeProfitManager(config, client=None)
+        
         # Feature tracking for adaptive components
         self.feature_metrics = {
             'adaptive_thresholds': {
@@ -64,6 +68,14 @@ class BacktestEngine:
                 'enabled': False,
                 'regime_changes': 0,
                 'trades_by_regime': {}
+            },
+            'scaled_take_profit': {
+                'enabled': self.config.enable_scaled_take_profit,
+                'partial_closes': 0,
+                'tp1_hits': 0,
+                'tp2_hits': 0,
+                'tp3_hits': 0,
+                'total_partial_profit': 0.0
             }
         }
     
@@ -187,64 +199,38 @@ class BacktestEngine:
             active_position = self.risk_mgr.get_active_position(self.config.symbol)
             
             if active_position:
-                # Update stops and check for stop hit
-                atr = self.strategy.current_indicators.atr_15m
-                self.risk_mgr.update_stops(active_position, current_price, atr)
-                
-                # Calculate current profit percentage
-                if active_position.side == "LONG":
-                    profit_pct = (current_price - active_position.entry_price) / active_position.entry_price
-                else:  # SHORT
-                    profit_pct = (active_position.entry_price - current_price) / active_position.entry_price
-                
-                # Check if take profit target is reached
-                take_profit_pct = self.config.take_profit_pct
-                
-                if profit_pct >= take_profit_pct:
-                    logger.info(f"[BACKTEST] TAKE PROFIT HIT! {self.config.symbol} {active_position.side} at {profit_pct*100:.2f}%")
-                    exit_price = self.simulate_trade_execution(
-                        signal_type="EXIT",
-                        candle=current_candle,
-                        is_long=(active_position.side == "LONG")
-                    )
+                # CRITICAL FIX: Only check exit conditions if we're past the entry candle
+                # This prevents immediate stop-outs within the same candle as entry
+                # We need at least 1 candle after entry before checking stops
+                if i > active_position.entry_candle_index + 1:
+                    # Update stops and check for stop hit
+                    atr = self.strategy.current_indicators.atr_15m
+                    self.risk_mgr.update_stops(active_position, current_price, atr)
                     
-                    exit_price = self.apply_fees_and_slippage(
-                        exit_price, 
-                        "SELL" if active_position.side == "LONG" else "BUY"
-                    )
-                    
-                    trade = self.risk_mgr.close_position(
-                        active_position,
-                        exit_price,
-                        "TAKE_PROFIT"
-                    )
-                    
-                    self.current_balance += trade.pnl
-                    self.trades.append(trade)
-                    active_position = None
-                
-                # Check if stop was hit during this candle
-                elif self._check_stop_hit_in_candle(active_position, current_candle):
-                    exit_price = self.simulate_trade_execution(
-                        signal_type="EXIT",
-                        candle=current_candle,
-                        is_long=(active_position.side == "LONG")
-                    )
-                    
-                    exit_price = self.apply_fees_and_slippage(
-                        exit_price, 
-                        "SELL" if active_position.side == "LONG" else "BUY"
-                    )
-                    
-                    trade = self.risk_mgr.close_position(
-                        active_position,
-                        exit_price,
-                        "TRAILING_STOP"
-                    )
-                    
-                    self.current_balance += trade.pnl
-                    self.trades.append(trade)
-                    active_position = None
+                    # Check for scaled take profit if enabled
+                    if self.config.enable_scaled_take_profit:
+                        exit_reason = self._check_exit_conditions_scaled_tp(
+                            active_position, current_candle, current_price
+                        )
+                        
+                        if exit_reason:
+                            # Position was closed (either partially or fully)
+                            # Check if position is fully closed
+                            if active_position.quantity == 0 or exit_reason == "SCALED_TP_FINAL":
+                                # Position fully closed, reset tracking
+                                self.scaled_tp_manager.reset_tracking(active_position.symbol)
+                                active_position = None
+                    else:
+                        # Original single take profit logic
+                        exit_reason = self._check_exit_conditions_single_tp(
+                            active_position, current_candle, current_price
+                        )
+                        
+                        if exit_reason:
+                            active_position = None
+                else:
+                    # Still within entry candle or first candle after entry - skip exit checks
+                    logger.debug(f"Skipping exit check: candle {i} <= entry candle {active_position.entry_candle_index} + 1")
             else:
                 # No active position, check for entry signals
                 long_signal = self.strategy.check_long_entry()
@@ -279,6 +265,16 @@ class BacktestEngine:
                         self.current_balance,
                         atr
                     )
+                    
+                    # CRITICAL FIX: Store the entry candle index
+                    # This allows us to skip exit checks until we're past this candle
+                    if position:
+                        position.entry_candle_index = i
+                        logger.info(f"Position opened at candle index {i}, will check exits starting from candle {i + 2}")
+                    
+                    # Set original_quantity for scaled TP tracking
+                    if position and position.original_quantity == 0:
+                        position.original_quantity = position.quantity
             
             # Track equity (balance + unrealized PnL)
             equity = self.current_balance
@@ -547,6 +543,294 @@ class BacktestEngine:
         else:  # SHORT
             # For short positions, check if high touched the stop
             return candle.high >= position.trailing_stop
+    
+    def _check_exit_conditions_scaled_tp(
+        self,
+        position: Position,
+        candle: Candle,
+        current_price: float
+    ) -> Optional[str]:
+        """Check exit conditions with scaled take profit enabled.
+        
+        This method handles:
+        - Checking for TP level hits
+        - Simulating partial closes
+        - Updating position size after partials
+        - Checking for stop loss hits
+        - Tracking partial exits in backtest results
+        
+        Args:
+            position: Active position to check
+            candle: Current candle
+            current_price: Current market price
+            
+        Returns:
+            Exit reason string if position closed, None if still open
+        """
+        # First check if stop was hit
+        if self._check_stop_hit_in_candle(position, candle):
+            exit_price = self.simulate_trade_execution(
+                signal_type="EXIT",
+                candle=candle,
+                is_long=(position.side == "LONG")
+            )
+            
+            exit_price = self.apply_fees_and_slippage(
+                exit_price, 
+                "SELL" if position.side == "LONG" else "BUY"
+            )
+            
+            trade = self.risk_mgr.close_position(
+                position,
+                exit_price,
+                "TRAILING_STOP"
+            )
+            
+            self.current_balance += trade.pnl
+            self.trades.append(trade)
+            
+            return "TRAILING_STOP"
+        
+        # Check for TP level hits
+        action = self.scaled_tp_manager.check_take_profit_levels(position, current_price)
+        
+        if action:
+            # Simulate partial close
+            result = self._simulate_partial_close(position, action, candle)
+            
+            if result['success']:
+                # Update position size after partial close
+                position.quantity -= result['filled_quantity']
+                
+                # Update stop loss
+                position.stop_loss = action.new_stop_loss
+                position.trailing_stop = action.new_stop_loss
+                
+                # Record TP level hit
+                if action.tp_level not in position.tp_levels_hit:
+                    position.tp_levels_hit.append(action.tp_level)
+                
+                # Record partial exit
+                partial_exit = {
+                    'tp_level': action.tp_level,
+                    'exit_time': candle.timestamp,
+                    'exit_price': result['fill_price'],
+                    'quantity_closed': result['filled_quantity'],
+                    'profit': result['realized_profit'],
+                    'profit_pct': action.profit_pct,
+                    'new_stop_loss': action.new_stop_loss
+                }
+                position.partial_exits.append(partial_exit)
+                
+                # Update balance with partial profit
+                self.current_balance += result['realized_profit']
+                
+                # Track metrics
+                self.feature_metrics['scaled_take_profit']['partial_closes'] += 1
+                self.feature_metrics['scaled_take_profit']['total_partial_profit'] += result['realized_profit']
+                
+                if action.tp_level == 1:
+                    self.feature_metrics['scaled_take_profit']['tp1_hits'] += 1
+                elif action.tp_level == 2:
+                    self.feature_metrics['scaled_take_profit']['tp2_hits'] += 1
+                elif action.tp_level == 3:
+                    self.feature_metrics['scaled_take_profit']['tp3_hits'] += 1
+                
+                # Update tracking
+                self.scaled_tp_manager.update_tracking_after_partial_close(
+                    position, action.tp_level, action.new_stop_loss
+                )
+                
+                # Check if this was the final TP level
+                if len(position.tp_levels_hit) >= len(self.config.scaled_tp_levels):
+                    # All TP levels hit, close remaining position
+                    if position.quantity > 0:
+                        exit_price = self.simulate_trade_execution(
+                            signal_type="EXIT",
+                            candle=candle,
+                            is_long=(position.side == "LONG")
+                        )
+                        
+                        exit_price = self.apply_fees_and_slippage(
+                            exit_price,
+                            "SELL" if position.side == "LONG" else "BUY"
+                        )
+                        
+                        # Calculate final profit
+                        if position.side == "LONG":
+                            final_profit = (exit_price - position.entry_price) * position.quantity
+                        else:
+                            final_profit = (position.entry_price - exit_price) * position.quantity
+                        
+                        self.current_balance += final_profit
+                        
+                        # Record final partial exit
+                        final_exit = {
+                            'tp_level': len(self.config.scaled_tp_levels),
+                            'exit_time': candle.timestamp,
+                            'exit_price': exit_price,
+                            'quantity_closed': position.quantity,
+                            'profit': final_profit,
+                            'profit_pct': action.profit_pct,
+                            'new_stop_loss': action.new_stop_loss
+                        }
+                        position.partial_exits.append(final_exit)
+                        
+                        # Create trade record with all partial exits
+                        trade = Trade(
+                            symbol=position.symbol,
+                            side=position.side,
+                            entry_price=position.entry_price,
+                            exit_price=exit_price,  # Final exit price
+                            quantity=position.original_quantity,
+                            entry_time=position.entry_time,
+                            exit_time=candle.timestamp,
+                            pnl=sum(pe['profit'] for pe in position.partial_exits),
+                            pnl_percent=(sum(pe['profit'] for pe in position.partial_exits) / 
+                                       (position.entry_price * position.original_quantity) * 100),
+                            exit_reason="SCALED_TP_FINAL"
+                        )
+                        
+                        self.trades.append(trade)
+                        
+                        # Mark position as fully closed
+                        position.quantity = 0
+                        
+                        return "SCALED_TP_FINAL"
+        
+        return None
+    
+    def _check_exit_conditions_single_tp(
+        self,
+        position: Position,
+        candle: Candle,
+        current_price: float
+    ) -> Optional[str]:
+        """Check exit conditions with single take profit (original logic).
+        
+        Args:
+            position: Active position to check
+            candle: Current candle
+            current_price: Current market price
+            
+        Returns:
+            Exit reason string if position closed, None if still open
+        """
+        # Calculate current profit percentage
+        if position.side == "LONG":
+            profit_pct = (current_price - position.entry_price) / position.entry_price
+        else:  # SHORT
+            profit_pct = (position.entry_price - current_price) / position.entry_price
+        
+        # Check if take profit target is reached
+        take_profit_pct = self.config.take_profit_pct
+        
+        if profit_pct >= take_profit_pct:
+            logger.info(f"[BACKTEST] TAKE PROFIT HIT! {self.config.symbol} {position.side} at {profit_pct*100:.2f}%")
+            exit_price = self.simulate_trade_execution(
+                signal_type="EXIT",
+                candle=candle,
+                is_long=(position.side == "LONG")
+            )
+            
+            exit_price = self.apply_fees_and_slippage(
+                exit_price, 
+                "SELL" if position.side == "LONG" else "BUY"
+            )
+            
+            trade = self.risk_mgr.close_position(
+                position,
+                exit_price,
+                "TAKE_PROFIT"
+            )
+            
+            self.current_balance += trade.pnl
+            self.trades.append(trade)
+            
+            return "TAKE_PROFIT"
+        
+        # Check if stop was hit during this candle
+        elif self._check_stop_hit_in_candle(position, candle):
+            exit_price = self.simulate_trade_execution(
+                signal_type="EXIT",
+                candle=candle,
+                is_long=(position.side == "LONG")
+            )
+            
+            exit_price = self.apply_fees_and_slippage(
+                exit_price, 
+                "SELL" if position.side == "LONG" else "BUY"
+            )
+            
+            trade = self.risk_mgr.close_position(
+                position,
+                exit_price,
+                "TRAILING_STOP"
+            )
+            
+            self.current_balance += trade.pnl
+            self.trades.append(trade)
+            
+            return "TRAILING_STOP"
+        
+        return None
+    
+    def _simulate_partial_close(
+        self,
+        position: Position,
+        action,  # PartialCloseAction
+        candle: Candle
+    ) -> Dict:
+        """Simulate a partial close execution in backtest.
+        
+        This method simulates what would happen if we executed a partial close
+        at the current candle. It calculates the fill price and realized profit.
+        
+        Args:
+            position: Position being partially closed
+            action: PartialCloseAction with details
+            candle: Current candle for price simulation
+            
+        Returns:
+            Dictionary with:
+                - success: bool
+                - filled_quantity: float
+                - fill_price: float
+                - realized_profit: float
+                - error_message: Optional[str]
+        """
+        # Simulate fill price (use target price as approximation)
+        # In reality, we might get filled slightly better or worse
+        fill_price = action.target_price
+        
+        # Apply fees and slippage
+        fill_price = self.apply_fees_and_slippage(
+            fill_price,
+            "SELL" if position.side == "LONG" else "BUY"
+        )
+        
+        # Calculate quantity to close (ensure we don't close more than we have)
+        filled_quantity = min(action.quantity, position.quantity)
+        
+        # Calculate realized profit
+        if position.side == "LONG":
+            realized_profit = (fill_price - position.entry_price) * filled_quantity
+        else:  # SHORT
+            realized_profit = (position.entry_price - fill_price) * filled_quantity
+        
+        logger.info(
+            f"[BACKTEST] Partial close simulated: TP{action.tp_level} "
+            f"{position.symbol} {filled_quantity:.4f} at {fill_price:.2f}, "
+            f"profit: ${realized_profit:.2f}"
+        )
+        
+        return {
+            'success': True,
+            'filled_quantity': filled_quantity,
+            'fill_price': fill_price,
+            'realized_profit': realized_profit,
+            'error_message': None
+        }
     
     def get_equity_curve(self) -> List[float]:
         """Get the equity curve from the backtest.

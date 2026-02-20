@@ -2,7 +2,10 @@
 
 import pytest
 from hypothesis import given, strategies as st
-from src.models import Candle, Position, Trade, Signal, IndicatorState, PerformanceMetrics
+from src.models import (
+    Candle, Position, Trade, Signal, IndicatorState, PerformanceMetrics,
+    PartialCloseAction, PartialCloseResult, TPStatus
+)
 
 
 # Feature: binance-futures-bot, Property 7: Trade Log Completeness
@@ -113,7 +116,8 @@ class TestDataModels:
             stop_loss=29400.0,
             trailing_stop=29400.0,
             entry_time=1609459200000,
-            unrealized_pnl=0.0
+            unrealized_pnl=0.0,
+            original_quantity=0.5
         )
         
         assert position.symbol == "BTCUSDT"
@@ -125,6 +129,9 @@ class TestDataModels:
         assert position.trailing_stop == 29400.0
         assert position.entry_time == 1609459200000
         assert position.unrealized_pnl == 0.0
+        assert position.original_quantity == 0.5
+        assert position.partial_exits == []
+        assert position.tp_levels_hit == []
     
     def test_trade_creation_long(self):
         """Test creating a Trade object for a long position."""
@@ -241,3 +248,89 @@ class TestDataModels:
         assert metrics.win_rate == 60.0
         assert metrics.profit_factor == 1.5
         assert metrics.sharpe_ratio == 1.2
+    
+    def test_partial_close_action_creation(self):
+        """Test creating a PartialCloseAction object."""
+        action = PartialCloseAction(
+            tp_level=1,
+            profit_pct=0.03,
+            close_pct=0.40,
+            target_price=30900.0,
+            quantity=0.2,
+            new_stop_loss=30000.0
+        )
+        
+        assert action.tp_level == 1
+        assert action.profit_pct == 0.03
+        assert action.close_pct == 0.40
+        assert action.target_price == 30900.0
+        assert action.quantity == 0.2
+        assert action.new_stop_loss == 30000.0
+    
+    def test_partial_close_result_success(self):
+        """Test creating a successful PartialCloseResult object."""
+        result = PartialCloseResult(
+            success=True,
+            order_id="12345678",
+            filled_quantity=0.2,
+            fill_price=30900.0,
+            realized_profit=180.0,
+            error_message=None
+        )
+        
+        assert result.success is True
+        assert result.order_id == "12345678"
+        assert result.filled_quantity == 0.2
+        assert result.fill_price == 30900.0
+        assert result.realized_profit == 180.0
+        assert result.error_message is None
+    
+    def test_partial_close_result_failure(self):
+        """Test creating a failed PartialCloseResult object."""
+        result = PartialCloseResult(
+            success=False,
+            order_id=None,
+            filled_quantity=0.0,
+            fill_price=0.0,
+            realized_profit=0.0,
+            error_message="Insufficient balance"
+        )
+        
+        assert result.success is False
+        assert result.order_id is None
+        assert result.filled_quantity == 0.0
+        assert result.error_message == "Insufficient balance"
+    
+    def test_tp_status_creation(self):
+        """Test creating a TPStatus object."""
+        status = TPStatus(
+            symbol="BTCUSDT",
+            levels_hit=[1, 2],
+            remaining_size_pct=0.30,
+            current_stop_loss=30900.0,
+            next_tp_level=3,
+            next_tp_price=32400.0
+        )
+        
+        assert status.symbol == "BTCUSDT"
+        assert status.levels_hit == [1, 2]
+        assert status.remaining_size_pct == 0.30
+        assert status.current_stop_loss == 30900.0
+        assert status.next_tp_level == 3
+        assert status.next_tp_price == 32400.0
+    
+    def test_tp_status_all_levels_hit(self):
+        """Test creating a TPStatus object when all levels are hit."""
+        status = TPStatus(
+            symbol="BTCUSDT",
+            levels_hit=[1, 2, 3],
+            remaining_size_pct=0.0,
+            current_stop_loss=31500.0,
+            next_tp_level=None,
+            next_tp_price=None
+        )
+        
+        assert status.levels_hit == [1, 2, 3]
+        assert status.remaining_size_pct == 0.0
+        assert status.next_tp_level is None
+        assert status.next_tp_price is None

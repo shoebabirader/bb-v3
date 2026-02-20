@@ -127,7 +127,8 @@ class RiskManager:
             stop_loss=stop_loss_price,
             trailing_stop=stop_loss_price,  # Initially same as stop_loss
             entry_time=signal.timestamp,
-            unrealized_pnl=0.0
+            unrealized_pnl=0.0,
+            original_quantity=sizing_result['quantity']  # Set original quantity for scaled TP tracking
         )
         
         # Check portfolio risk limits if PortfolioManager is enabled
@@ -402,7 +403,7 @@ class RiskManager:
         Args:
             position: Position to close
             exit_price: Price at which position is closed
-            reason: Exit reason ("STOP_LOSS", "TRAILING_STOP", "SIGNAL_EXIT", "PANIC", "TIME_BASED", "REGIME_CHANGE")
+            reason: Exit reason ("STOP_LOSS", "TRAILING_STOP", "TAKE_PROFIT", "SIGNAL_EXIT", "PANIC", "TIME_BASED", "REGIME_CHANGE")
             
         Returns:
             Trade object with complete trade details
@@ -411,7 +412,7 @@ class RiskManager:
             ValueError: If exit reason is invalid or inputs are invalid
         """
         # Validate exit reason
-        valid_reasons = ["STOP_LOSS", "TRAILING_STOP", "SIGNAL_EXIT", "PANIC", "TIME_BASED", "REGIME_CHANGE"]
+        valid_reasons = ["STOP_LOSS", "TRAILING_STOP", "TAKE_PROFIT", "SIGNAL_EXIT", "PANIC", "TIME_BASED", "REGIME_CHANGE"]
         if reason not in valid_reasons:
             raise ValueError(f"Invalid exit reason: {reason}. Must be one of: {', '.join(valid_reasons)}")
         

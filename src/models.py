@@ -1,7 +1,7 @@
 """Data models and core types for Binance Futures Trading Bot."""
 
 from dataclasses import dataclass, field
-from typing import Optional, Dict
+from typing import Optional, Dict, List
 
 
 @dataclass
@@ -38,6 +38,10 @@ class Position:
         trailing_stop: Current trailing stop price
         entry_time: Unix timestamp when position was opened
         unrealized_pnl: Current unrealized profit/loss
+        original_quantity: Initial position size before any partial closes
+        partial_exits: History of partial exit actions
+        tp_levels_hit: List of take profit levels that have been hit (e.g., [1, 2])
+        entry_candle_index: Index of the candle where position was entered (for backtest timing)
     """
     symbol: str
     side: str  # "LONG" or "SHORT"
@@ -48,6 +52,71 @@ class Position:
     trailing_stop: float
     entry_time: int
     unrealized_pnl: float = 0.0
+    original_quantity: float = 0.0
+    partial_exits: List[Dict] = field(default_factory=list)
+    tp_levels_hit: List[int] = field(default_factory=list)
+    entry_candle_index: int = -1  # -1 means not set (for live trading compatibility)
+
+
+@dataclass
+@dataclass
+class PartialCloseAction:
+    """Action to close part of a position at a take profit level.
+    
+    Attributes:
+        tp_level: Take profit level number (1, 2, 3, etc.)
+        profit_pct: Target profit percentage for this level
+        close_pct: Percentage of position to close at this level
+        target_price: Price at which to execute the partial close
+        quantity: Actual quantity to close (in base currency)
+        new_stop_loss: New stop loss price after this partial close
+    """
+    tp_level: int
+    profit_pct: float
+    close_pct: float
+    target_price: float
+    quantity: float
+    new_stop_loss: float
+
+
+@dataclass
+class PartialCloseResult:
+    """Result of a partial close execution.
+    
+    Attributes:
+        success: Whether the partial close was successful
+        order_id: Exchange order ID (None if failed)
+        filled_quantity: Actual quantity filled by the exchange
+        fill_price: Average fill price for the order
+        realized_profit: Realized profit/loss from this partial close
+        error_message: Error message if execution failed (None if successful)
+    """
+    success: bool
+    order_id: Optional[str]
+    filled_quantity: float
+    fill_price: float
+    realized_profit: float
+    error_message: Optional[str]
+
+
+@dataclass
+class TPStatus:
+    """Status of take profit levels for a position.
+    
+    Attributes:
+        symbol: Trading pair symbol
+        levels_hit: List of TP level numbers that have been hit (e.g., [1, 2])
+        remaining_size_pct: Percentage of original position still open (0.0-1.0)
+        current_stop_loss: Current stop loss price
+        next_tp_level: Next TP level to hit (None if all levels hit)
+        next_tp_price: Price target for next TP level (None if all levels hit)
+    """
+    symbol: str
+    levels_hit: List[int]
+    remaining_size_pct: float
+    current_stop_loss: float
+    next_tp_level: Optional[int]
+    next_tp_price: Optional[float]
 
 
 @dataclass
@@ -64,7 +133,7 @@ class Trade:
         pnl_percent: Profit/loss as percentage of entry value
         entry_time: Unix timestamp when trade was entered
         exit_time: Unix timestamp when trade was exited
-        exit_reason: Reason for exit ("STOP_LOSS", "TRAILING_STOP", "SIGNAL_EXIT", "PANIC")
+        exit_reason: Reason for exit ("STOP_LOSS", "TRAILING_STOP", "TAKE_PROFIT", "SIGNAL_EXIT", "PANIC", "TIME_BASED", "REGIME_CHANGE")
     """
     symbol: str
     side: str

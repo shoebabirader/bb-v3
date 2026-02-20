@@ -102,12 +102,13 @@ def test_initial_stop_loss_placement(wallet_balance, entry_price, atr, signal_ty
 @given(
     entry_price=st.floats(min_value=1000, max_value=50000),
     atr=st.floats(min_value=10, max_value=500),
-    price_move_percent=st.floats(min_value=0.01, max_value=0.1),  # 1-10% favorable move
+    price_move_percent=st.floats(min_value=0.05, max_value=0.15),  # 5-15% favorable move (enough to activate)
     side=st.sampled_from(["LONG", "SHORT"])
 )
 def test_trailing_stop_only_tightens(entry_price, atr, price_move_percent, side):
-    """For any position in profit, the trailing stop should be set at 1.5x ATR 
-    from current price, and should only move closer to current price (never farther away).
+    """For any position in profit beyond activation threshold, the trailing stop 
+    should be set at 1.5x ATR from current price, and should only move closer to 
+    current price (never farther away).
     
     Validates: Requirements 8.2, 8.3, 8.5
     """
@@ -118,6 +119,7 @@ def test_trailing_stop_only_tightens(entry_price, atr, price_move_percent, side)
     config.leverage = 3
     config.stop_loss_atr_multiplier = 2.0
     config.trailing_stop_atr_multiplier = 1.5
+    # Activation threshold defaults to 2.0x ATR
     
     position_sizer = PositionSizer(config)
     risk_manager = RiskManager(config, position_sizer)
@@ -138,13 +140,14 @@ def test_trailing_stop_only_tightens(entry_price, atr, price_move_percent, side)
         stop_loss=initial_stop,
         trailing_stop=initial_stop,
         entry_time=1000000,
-        unrealized_pnl=0.0
+        unrealized_pnl=0.0,
+        original_quantity=0.1
     )
     
     # Add position to risk manager
     risk_manager.active_positions["BTCUSDT"] = position
     
-    # Move price favorably
+    # Move price favorably (enough to activate trailing stop)
     if side == "LONG":
         new_price = entry_price * (1 + price_move_percent)
     else:
@@ -156,27 +159,42 @@ def test_trailing_stop_only_tightens(entry_price, atr, price_move_percent, side)
     # Update stops
     risk_manager.update_stops(position, new_price, atr)
     
-    # Verify trailing stop moved in favorable direction (tightened)
+    # Calculate activation threshold (2.0x ATR by default)
+    activation_threshold = 2.0 * atr
+    
+    # Check if price moved enough to activate trailing stop
     if side == "LONG":
-        # For long, trailing stop should move up (increase)
-        assert position.trailing_stop >= old_trailing_stop, \
-            f"Long trailing stop should only move up. Old: {old_trailing_stop}, New: {position.trailing_stop}"
-        
-        # Verify it's at 1.5x ATR from current price (or at old stop if that's tighter)
-        expected_new_stop = new_price - (config.trailing_stop_atr_multiplier * atr)
-        if expected_new_stop > old_trailing_stop:
-            assert abs(position.trailing_stop - expected_new_stop) < 0.01, \
-                f"Trailing stop should be 1.5x ATR from price. Expected: {expected_new_stop}, Got: {position.trailing_stop}"
-    else:  # SHORT
-        # For short, trailing stop should move down (decrease)
-        assert position.trailing_stop <= old_trailing_stop, \
-            f"Short trailing stop should only move down. Old: {old_trailing_stop}, New: {position.trailing_stop}"
-        
-        # Verify it's at 1.5x ATR from current price (or at old stop if that's tighter)
-        expected_new_stop = new_price + (config.trailing_stop_atr_multiplier * atr)
-        if expected_new_stop < old_trailing_stop:
-            assert abs(position.trailing_stop - expected_new_stop) < 0.01, \
-                f"Trailing stop should be 1.5x ATR from price. Expected: {expected_new_stop}, Got: {position.trailing_stop}"
+        profit_distance = new_price - entry_price
+    else:
+        profit_distance = entry_price - new_price
+    
+    # Only verify trailing stop behavior if activation threshold is met
+    if profit_distance >= activation_threshold:
+        # Verify trailing stop moved in favorable direction (tightened)
+        if side == "LONG":
+            # For long, trailing stop should move up (increase)
+            assert position.trailing_stop >= old_trailing_stop, \
+                f"Long trailing stop should only move up. Old: {old_trailing_stop}, New: {position.trailing_stop}"
+            
+            # Verify it's at 1.5x ATR from current price (or at old stop if that's tighter)
+            expected_new_stop = new_price - (config.trailing_stop_atr_multiplier * atr)
+            if expected_new_stop > old_trailing_stop:
+                assert abs(position.trailing_stop - expected_new_stop) < 0.01, \
+                    f"Trailing stop should be 1.5x ATR from price. Expected: {expected_new_stop}, Got: {position.trailing_stop}"
+        else:  # SHORT
+            # For short, trailing stop should move down (decrease)
+            assert position.trailing_stop <= old_trailing_stop, \
+                f"Short trailing stop should only move down. Old: {old_trailing_stop}, New: {position.trailing_stop}"
+            
+            # Verify it's at 1.5x ATR from current price (or at old stop if that's tighter)
+            expected_new_stop = new_price + (config.trailing_stop_atr_multiplier * atr)
+            if expected_new_stop < old_trailing_stop:
+                assert abs(position.trailing_stop - expected_new_stop) < 0.01, \
+                    f"Trailing stop should be 1.5x ATR from price. Expected: {expected_new_stop}, Got: {position.trailing_stop}"
+    else:
+        # If activation threshold not met, trailing stop should remain unchanged
+        assert position.trailing_stop == old_trailing_stop, \
+            f"Trailing stop should not change before activation threshold. Profit: {profit_distance}, Threshold: {activation_threshold}"
     
     # Now move price unfavorably and verify stop doesn't widen
     if side == "LONG":

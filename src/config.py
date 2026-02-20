@@ -2,8 +2,11 @@
 
 import json
 import os
+import logging
 from dataclasses import dataclass, field
 from typing import Optional
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -28,6 +31,12 @@ class Config:
     leverage: int = 3
     stop_loss_atr_multiplier: float = 2.0
     trailing_stop_atr_multiplier: float = 1.5
+    stop_loss_pct: float = 0.02  # 2% stop loss
+    take_profit_pct: float = 0.04  # 4% take profit
+    trailing_stop_activation: float = 0.015  # 1.5% profit to activate trailing
+    trailing_stop_distance: float = 0.01  # 1% trailing distance
+    max_positions: int = 3
+    max_daily_loss: float = 0.05  # 5% max daily loss
     
     # Indicator Parameters
     atr_period: int = 14
@@ -135,6 +144,16 @@ class Config:
     async_volume_profile: bool = True
     cache_indicators: bool = True
     
+    # Scaled Take Profit Parameters
+    enable_scaled_take_profit: bool = False
+    scaled_tp_levels: list = field(default_factory=lambda: [
+        {"profit_pct": 0.03, "close_pct": 0.40},  # TP1: +3%, close 40%
+        {"profit_pct": 0.05, "close_pct": 0.30},  # TP2: +5%, close 30%
+        {"profit_pct": 0.08, "close_pct": 0.30}   # TP3: +8%, close 30%
+    ])
+    scaled_tp_min_order_size: float = 0.001  # Binance minimum (symbol-specific)
+    scaled_tp_fallback_to_single: bool = True  # Fall back if minimums not met
+    
     # Applied defaults tracking
     _applied_defaults: list = field(default_factory=list, init=False, repr=False)
     
@@ -156,7 +175,7 @@ class Config:
         
         # Load from JSON file if it exists
         if os.path.exists(config_path):
-            with open(config_path, 'r') as f:
+            with open(config_path, 'r', encoding='utf-8') as f:
                 config_data = json.load(f)
                 config._load_from_dict(config_data)
         else:
@@ -220,6 +239,37 @@ class Config:
             self.trailing_stop_atr_multiplier = float(config_data["trailing_stop_atr_multiplier"])
         else:
             self._applied_defaults.append(f"trailing_stop_atr_multiplier (default: {self.trailing_stop_atr_multiplier})")
+        
+        # Percentage-based risk parameters
+        if "stop_loss_pct" in config_data:
+            self.stop_loss_pct = float(config_data["stop_loss_pct"])
+        else:
+            self._applied_defaults.append(f"stop_loss_pct (default: {self.stop_loss_pct})")
+            
+        if "take_profit_pct" in config_data:
+            self.take_profit_pct = float(config_data["take_profit_pct"])
+        else:
+            self._applied_defaults.append(f"take_profit_pct (default: {self.take_profit_pct})")
+            
+        if "trailing_stop_activation" in config_data:
+            self.trailing_stop_activation = float(config_data["trailing_stop_activation"])
+        else:
+            self._applied_defaults.append(f"trailing_stop_activation (default: {self.trailing_stop_activation})")
+            
+        if "trailing_stop_distance" in config_data:
+            self.trailing_stop_distance = float(config_data["trailing_stop_distance"])
+        else:
+            self._applied_defaults.append(f"trailing_stop_distance (default: {self.trailing_stop_distance})")
+            
+        if "max_positions" in config_data:
+            self.max_positions = int(config_data["max_positions"])
+        else:
+            self._applied_defaults.append(f"max_positions (default: {self.max_positions})")
+            
+        if "max_daily_loss" in config_data:
+            self.max_daily_loss = float(config_data["max_daily_loss"])
+        else:
+            self._applied_defaults.append(f"max_daily_loss (default: {self.max_daily_loss})")
         
         # Indicator Parameters
         if "atr_period" in config_data:
@@ -362,6 +412,15 @@ class Config:
         self._load_int_param(config_data, "data_cleanup_interval_hours")
         self._load_bool_param(config_data, "async_volume_profile")
         self._load_bool_param(config_data, "cache_indicators")
+        
+        # Scaled Take Profit Parameters
+        self._load_bool_param(config_data, "enable_scaled_take_profit")
+        if "scaled_tp_levels" in config_data:
+            self.scaled_tp_levels = config_data["scaled_tp_levels"]
+        else:
+            self._applied_defaults.append(f"scaled_tp_levels (default: {self.scaled_tp_levels})")
+        self._load_float_param(config_data, "scaled_tp_min_order_size")
+        self._load_bool_param(config_data, "scaled_tp_fallback_to_single")
     
     def _load_bool_param(self, config_data: dict, param_name: str) -> None:
         """Load a boolean parameter from config data."""
@@ -444,8 +503,12 @@ class Config:
         
         # Validate risk parameters
         # WARNING: Values above 0.1 (10%) are extremely dangerous and can lead to account loss
-        if self.risk_per_trade <= 0 or self.risk_per_trade > 1.0:
-            errors.append(f"Invalid risk_per_trade {self.risk_per_trade}. Must be between 0 and 1.0 (0-100%)")
+        # For small accounts (<$100), higher risk may be acceptable but use with extreme caution
+        if self.risk_per_trade <= 0 or self.risk_per_trade > 0.50:
+            errors.append(f"Invalid risk_per_trade {self.risk_per_trade}. Must be between 0 and 0.50 (0-50%)")
+        elif self.risk_per_trade > 0.1:
+            # Log warning for high risk but don't block it
+            logger.warning(f"⚠️  HIGH RISK WARNING: risk_per_trade is {self.risk_per_trade*100:.1f}% (>{10}%). This is extremely risky!")
         
         if self.leverage < 1 or self.leverage > 125:
             errors.append(f"Invalid leverage {self.leverage}. Must be between 1 and 125")
@@ -499,6 +562,7 @@ class Config:
         self._validate_advanced_exits(errors)
         self._validate_regime_detection(errors)
         self._validate_performance(errors)
+        self._validate_scaled_take_profit(errors)
         
         # If there are errors, raise ValueError with all error messages
         if errors:
@@ -637,8 +701,11 @@ class Config:
         if self.portfolio_correlation_lookback_days < 7 or self.portfolio_correlation_lookback_days > 90:
             errors.append(f"Invalid portfolio_correlation_lookback_days {self.portfolio_correlation_lookback_days}. Must be between 7 and 90")
         
-        if self.portfolio_max_total_risk <= 0 or self.portfolio_max_total_risk > 1.0:
-            errors.append(f"Invalid portfolio_max_total_risk {self.portfolio_max_total_risk}. Must be between 0 and 1.0 (0-100%)")
+        if self.portfolio_max_total_risk <= 0 or self.portfolio_max_total_risk > 0.50:
+            errors.append(f"Invalid portfolio_max_total_risk {self.portfolio_max_total_risk}. Must be between 0 and 0.50 (0-50%)")
+        elif self.portfolio_max_total_risk > 0.20:
+            # Log warning for high risk but don't block it
+            logger.warning(f"⚠️  HIGH RISK WARNING: portfolio_max_total_risk is {self.portfolio_max_total_risk*100:.1f}% (>{20}%). This is extremely risky!")
     
     def _validate_advanced_exits(self, errors: list) -> None:
         """Validate advanced exit parameters."""
@@ -721,11 +788,73 @@ class Config:
         
         if self.data_cleanup_interval_hours < 1:
             errors.append(f"Invalid data_cleanup_interval_hours {self.data_cleanup_interval_hours}. Must be at least 1")
+    
+    def _validate_scaled_take_profit(self, errors: list) -> None:
+        """Validate scaled take profit parameters."""
+        # Validate minimum order size
+        if self.scaled_tp_min_order_size <= 0:
+            errors.append(f"Invalid scaled_tp_min_order_size {self.scaled_tp_min_order_size}. Must be positive")
         
-        # If there are errors, raise ValueError with all error messages
-        if errors:
-            error_message = "Configuration validation failed:\n" + "\n".join(f"  - {error}" for error in errors)
-            raise ValueError(error_message)
+        # Validate TP levels structure
+        if not isinstance(self.scaled_tp_levels, list):
+            errors.append("scaled_tp_levels must be a list")
+            return  # Can't validate further if not a list
+        
+        if len(self.scaled_tp_levels) == 0:
+            errors.append("scaled_tp_levels must contain at least one level")
+            return
+        
+        # Validate each TP level
+        total_close_pct = 0.0
+        prev_profit_pct = 0.0
+        
+        for i, level in enumerate(self.scaled_tp_levels):
+            if not isinstance(level, dict):
+                errors.append(f"scaled_tp_levels[{i}] must be a dictionary")
+                continue
+            
+            # Check required keys
+            if "profit_pct" not in level:
+                errors.append(f"scaled_tp_levels[{i}] missing required key 'profit_pct'")
+                continue
+            
+            if "close_pct" not in level:
+                errors.append(f"scaled_tp_levels[{i}] missing required key 'close_pct'")
+                continue
+            
+            profit_pct = level["profit_pct"]
+            close_pct = level["close_pct"]
+            
+            # Validate profit_pct
+            if not isinstance(profit_pct, (int, float)):
+                errors.append(f"scaled_tp_levels[{i}]['profit_pct'] must be a number")
+            elif profit_pct <= 0:
+                errors.append(f"scaled_tp_levels[{i}]['profit_pct'] must be positive (got {profit_pct})")
+            elif profit_pct > 1.0:
+                errors.append(f"scaled_tp_levels[{i}]['profit_pct'] must be <= 1.0 (100%) (got {profit_pct})")
+            
+            # Validate close_pct
+            if not isinstance(close_pct, (int, float)):
+                errors.append(f"scaled_tp_levels[{i}]['close_pct'] must be a number")
+            elif close_pct <= 0:
+                errors.append(f"scaled_tp_levels[{i}]['close_pct'] must be positive (got {close_pct})")
+            elif close_pct > 1.0:
+                errors.append(f"scaled_tp_levels[{i}]['close_pct'] must be <= 1.0 (100%) (got {close_pct})")
+            
+            # Check profit levels are in ascending order (Property 7: Profit level monotonicity)
+            if isinstance(profit_pct, (int, float)) and profit_pct <= prev_profit_pct and i > 0:
+                errors.append(f"scaled_tp_levels[{i}]['profit_pct'] ({profit_pct}) must be greater than previous level ({prev_profit_pct}). Profit levels must be in ascending order.")
+            
+            if isinstance(profit_pct, (int, float)):
+                prev_profit_pct = profit_pct
+            
+            # Sum up close percentages
+            if isinstance(close_pct, (int, float)):
+                total_close_pct += close_pct
+        
+        # Check that close percentages sum to 1.0 (100%) (Property 5: Close percentage sum)
+        if abs(total_close_pct - 1.0) > 0.01:  # Allow 1% tolerance for rounding
+            errors.append(f"scaled_tp_levels close percentages must sum to 1.0 (100%), got {total_close_pct:.2f}. This will be normalized at runtime.")
     
     def get_applied_defaults(self) -> list:
         """Get list of configuration parameters that used default values.

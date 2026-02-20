@@ -12,6 +12,9 @@ print("=" * 80)
 # Load config
 config = Config.load_from_file('config/config.json')
 
+# Override run_mode to BACKTEST
+config.run_mode = "BACKTEST"
+
 # Get portfolio symbols
 symbols = config.portfolio_symbols
 print(f"\nBacktesting {len(symbols)} symbols: {', '.join(symbols)}")

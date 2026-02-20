@@ -140,29 +140,32 @@ class AdvancedExitManager:
         
         profit_atr = profit_distance / atr if atr > 0 else 0
         
-        # Move stop to breakeven at 2x ATR profit
+        # Move stop to breakeven + buffer at configured ATR profit
+        # Use 0.5x ATR buffer to avoid getting stopped out on normal retracements
         if profit_atr >= self.config.exit_breakeven_atr_multiplier:
+            breakeven_buffer = 0.5 * atr  # Buffer to avoid premature stops
+            
             if position.side == "LONG":
-                # For long, breakeven is entry price
-                new_stop = position.entry_price
+                # For long, breakeven is entry price + buffer
+                new_stop = position.entry_price + breakeven_buffer
                 # Only move stop up, never down
                 if new_stop > position.trailing_stop:
                     old_stop = position.trailing_stop
                     position.trailing_stop = new_stop
                     logger.info(
                         f"Breakeven stop set for {position.symbol}: "
-                        f"profit={profit_atr:.2f}x ATR, stop moved from {old_stop:.2f} to {new_stop:.2f}"
+                        f"profit={profit_atr:.2f}x ATR, stop moved from {old_stop:.2f} to {new_stop:.2f} (entry+{breakeven_buffer:.4f})"
                     )
             else:  # SHORT
-                # For short, breakeven is entry price
-                new_stop = position.entry_price
+                # For short, breakeven is entry price - buffer
+                new_stop = position.entry_price - breakeven_buffer
                 # Only move stop down, never up
                 if new_stop < position.trailing_stop:
                     old_stop = position.trailing_stop
                     position.trailing_stop = new_stop
                     logger.info(
                         f"Breakeven stop set for {position.symbol}: "
-                        f"profit={profit_atr:.2f}x ATR, stop moved from {old_stop:.2f} to {new_stop:.2f}"
+                        f"profit={profit_atr:.2f}x ATR, stop moved from {old_stop:.2f} to {new_stop:.2f} (entry-{breakeven_buffer:.4f})"
                     )
         
         # Tighten stop to 0.5x ATR on momentum reversal while in profit

@@ -300,81 +300,56 @@ class StrategyEngine:
             self.current_indicators.price_vs_vwap = "BELOW"
     
     def _check_momentum_continuation(self, candles_15m: List[Candle], direction: str) -> bool:
-        """Check if momentum is continuing in the signal direction.
+        """Check if momentum allows entry (improved version - less restrictive).
         
-        This prevents entering trades on exhausted moves by checking:
-        1. Recent price action (last 3 candles) is moving in signal direction
-        2. Price hasn't moved too far from EMA (overextension check)
-        3. Current candle is still moving in the right direction
+        This IMPROVED version focuses on preventing EXTREMELY overextended entries,
+        but allows pullback entries which are actually better timing.
+        
+        OLD VERSION: Required 2-3 consecutive candles in direction + not overextended
+        NEW VERSION: Only checks if price is not EXTREMELY overextended from EMA
+        
+        This allows:
+        - Pullback entries (better timing)
+        - Entries after small consolidations
+        - Entries on the first push after a pullback
         
         Args:
             candles_15m: List of 15-minute candles
             direction: "LONG" or "SHORT"
             
         Returns:
-            True if momentum is continuing, False if move is exhausted
+            True if entry is allowed (not extremely overextended), False otherwise
         """
         if len(candles_15m) < 20:
             return False
         
         current_candle = candles_15m[-1]
-        prev_candle_1 = candles_15m[-2]
-        prev_candle_2 = candles_15m[-3]
-        prev_candle_3 = candles_15m[-4]
         
         # Calculate 20-period EMA for overextension check
         closes = [c.close for c in candles_15m[-20:]]
         ema_20 = self._calculate_simple_ema(closes, 20)
         
         if direction == "LONG":
-            # For LONG signals, check:
-            # 1. At least 2 of last 3 candles are green (close > open)
-            green_candles = sum([
-                1 if prev_candle_1.close > prev_candle_1.open else 0,
-                1 if prev_candle_2.close > prev_candle_2.open else 0,
-                1 if prev_candle_3.close > prev_candle_3.open else 0
-            ])
+            # For LONG entries:
+            # Allow entry if price is within 5% above EMA
+            # This is MUCH more relaxed than the old 3% limit
+            # Allows pullback entries and early trend entries
+            not_overextended = (current_candle.close <= ema_20 * 1.05)
             
-            # 2. Current candle is green or at least not strongly red
-            current_candle_ok = (current_candle.close >= current_candle.open * 0.998)
+            if not not_overextended:
+                logger.debug(f"LONG rejected: Price {current_candle.close:.2f} is >5% above EMA {ema_20:.2f}")
             
-            # 3. Price hasn't moved too far above EMA (not overextended)
-            # Allow up to 3% above EMA (relaxed from 2%)
-            not_overextended = (current_candle.close <= ema_20 * 1.03)
-            
-            # 4. Price is making higher lows (last 3 candles)
-            higher_lows = (prev_candle_1.low >= prev_candle_3.low * 0.998)
-            
-            # Accept if momentum is strong (3 green candles) OR (2 green + not overextended)
-            strong_momentum = green_candles >= 3
-            moderate_momentum = green_candles >= 2 and not_overextended
-            
-            return (strong_momentum or moderate_momentum) and current_candle_ok and higher_lows
+            return not_overextended
         
         else:  # SHORT
-            # For SHORT signals, check:
-            # 1. At least 2 of last 3 candles are red (close < open)
-            red_candles = sum([
-                1 if prev_candle_1.close < prev_candle_1.open else 0,
-                1 if prev_candle_2.close < prev_candle_2.open else 0,
-                1 if prev_candle_3.close < prev_candle_3.open else 0
-            ])
+            # For SHORT entries:
+            # Allow entry if price is within 5% below EMA
+            not_overextended = (current_candle.close >= ema_20 * 0.95)
             
-            # 2. Current candle is red or at least not strongly green
-            current_candle_ok = (current_candle.close <= current_candle.open * 1.002)
+            if not not_overextended:
+                logger.debug(f"SHORT rejected: Price {current_candle.close:.2f} is >5% below EMA {ema_20:.2f}")
             
-            # 3. Price hasn't moved too far below EMA (not overextended)
-            # Allow up to 3% below EMA (relaxed from 2%)
-            not_overextended = (current_candle.close >= ema_20 * 0.97)
-            
-            # 4. Price is making lower highs (last 3 candles)
-            lower_highs = (prev_candle_1.high <= prev_candle_3.high * 1.002)
-            
-            # Accept if momentum is strong (3 red candles) OR (2 red + not overextended)
-            strong_momentum = red_candles >= 3
-            moderate_momentum = red_candles >= 2 and not_overextended
-            
-            return (strong_momentum or moderate_momentum) and current_candle_ok and lower_highs
+            return not_overextended
     
     def _calculate_simple_ema(self, values: List[float], period: int) -> float:
         """Calculate simple Exponential Moving Average.
@@ -476,10 +451,11 @@ class StrategyEngine:
         if not conditions_met:
             return None
         
-        # MOMENTUM CONTINUATION CHECK - Prevent entering exhausted moves
+        # MOMENTUM CONTINUATION CHECK - Prevent entering EXTREMELY overextended moves
+        # IMPROVED VERSION: Less restrictive, allows pullback entries
         if hasattr(self, '_candles_15m') and self._candles_15m:
             if not self._check_momentum_continuation(self._candles_15m, "LONG"):
-                logger.info(f"[{symbol if symbol else self.config.symbol}] LONG signal rejected - momentum exhausted or overextended")
+                logger.info(f"[{symbol if symbol else self.config.symbol}] LONG signal rejected - price too overextended from EMA")
                 return None
         
         # Create signal with indicator snapshot
@@ -582,10 +558,11 @@ class StrategyEngine:
         if not conditions_met:
             return None
         
-        # MOMENTUM CONTINUATION CHECK - Prevent entering exhausted moves
+        # MOMENTUM CONTINUATION CHECK - Prevent entering EXTREMELY overextended moves
+        # IMPROVED VERSION: Less restrictive, allows pullback entries
         if hasattr(self, '_candles_15m') and self._candles_15m:
             if not self._check_momentum_continuation(self._candles_15m, "SHORT"):
-                logger.info(f"[{symbol if symbol else self.config.symbol}] SHORT signal rejected - momentum exhausted or overextended")
+                logger.info(f"[{symbol if symbol else self.config.symbol}] SHORT signal rejected - price too overextended from EMA")
                 return None
         
         # Create signal with indicator snapshot

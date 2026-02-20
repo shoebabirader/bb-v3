@@ -30,6 +30,7 @@ from src.backtest_engine import BacktestEngine
 from src.logger import get_logger, TradingLogger
 from src.models import PerformanceMetrics
 from src.portfolio_manager import PortfolioManager
+from src.scaled_tp_manager import ScaledTakeProfitManager
 
 
 # Configure logging with BOTH file and console output
@@ -98,6 +99,11 @@ class TradingBot:
         if config.enable_portfolio_management:
             self.portfolio_manager = PortfolioManager(config)
             logger.info(f"Portfolio Manager initialized with {len(config.portfolio_symbols)} symbols")
+        
+        # Initialize scaled take profit manager
+        self.scaled_tp_manager = ScaledTakeProfitManager(config, self.client)
+        if config.enable_scaled_take_profit:
+            logger.info(f"Scaled TP Manager initialized with {len(config.scaled_tp_levels)} levels")
         
         # Initialize backtest engine (only for BACKTEST mode)
         self.backtest_engine: Optional[BacktestEngine] = None
@@ -791,9 +797,207 @@ class TradingBot:
                 else:  # SHORT
                     profit_pct = (active_position.entry_price - current_price) / active_position.entry_price
                 
-                # Check if take profit target is reached (PRIORITY 1)
-                take_profit_pct = self.config.take_profit_pct
-                if profit_pct >= take_profit_pct:
+                # PRIORITY 1: Check for scaled take profit levels (if enabled)
+                if self.config.enable_scaled_take_profit:
+                    partial_close_action = self.scaled_tp_manager.check_take_profit_levels(
+                        active_position, 
+                        current_price
+                    )
+                    
+                    if partial_close_action:
+                        # Log TP level hit
+                        logger.info(
+                            f"[{symbol}] TP{partial_close_action.tp_level} hit at ${current_price:.2f} "
+                            f"(target: ${partial_close_action.target_price:.2f})"
+                        )
+                        
+                        # Execute partial close (if not simulating)
+                        if not simulate_execution:
+                            result = self.scaled_tp_manager.execute_partial_close(
+                                active_position,
+                                partial_close_action
+                            )
+                            
+                            if result.success:
+                                # Update position after partial close
+                                active_position.quantity -= result.filled_quantity
+                                active_position.stop_loss = partial_close_action.new_stop_loss
+                                
+                                # Record partial exit
+                                partial_exit = {
+                                    "tp_level": partial_close_action.tp_level,
+                                    "exit_time": int(time.time() * 1000),
+                                    "exit_price": result.fill_price,
+                                    "quantity_closed": result.filled_quantity,
+                                    "profit": result.realized_profit,
+                                    "profit_pct": partial_close_action.profit_pct,
+                                    "new_stop_loss": partial_close_action.new_stop_loss
+                                }
+                                active_position.partial_exits.append(partial_exit)
+                                
+                                # Mark TP level as hit
+                                if partial_close_action.tp_level not in active_position.tp_levels_hit:
+                                    active_position.tp_levels_hit.append(partial_close_action.tp_level)
+                                
+                                # Update balance with realized profit
+                                self.wallet_balance += result.realized_profit
+                                
+                                # Update portfolio manager PnL
+                                if self.portfolio_manager:
+                                    self.portfolio_manager.update_pnl(symbol, result.realized_profit)
+                                
+                                # Update tracking in scaled TP manager
+                                self.scaled_tp_manager.update_tracking_after_partial_close(
+                                    active_position,
+                                    partial_close_action.tp_level,
+                                    partial_close_action.new_stop_loss
+                                )
+                                
+                                # Log partial close
+                                self.logger.log_system_event(
+                                    f"[{symbol}] Partial close executed: TP{partial_close_action.tp_level} "
+                                    f"closed {result.filled_quantity:.4f} at ${result.fill_price:.2f}, "
+                                    f"profit: ${result.realized_profit:.2f}, "
+                                    f"remaining: {active_position.quantity:.4f}, "
+                                    f"new SL: ${partial_close_action.new_stop_loss:.2f}"
+                                )
+                                
+                                # Show notification
+                                pnl_text = f"+${result.realized_profit:.2f}" if result.realized_profit >= 0 else f"${result.realized_profit:.2f}"
+                                profit_pct_display = partial_close_action.profit_pct * 100
+                                self.ui_display.show_notification(
+                                    f"[{symbol}] 🎯 TP{partial_close_action.tp_level} HIT! "
+                                    f"Closed {partial_close_action.close_pct*100:.0f}% @ ${result.fill_price:.2f} | "
+                                    f"PnL: {pnl_text} ({profit_pct_display:.1f}%)",
+                                    "SUCCESS"
+                                )
+                                
+                                # Check if all TP levels hit (position fully closed)
+                                if len(active_position.tp_levels_hit) >= len(self.config.scaled_tp_levels):
+                                    # Position fully closed via scaled TP
+                                    trade = self.risk_manager.close_position(
+                                        active_position,
+                                        current_price,
+                                        "TAKE_PROFIT"
+                                    )
+                                    
+                                    # Update portfolio manager
+                                    if self.portfolio_manager:
+                                        self.portfolio_manager.update_position(symbol, None)
+                                    
+                                    # Reset tracking
+                                    self.scaled_tp_manager.reset_tracking(symbol)
+                                    
+                                    # Log trade
+                                    self.logger.log_trade(trade)
+                                    
+                                    # Show notification
+                                    total_pnl = sum(pe["profit"] for pe in active_position.partial_exits)
+                                    self.ui_display.show_notification(
+                                        f"[{symbol}] ✅ All TP levels hit! Total PnL: ${total_pnl:.2f}",
+                                        "SUCCESS"
+                                    )
+                            else:
+                                # Partial close failed, log error
+                                self.logger.log_error(
+                                    f"[{symbol}] Partial close failed: {result.error_message}"
+                                )
+                                self.ui_display.show_notification(
+                                    f"[{symbol}] ⚠️ Partial close failed: {result.error_message}",
+                                    "ERROR"
+                                )
+                        else:
+                            # Simulating execution (paper trading)
+                            # Update position after simulated partial close
+                            active_position.quantity -= partial_close_action.quantity
+                            active_position.stop_loss = partial_close_action.new_stop_loss
+                            
+                            # Calculate simulated profit
+                            if active_position.side == "LONG":
+                                simulated_profit = (current_price - active_position.entry_price) * partial_close_action.quantity
+                            else:  # SHORT
+                                simulated_profit = (active_position.entry_price - current_price) * partial_close_action.quantity
+                            
+                            # Record partial exit
+                            partial_exit = {
+                                "tp_level": partial_close_action.tp_level,
+                                "exit_time": int(time.time() * 1000),
+                                "exit_price": current_price,
+                                "quantity_closed": partial_close_action.quantity,
+                                "profit": simulated_profit,
+                                "profit_pct": partial_close_action.profit_pct,
+                                "new_stop_loss": partial_close_action.new_stop_loss
+                            }
+                            active_position.partial_exits.append(partial_exit)
+                            
+                            # Mark TP level as hit
+                            if partial_close_action.tp_level not in active_position.tp_levels_hit:
+                                active_position.tp_levels_hit.append(partial_close_action.tp_level)
+                            
+                            # Update balance with simulated profit
+                            self.wallet_balance += simulated_profit
+                            
+                            # Update portfolio manager PnL
+                            if self.portfolio_manager:
+                                self.portfolio_manager.update_pnl(symbol, simulated_profit)
+                            
+                            # Update tracking in scaled TP manager
+                            self.scaled_tp_manager.update_tracking_after_partial_close(
+                                active_position,
+                                partial_close_action.tp_level,
+                                partial_close_action.new_stop_loss
+                            )
+                            
+                            # Log partial close
+                            self.logger.log_system_event(
+                                f"[{symbol}] Simulated partial close: TP{partial_close_action.tp_level} "
+                                f"closed {partial_close_action.quantity:.4f} at ${current_price:.2f}, "
+                                f"profit: ${simulated_profit:.2f}, "
+                                f"remaining: {active_position.quantity:.4f}, "
+                                f"new SL: ${partial_close_action.new_stop_loss:.2f}"
+                            )
+                            
+                            # Show notification
+                            pnl_text = f"+${simulated_profit:.2f}" if simulated_profit >= 0 else f"${simulated_profit:.2f}"
+                            profit_pct_display = partial_close_action.profit_pct * 100
+                            self.ui_display.show_notification(
+                                f"[{symbol}] 🎯 TP{partial_close_action.tp_level} HIT! "
+                                f"Closed {partial_close_action.close_pct*100:.0f}% @ ${current_price:.2f} | "
+                                f"PnL: {pnl_text} ({profit_pct_display:.1f}%)",
+                                "SUCCESS"
+                            )
+                            
+                            # Check if all TP levels hit (position fully closed)
+                            if len(active_position.tp_levels_hit) >= len(self.config.scaled_tp_levels):
+                                # Position fully closed via scaled TP
+                                trade = self.risk_manager.close_position(
+                                    active_position,
+                                    current_price,
+                                    "TAKE_PROFIT"
+                                )
+                                
+                                # Update portfolio manager
+                                if self.portfolio_manager:
+                                    self.portfolio_manager.update_position(symbol, None)
+                                
+                                # Reset tracking
+                                self.scaled_tp_manager.reset_tracking(symbol)
+                                
+                                # Log trade
+                                self.logger.log_trade(trade)
+                                
+                                # Show notification
+                                total_pnl = sum(pe["profit"] for pe in active_position.partial_exits)
+                                self.ui_display.show_notification(
+                                    f"[{symbol}] ✅ All TP levels hit! Total PnL: ${total_pnl:.2f}",
+                                    "SUCCESS"
+                                )
+                        
+                        # Skip regular TP check since we're using scaled TP
+                        # Continue to stop loss check
+                
+                # PRIORITY 2: Check if regular take profit target is reached (only if scaled TP not enabled or not triggered)
+                elif profit_pct >= self.config.take_profit_pct:
                     # Close position at take profit
                     trade = self.risk_manager.close_position(
                         active_position,
@@ -819,6 +1023,10 @@ class TradingBot:
                         self.portfolio_manager.update_pnl(symbol, trade.pnl)
                         self.portfolio_manager.update_position(symbol, None)
                     
+                    # Reset scaled TP tracking if enabled
+                    if self.config.enable_scaled_take_profit:
+                        self.scaled_tp_manager.reset_tracking(symbol)
+                    
                     # Log trade
                     self.logger.log_trade(trade)
                     
@@ -830,7 +1038,7 @@ class TradingBot:
                         "SUCCESS"
                     )
                 
-                # Check if stop was hit (PRIORITY 2)
+                # PRIORITY 3: Check if stop was hit
                 elif self.risk_manager.check_stop_hit(active_position, current_price):
                     # Close position
                     trade = self.risk_manager.close_position(
@@ -856,6 +1064,10 @@ class TradingBot:
                     if self.portfolio_manager:
                         self.portfolio_manager.update_pnl(symbol, trade.pnl)
                         self.portfolio_manager.update_position(symbol, None)
+                    
+                    # Reset scaled TP tracking if enabled
+                    if self.config.enable_scaled_take_profit:
+                        self.scaled_tp_manager.reset_tracking(symbol)
                     
                     # Log trade
                     self.logger.log_trade(trade)
@@ -913,11 +1125,15 @@ class TradingBot:
                         )
                         logger.info(f"[{symbol}] [OK] Position created: {position.side} qty={position.quantity:.4f} @ ${position.entry_price:.4f}")
                         
-                        # Check if portfolio manager allows this position
+                        # CRITICAL FIX: Check if portfolio manager allows this position
+                        # If not allowed, remove it from risk manager immediately (before execution)
                         if self.portfolio_manager:
                             if not self.portfolio_manager.can_add_position(symbol, position, self.wallet_balance):
-                                logger.info(f"Skipping {symbol} signal - would exceed portfolio risk limits")
-                                self.risk_manager.close_position(position, current_price, "SIGNAL_EXIT")
+                                logger.info(f"[{symbol}] Skipping signal - would exceed portfolio risk limits")
+                                # Remove position from risk manager's active positions
+                                if symbol in self.risk_manager.active_positions:
+                                    del self.risk_manager.active_positions[symbol]
+                                logger.info(f"[{symbol}] Position removed from risk manager (not executed)")
                                 return
                         
                         # Execute entry order (if not simulating)

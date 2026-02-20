@@ -766,3 +766,302 @@ class TestAdvancedFeaturesConfiguration:
         finally:
             # Clean up temp file
             os.unlink(temp_path)
+
+
+# ===== SCALED TAKE PROFIT CONFIGURATION TESTS =====
+
+# Feature: scaled-take-profit, Property 5: Close percentage sum
+# Feature: scaled-take-profit, Property 7: Profit level monotonicity
+@given(
+    enable_scaled_take_profit=st.booleans(),
+    num_levels=st.integers(min_value=2, max_value=5),
+    min_order_size=st.floats(min_value=0.0001, max_value=0.01)
+)
+def test_valid_scaled_tp_configuration_passes_validation(
+    enable_scaled_take_profit, num_levels, min_order_size
+):
+    """For any valid scaled take profit configuration, validation should pass without errors.
+    
+    Property 5: Close percentage sum
+    Property 7: Profit level monotonicity
+    Validates: Requirements 2.4, 2.5
+    """
+    config = Config()
+    config.enable_scaled_take_profit = enable_scaled_take_profit
+    config.scaled_tp_min_order_size = min_order_size
+    
+    # Generate valid TP levels with ascending profit percentages and close percentages that sum to 1.0
+    scaled_tp_levels = []
+    profit_step = 0.02  # 2% increments
+    close_pct_per_level = 1.0 / num_levels
+    
+    for i in range(num_levels):
+        profit_pct = 0.02 + (i * profit_step)  # Start at 2%, increment by 2%
+        scaled_tp_levels.append({
+            "profit_pct": profit_pct,
+            "close_pct": close_pct_per_level
+        })
+    
+    config.scaled_tp_levels = scaled_tp_levels
+    
+    # Should not raise any exception
+    config.validate()
+
+
+class TestScaledTakeProfitConfiguration:
+    """Unit tests for scaled take profit configuration validation.
+    
+    Validates: Requirements 2.1, 2.2, 2.4, 2.5
+    """
+    
+    def test_valid_scaled_tp_config_accepted(self):
+        """Valid scaled take profit configuration should be accepted."""
+        config = Config()
+        config.enable_scaled_take_profit = True
+        config.scaled_tp_levels = [
+            {"profit_pct": 0.03, "close_pct": 0.40},
+            {"profit_pct": 0.05, "close_pct": 0.30},
+            {"profit_pct": 0.08, "close_pct": 0.30}
+        ]
+        config.scaled_tp_min_order_size = 0.001
+        config.scaled_tp_fallback_to_single = True
+        
+        # Should not raise any exception
+        config.validate()
+    
+    def test_scaled_tp_disabled_by_default(self):
+        """Scaled take profit should be disabled by default."""
+        config = Config()
+        assert config.enable_scaled_take_profit == False
+    
+    def test_scaled_tp_levels_not_ascending_rejected(self):
+        """TP levels not in ascending order should be rejected (Property 7)."""
+        config = Config()
+        config.scaled_tp_levels = [
+            {"profit_pct": 0.05, "close_pct": 0.40},
+            {"profit_pct": 0.03, "close_pct": 0.30},  # Lower than previous
+            {"profit_pct": 0.08, "close_pct": 0.30}
+        ]
+        
+        with pytest.raises(ValueError) as exc_info:
+            config.validate()
+        
+        error_msg = str(exc_info.value).lower()
+        assert "ascending" in error_msg or "greater than" in error_msg
+    
+    def test_scaled_tp_close_percentages_not_summing_to_100_warned(self):
+        """Close percentages not summing to 100% should generate warning (Property 5)."""
+        config = Config()
+        config.scaled_tp_levels = [
+            {"profit_pct": 0.03, "close_pct": 0.40},
+            {"profit_pct": 0.05, "close_pct": 0.30},
+            {"profit_pct": 0.08, "close_pct": 0.20}  # Sum = 0.90, not 1.0
+        ]
+        
+        with pytest.raises(ValueError) as exc_info:
+            config.validate()
+        
+        error_msg = str(exc_info.value).lower()
+        assert "sum" in error_msg or "normalized" in error_msg
+    
+    def test_scaled_tp_negative_profit_pct_rejected(self):
+        """Negative profit percentage should be rejected."""
+        config = Config()
+        config.scaled_tp_levels = [
+            {"profit_pct": -0.03, "close_pct": 0.50},
+            {"profit_pct": 0.05, "close_pct": 0.50}
+        ]
+        
+        with pytest.raises(ValueError) as exc_info:
+            config.validate()
+        
+        assert "profit_pct" in str(exc_info.value).lower()
+        assert "positive" in str(exc_info.value).lower()
+    
+    def test_scaled_tp_negative_close_pct_rejected(self):
+        """Negative close percentage should be rejected."""
+        config = Config()
+        config.scaled_tp_levels = [
+            {"profit_pct": 0.03, "close_pct": -0.50},
+            {"profit_pct": 0.05, "close_pct": 0.50}
+        ]
+        
+        with pytest.raises(ValueError) as exc_info:
+            config.validate()
+        
+        assert "close_pct" in str(exc_info.value).lower()
+        assert "positive" in str(exc_info.value).lower()
+    
+    def test_scaled_tp_excessive_profit_pct_rejected(self):
+        """Profit percentage > 100% should be rejected."""
+        config = Config()
+        config.scaled_tp_levels = [
+            {"profit_pct": 1.5, "close_pct": 0.50},
+            {"profit_pct": 2.0, "close_pct": 0.50}
+        ]
+        
+        with pytest.raises(ValueError) as exc_info:
+            config.validate()
+        
+        assert "profit_pct" in str(exc_info.value).lower()
+    
+    def test_scaled_tp_excessive_close_pct_rejected(self):
+        """Close percentage > 100% should be rejected."""
+        config = Config()
+        config.scaled_tp_levels = [
+            {"profit_pct": 0.03, "close_pct": 1.5},
+            {"profit_pct": 0.05, "close_pct": 0.50}
+        ]
+        
+        with pytest.raises(ValueError) as exc_info:
+            config.validate()
+        
+        assert "close_pct" in str(exc_info.value).lower()
+    
+    def test_scaled_tp_missing_profit_pct_rejected(self):
+        """Missing profit_pct key should be rejected."""
+        config = Config()
+        config.scaled_tp_levels = [
+            {"close_pct": 0.50},  # Missing profit_pct
+            {"profit_pct": 0.05, "close_pct": 0.50}
+        ]
+        
+        with pytest.raises(ValueError) as exc_info:
+            config.validate()
+        
+        assert "profit_pct" in str(exc_info.value).lower()
+        assert "missing" in str(exc_info.value).lower()
+    
+    def test_scaled_tp_missing_close_pct_rejected(self):
+        """Missing close_pct key should be rejected."""
+        config = Config()
+        config.scaled_tp_levels = [
+            {"profit_pct": 0.03},  # Missing close_pct
+            {"profit_pct": 0.05, "close_pct": 0.50}
+        ]
+        
+        with pytest.raises(ValueError) as exc_info:
+            config.validate()
+        
+        assert "close_pct" in str(exc_info.value).lower()
+        assert "missing" in str(exc_info.value).lower()
+    
+    def test_scaled_tp_empty_levels_rejected(self):
+        """Empty TP levels list should be rejected."""
+        config = Config()
+        config.scaled_tp_levels = []
+        
+        with pytest.raises(ValueError) as exc_info:
+            config.validate()
+        
+        assert "scaled_tp_levels" in str(exc_info.value).lower()
+        assert "at least one" in str(exc_info.value).lower()
+    
+    def test_scaled_tp_not_list_rejected(self):
+        """TP levels not being a list should be rejected."""
+        config = Config()
+        config.scaled_tp_levels = "not a list"
+        
+        with pytest.raises(ValueError) as exc_info:
+            config.validate()
+        
+        assert "scaled_tp_levels" in str(exc_info.value).lower()
+        assert "list" in str(exc_info.value).lower()
+    
+    def test_scaled_tp_level_not_dict_rejected(self):
+        """TP level not being a dictionary should be rejected."""
+        config = Config()
+        config.scaled_tp_levels = [
+            "not a dict",
+            {"profit_pct": 0.05, "close_pct": 0.50}
+        ]
+        
+        with pytest.raises(ValueError) as exc_info:
+            config.validate()
+        
+        assert "scaled_tp_levels" in str(exc_info.value).lower()
+        assert "dictionary" in str(exc_info.value).lower()
+    
+    def test_scaled_tp_negative_min_order_size_rejected(self):
+        """Negative minimum order size should be rejected."""
+        config = Config()
+        config.scaled_tp_min_order_size = -0.001
+        
+        with pytest.raises(ValueError) as exc_info:
+            config.validate()
+        
+        assert "scaled_tp_min_order_size" in str(exc_info.value).lower()
+        assert "positive" in str(exc_info.value).lower()
+    
+    def test_scaled_tp_config_from_file(self):
+        """Scaled take profit configuration should load from file correctly."""
+        config_data = {
+            "run_mode": "BACKTEST",
+            "enable_scaled_take_profit": True,
+            "scaled_tp_levels": [
+                {"profit_pct": 0.03, "close_pct": 0.40},
+                {"profit_pct": 0.05, "close_pct": 0.30},
+                {"profit_pct": 0.08, "close_pct": 0.30}
+            ],
+            "scaled_tp_min_order_size": 0.002,
+            "scaled_tp_fallback_to_single": False
+        }
+        
+        # Write to temporary file
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as f:
+            json.dump(config_data, f)
+            temp_path = f.name
+        
+        try:
+            # Load config from file
+            config = Config.load_from_file(temp_path)
+            
+            # Verify scaled TP loaded correctly
+            assert config.enable_scaled_take_profit == True
+            assert len(config.scaled_tp_levels) == 3
+            assert config.scaled_tp_levels[0]["profit_pct"] == 0.03
+            assert config.scaled_tp_levels[0]["close_pct"] == 0.40
+            assert config.scaled_tp_min_order_size == 0.002
+            assert config.scaled_tp_fallback_to_single == False
+            
+            # Verify config is valid
+            config.validate()
+            
+        finally:
+            # Clean up temp file
+            os.unlink(temp_path)
+    
+    def test_scaled_tp_uses_defaults_when_missing(self):
+        """Scaled take profit should use defaults when not specified in config."""
+        config_data = {
+            "run_mode": "BACKTEST"
+            # No scaled TP specified
+        }
+        
+        # Write to temporary file
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as f:
+            json.dump(config_data, f)
+            temp_path = f.name
+        
+        try:
+            # Load config from file
+            config = Config.load_from_file(temp_path)
+            
+            # Verify defaults are applied
+            assert config.enable_scaled_take_profit == False
+            assert len(config.scaled_tp_levels) == 3
+            assert config.scaled_tp_levels[0]["profit_pct"] == 0.03
+            assert config.scaled_tp_min_order_size == 0.001
+            assert config.scaled_tp_fallback_to_single == True
+            
+            # Verify defaults were tracked
+            applied_defaults = config.get_applied_defaults()
+            assert any("scaled_tp" in default.lower() for default in applied_defaults)
+            
+            # Verify config is valid with defaults
+            config.validate()
+            
+        finally:
+            # Clean up temp file
+            os.unlink(temp_path)
+

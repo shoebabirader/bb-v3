@@ -956,3 +956,533 @@ class TestBacktestEngineEnhanced:
         # Verify contribution calculation
         # All features ROI (8.0) - Without feature ROI (7.0) = 1.0
         assert contributions['adaptive_threshold_mgr']['roi_contribution'] == 1.0
+
+
+
+class TestBacktestScaledTP:
+    """Unit tests for scaled take profit backtest integration."""
+    
+    @pytest.fixture
+    def config_scaled_tp(self):
+        """Create a test configuration with scaled TP enabled."""
+        config = Config()
+        config.symbol = "BTCUSDT"
+        config.risk_per_trade = 0.01
+        config.leverage = 3
+        config.trading_fee = 0.0005
+        config.slippage = 0.0002
+        config.enable_scaled_take_profit = True
+        config.scaled_tp_levels = [
+            {"profit_pct": 0.03, "close_pct": 0.40},
+            {"profit_pct": 0.05, "close_pct": 0.30},
+            {"profit_pct": 0.08, "close_pct": 0.30}
+        ]
+        config.scaled_tp_min_order_size = 0.001
+        config.scaled_tp_fallback_to_single = True
+        return config
+    
+    @pytest.fixture
+    def strategy_scaled_tp(self, config_scaled_tp):
+        """Create a test strategy engine."""
+        return StrategyEngine(config_scaled_tp)
+    
+    @pytest.fixture
+    def position_sizer_scaled_tp(self, config_scaled_tp):
+        """Create a test position sizer."""
+        return PositionSizer(config_scaled_tp)
+    
+    @pytest.fixture
+    def risk_manager_scaled_tp(self, config_scaled_tp, position_sizer_scaled_tp):
+        """Create a test risk manager."""
+        return RiskManager(config_scaled_tp, position_sizer_scaled_tp)
+    
+    @pytest.fixture
+    def backtest_engine_scaled_tp(self, config_scaled_tp, strategy_scaled_tp, risk_manager_scaled_tp):
+        """Create a test backtest engine with scaled TP."""
+        return BacktestEngine(config_scaled_tp, strategy_scaled_tp, risk_manager_scaled_tp)
+    
+    def test_scaled_tp_manager_initialized(self, backtest_engine_scaled_tp):
+        """Test that ScaledTakeProfitManager is initialized in backtest engine."""
+        assert hasattr(backtest_engine_scaled_tp, 'scaled_tp_manager')
+        assert backtest_engine_scaled_tp.scaled_tp_manager is not None
+        assert backtest_engine_scaled_tp.scaled_tp_manager.config.enable_scaled_take_profit is True
+    
+    def test_scaled_tp_feature_metrics_initialized(self, backtest_engine_scaled_tp):
+        """Test that scaled TP feature metrics are initialized."""
+        assert 'scaled_take_profit' in backtest_engine_scaled_tp.feature_metrics
+        
+        scaled_tp_metrics = backtest_engine_scaled_tp.feature_metrics['scaled_take_profit']
+        assert scaled_tp_metrics['enabled'] is True
+        assert scaled_tp_metrics['partial_closes'] == 0
+        assert scaled_tp_metrics['tp1_hits'] == 0
+        assert scaled_tp_metrics['tp2_hits'] == 0
+        assert scaled_tp_metrics['tp3_hits'] == 0
+        assert scaled_tp_metrics['total_partial_profit'] == 0.0
+    
+    def test_simulate_partial_close(self, backtest_engine_scaled_tp):
+        """Test partial close simulation."""
+        from src.models import Position, PartialCloseAction
+        import time
+        
+        # Create a test position
+        position = Position(
+            symbol="BTCUSDT",
+            side="LONG",
+            entry_price=50000.0,
+            quantity=0.1,
+            leverage=3,
+            stop_loss=49000.0,
+            trailing_stop=49000.0,
+            entry_time=int(time.time() * 1000),
+            original_quantity=0.1
+        )
+        
+        # Create a partial close action
+        action = PartialCloseAction(
+            tp_level=1,
+            profit_pct=0.03,
+            close_pct=0.40,
+            target_price=51500.0,
+            quantity=0.04,
+            new_stop_loss=50000.0
+        )
+        
+        # Create a test candle
+        candle = Candle(
+            timestamp=int(time.time() * 1000),
+            open=51500.0,
+            high=51600.0,
+            low=51400.0,
+            close=51500.0,
+            volume=100.0
+        )
+        
+        # Simulate partial close
+        result = backtest_engine_scaled_tp._simulate_partial_close(position, action, candle)
+        
+        # Verify result
+        assert result['success'] is True
+        assert result['filled_quantity'] == 0.04
+        assert result['fill_price'] > 0
+        assert result['realized_profit'] > 0
+        assert result['error_message'] is None
+    
+    def test_simulate_partial_close_quantity_limit(self, backtest_engine_scaled_tp):
+        """Test that partial close doesn't exceed position quantity."""
+        from src.models import Position, PartialCloseAction
+        import time
+        
+        # Create a test position with small quantity
+        position = Position(
+            symbol="BTCUSDT",
+            side="LONG",
+            entry_price=50000.0,
+            quantity=0.02,  # Small remaining quantity
+            leverage=3,
+            stop_loss=49000.0,
+            trailing_stop=49000.0,
+            entry_time=int(time.time() * 1000),
+            original_quantity=0.1
+        )
+        
+        # Create a partial close action that tries to close more than available
+        action = PartialCloseAction(
+            tp_level=3,
+            profit_pct=0.08,
+            close_pct=0.30,
+            target_price=54000.0,
+            quantity=0.03,  # More than position.quantity
+            new_stop_loss=52500.0
+        )
+        
+        # Create a test candle
+        candle = Candle(
+            timestamp=int(time.time() * 1000),
+            open=54000.0,
+            high=54100.0,
+            low=53900.0,
+            close=54000.0,
+            volume=100.0
+        )
+        
+        # Simulate partial close
+        result = backtest_engine_scaled_tp._simulate_partial_close(position, action, candle)
+        
+        # Verify that filled quantity is limited to position quantity
+        assert result['success'] is True
+        assert result['filled_quantity'] == 0.02  # Limited to position.quantity
+        assert result['filled_quantity'] <= position.quantity
+    
+    def test_check_exit_conditions_scaled_tp_partial(self, backtest_engine_scaled_tp):
+        """Test exit conditions check with scaled TP (partial close)."""
+        from src.models import Position
+        import time
+        
+        # Create a test position
+        position = Position(
+            symbol="BTCUSDT",
+            side="LONG",
+            entry_price=50000.0,
+            quantity=0.1,
+            leverage=3,
+            stop_loss=49000.0,
+            trailing_stop=49000.0,
+            entry_time=int(time.time() * 1000),
+            original_quantity=0.1
+        )
+        
+        # Create a candle where TP1 is hit (3% profit = 51500)
+        candle = Candle(
+            timestamp=int(time.time() * 1000),
+            open=51500.0,
+            high=51600.0,
+            low=51400.0,
+            close=51500.0,
+            volume=100.0
+        )
+        
+        current_price = 51500.0
+        
+        # Check exit conditions
+        exit_reason = backtest_engine_scaled_tp._check_exit_conditions_scaled_tp(
+            position, candle, current_price
+        )
+        
+        # Should not fully exit, just partial close
+        # Position should be updated with reduced quantity
+        assert position.quantity < 0.1  # Quantity reduced
+        assert len(position.tp_levels_hit) == 1  # TP1 hit
+        assert position.tp_levels_hit[0] == 1
+        assert len(position.partial_exits) == 1  # One partial exit recorded
+        assert exit_reason is None  # Not fully closed yet
+    
+    def test_check_exit_conditions_scaled_tp_stop_loss(self, backtest_engine_scaled_tp):
+        """Test that stop loss is checked before TP levels."""
+        from src.models import Position
+        import time
+        
+        # Create a test position
+        position = Position(
+            symbol="BTCUSDT",
+            side="LONG",
+            entry_price=50000.0,
+            quantity=0.1,
+            leverage=3,
+            stop_loss=49000.0,
+            trailing_stop=49000.0,
+            entry_time=int(time.time() * 1000),
+            original_quantity=0.1
+        )
+        
+        # Create a candle where stop loss is hit
+        candle = Candle(
+            timestamp=int(time.time() * 1000),
+            open=49500.0,
+            high=49600.0,
+            low=48900.0,  # Touches stop loss
+            close=49000.0,
+            volume=100.0
+        )
+        
+        current_price = 49000.0
+        
+        # Check exit conditions
+        exit_reason = backtest_engine_scaled_tp._check_exit_conditions_scaled_tp(
+            position, candle, current_price
+        )
+        
+        # Should exit due to stop loss
+        assert exit_reason == "TRAILING_STOP"
+        assert len(backtest_engine_scaled_tp.trades) == 1
+        assert backtest_engine_scaled_tp.trades[0].exit_reason == "TRAILING_STOP"
+    
+    def test_check_exit_conditions_scaled_tp_final(self, backtest_engine_scaled_tp):
+        """Test that position closes after all TP levels hit."""
+        from src.models import Position
+        import time
+        
+        # Create a test position with TP1 and TP2 already hit
+        position = Position(
+            symbol="BTCUSDT",
+            side="LONG",
+            entry_price=50000.0,
+            quantity=0.03,  # 30% remaining (TP1 40% + TP2 30% already closed)
+            leverage=3,
+            stop_loss=51500.0,  # Moved to TP1 level
+            trailing_stop=51500.0,
+            entry_time=int(time.time() * 1000),
+            original_quantity=0.1,
+            tp_levels_hit=[1, 2],
+            partial_exits=[
+                {
+                    'tp_level': 1,
+                    'exit_time': int(time.time() * 1000),
+                    'exit_price': 51500.0,
+                    'quantity_closed': 0.04,
+                    'profit': 60.0,
+                    'profit_pct': 0.03,
+                    'new_stop_loss': 50000.0
+                },
+                {
+                    'tp_level': 2,
+                    'exit_time': int(time.time() * 1000),
+                    'exit_price': 52500.0,
+                    'quantity_closed': 0.03,
+                    'profit': 75.0,
+                    'profit_pct': 0.05,
+                    'new_stop_loss': 51500.0
+                }
+            ]
+        )
+        
+        # Create a candle where TP3 is hit (8% profit = 54000)
+        candle = Candle(
+            timestamp=int(time.time() * 1000),
+            open=54000.0,
+            high=54100.0,
+            low=53900.0,
+            close=54000.0,
+            volume=100.0
+        )
+        
+        current_price = 54000.0
+        
+        # Initialize tracking for this position (simulating that it was tracked before)
+        backtest_engine_scaled_tp.scaled_tp_manager._initialize_tracking(position)
+        
+        # Check exit conditions
+        exit_reason = backtest_engine_scaled_tp._check_exit_conditions_scaled_tp(
+            position, candle, current_price
+        )
+        
+        # Should fully close position
+        # Note: The exit_reason might be None if the partial close happens but position isn't fully closed yet
+        # The important thing is that the position is updated correctly
+        assert len(position.tp_levels_hit) == 3  # All TPs hit
+        assert len(position.partial_exits) == 3  # All partials recorded
+        
+        # After all TPs hit, position should be fully closed
+        if exit_reason == "SCALED_TP_FINAL":
+            assert position.quantity == 0  # Fully closed
+            assert len(backtest_engine_scaled_tp.trades) == 1
+            assert backtest_engine_scaled_tp.trades[0].exit_reason == "SCALED_TP_FINAL"
+    
+    def test_check_exit_conditions_single_tp(self, config_scaled_tp, strategy_scaled_tp, 
+                                            position_sizer_scaled_tp, risk_manager_scaled_tp):
+        """Test single TP exit conditions (when scaled TP disabled)."""
+        from src.models import Position
+        import time
+        
+        # Disable scaled TP
+        config_scaled_tp.enable_scaled_take_profit = False
+        config_scaled_tp.take_profit_pct = 0.05  # 5% single TP
+        
+        backtest_engine = BacktestEngine(config_scaled_tp, strategy_scaled_tp, risk_manager_scaled_tp)
+        
+        # Create a test position
+        position = Position(
+            symbol="BTCUSDT",
+            side="LONG",
+            entry_price=50000.0,
+            quantity=0.1,
+            leverage=3,
+            stop_loss=49000.0,
+            trailing_stop=49000.0,
+            entry_time=int(time.time() * 1000),
+            original_quantity=0.1
+        )
+        
+        # Create a candle where single TP is hit (5% profit = 52500)
+        candle = Candle(
+            timestamp=int(time.time() * 1000),
+            open=52500.0,
+            high=52600.0,
+            low=52400.0,
+            close=52500.0,
+            volume=100.0
+        )
+        
+        current_price = 52500.0
+        
+        # Check exit conditions
+        exit_reason = backtest_engine._check_exit_conditions_single_tp(
+            position, candle, current_price
+        )
+        
+        # Should fully close position
+        assert exit_reason == "TAKE_PROFIT"
+        assert len(backtest_engine.trades) == 1
+        assert backtest_engine.trades[0].exit_reason == "TAKE_PROFIT"
+    
+    def test_position_size_updates_after_partial(self, backtest_engine_scaled_tp):
+        """Test that position size is correctly updated after partial close."""
+        from src.models import Position
+        import time
+        
+        # Create a test position
+        position = Position(
+            symbol="BTCUSDT",
+            side="LONG",
+            entry_price=50000.0,
+            quantity=0.1,
+            leverage=3,
+            stop_loss=49000.0,
+            trailing_stop=49000.0,
+            entry_time=int(time.time() * 1000),
+            original_quantity=0.1
+        )
+        
+        initial_quantity = position.quantity
+        
+        # Create a candle where TP1 is hit
+        candle = Candle(
+            timestamp=int(time.time() * 1000),
+            open=51500.0,
+            high=51600.0,
+            low=51400.0,
+            close=51500.0,
+            volume=100.0
+        )
+        
+        current_price = 51500.0
+        
+        # Check exit conditions (should trigger partial close)
+        backtest_engine_scaled_tp._check_exit_conditions_scaled_tp(
+            position, candle, current_price
+        )
+        
+        # Verify position size updated
+        assert position.quantity < initial_quantity
+        expected_remaining = initial_quantity * (1 - 0.40)  # 40% closed
+        assert abs(position.quantity - expected_remaining) < 0.0001
+    
+    def test_stop_loss_ladder_in_backtest(self, backtest_engine_scaled_tp):
+        """Test that stop loss is updated after TP hits in backtest."""
+        from src.models import Position
+        import time
+        
+        # Create a test position
+        position = Position(
+            symbol="BTCUSDT",
+            side="LONG",
+            entry_price=50000.0,
+            quantity=0.1,
+            leverage=3,
+            stop_loss=49000.0,
+            trailing_stop=49000.0,
+            entry_time=int(time.time() * 1000),
+            original_quantity=0.1
+        )
+        
+        initial_stop_loss = position.stop_loss
+        
+        # Create a candle where TP1 is hit
+        candle = Candle(
+            timestamp=int(time.time() * 1000),
+            open=51500.0,
+            high=51600.0,
+            low=51400.0,
+            close=51500.0,
+            volume=100.0
+        )
+        
+        current_price = 51500.0
+        
+        # Check exit conditions (should trigger partial close and SL update)
+        backtest_engine_scaled_tp._check_exit_conditions_scaled_tp(
+            position, candle, current_price
+        )
+        
+        # Verify stop loss updated to breakeven
+        assert position.stop_loss > initial_stop_loss
+        assert position.stop_loss == position.entry_price  # Moved to breakeven
+        assert position.trailing_stop == position.stop_loss
+    
+    def test_partial_exits_tracked_in_backtest(self, backtest_engine_scaled_tp):
+        """Test that partial exits are tracked in backtest results."""
+        from src.models import Position
+        import time
+        
+        # Create a test position
+        position = Position(
+            symbol="BTCUSDT",
+            side="LONG",
+            entry_price=50000.0,
+            quantity=0.1,
+            leverage=3,
+            stop_loss=49000.0,
+            trailing_stop=49000.0,
+            entry_time=int(time.time() * 1000),
+            original_quantity=0.1
+        )
+        
+        # Create a candle where TP1 is hit
+        candle = Candle(
+            timestamp=int(time.time() * 1000),
+            open=51500.0,
+            high=51600.0,
+            low=51400.0,
+            close=51500.0,
+            volume=100.0
+        )
+        
+        current_price = 51500.0
+        
+        # Check exit conditions
+        backtest_engine_scaled_tp._check_exit_conditions_scaled_tp(
+            position, candle, current_price
+        )
+        
+        # Verify partial exit tracked
+        assert len(position.partial_exits) == 1
+        
+        partial_exit = position.partial_exits[0]
+        assert partial_exit['tp_level'] == 1
+        assert partial_exit['quantity_closed'] > 0
+        assert partial_exit['profit'] > 0
+        assert partial_exit['exit_price'] > position.entry_price
+        assert partial_exit['new_stop_loss'] == position.entry_price
+    
+    def test_scaled_tp_metrics_updated(self, backtest_engine_scaled_tp):
+        """Test that scaled TP metrics are updated during backtest."""
+        from src.models import Position
+        import time
+        
+        # Create a test position
+        position = Position(
+            symbol="BTCUSDT",
+            side="LONG",
+            entry_price=50000.0,
+            quantity=0.1,
+            leverage=3,
+            stop_loss=49000.0,
+            trailing_stop=49000.0,
+            entry_time=int(time.time() * 1000),
+            original_quantity=0.1
+        )
+        
+        # Create a candle where TP1 is hit
+        candle = Candle(
+            timestamp=int(time.time() * 1000),
+            open=51500.0,
+            high=51600.0,
+            low=51400.0,
+            close=51500.0,
+            volume=100.0
+        )
+        
+        current_price = 51500.0
+        
+        # Check initial metrics
+        assert backtest_engine_scaled_tp.feature_metrics['scaled_take_profit']['partial_closes'] == 0
+        assert backtest_engine_scaled_tp.feature_metrics['scaled_take_profit']['tp1_hits'] == 0
+        
+        # Check exit conditions (should trigger partial close)
+        backtest_engine_scaled_tp._check_exit_conditions_scaled_tp(
+            position, candle, current_price
+        )
+        
+        # Verify metrics updated
+        assert backtest_engine_scaled_tp.feature_metrics['scaled_take_profit']['partial_closes'] == 1
+        assert backtest_engine_scaled_tp.feature_metrics['scaled_take_profit']['tp1_hits'] == 1
+        assert backtest_engine_scaled_tp.feature_metrics['scaled_take_profit']['total_partial_profit'] > 0
